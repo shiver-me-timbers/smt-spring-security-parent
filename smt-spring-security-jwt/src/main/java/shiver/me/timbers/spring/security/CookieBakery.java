@@ -21,6 +21,10 @@ import javax.servlet.http.Cookie;
 /**
  * @author Karl Bennett
  */
-public interface Bakery {
-    Cookie bake(String name, String value);
+public class CookieBakery implements Bakery {
+
+    @Override
+    public Cookie bake(String name, String value) {
+        throw new UnsupportedOperationException();
+    }
 }

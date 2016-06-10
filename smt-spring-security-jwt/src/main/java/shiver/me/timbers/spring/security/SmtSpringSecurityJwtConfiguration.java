@@ -88,7 +88,7 @@ public class SmtSpringSecurityJwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(Bakery.class)
     public Bakery bakery() {
-        return new Bakery();
+        return new CookieBakery();
     }
 
     @Bean
