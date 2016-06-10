@@ -21,16 +21,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 /**
  * @author Karl Bennett
  */
 @Configuration
-public class JwtAuthenticationConfiguration {
+@Import(JwtConfiguration.class)
+public class JwtSpringSecurityConfiguration {
 
     @Value("${smt.spring.security.jwt.tokenName:X-AUTH-TOKEN}")
     private String tokenName;
+
+    @Value("${smt.spring.security.jwt.loginSuccessUrl:/}")
+    private String loginSuccessUrl;
 
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
@@ -41,5 +47,23 @@ public class JwtAuthenticationConfiguration {
         AuthenticationSuccessHandler delegate
     ) {
         return new JwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery, delegate);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtAuthenticationFilter.class)
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtLogoutHandler.class)
+    public JwtLogoutHandler jwtLogoutHandler() {
+        return new JwtLogoutHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationSuccessHandler.class)
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new SimpleUrlAuthenticationSuccessHandler(loginSuccessUrl);
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,6 +30,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * @author Karl Bennett
  */
+@Configuration
 public class SmtSpringSecurityJwtConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
     public static SmtSpringSecurityJwtConfigurer smtJwt() {
@@ -83,10 +85,8 @@ public class SmtSpringSecurityJwtConfigurer extends SecurityConfigurerAdapter<De
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.setParent(http.getSharedObject(ApplicationContext.class));
         context.register(PropertySourcesPlaceholderConfigurer.class);
-        context.register(JwtConfiguration.class);
-        context.register(JwtAuthenticationConfiguration.class);
+        context.register(JwtSpringSecurityConfiguration.class);
         context.refresh();
         context.getAutowireCapableBeanFactory().autowireBean(this);
-        context.close();
     }
 }
