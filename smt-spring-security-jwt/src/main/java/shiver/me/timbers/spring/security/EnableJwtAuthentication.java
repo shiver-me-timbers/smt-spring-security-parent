@@ -16,25 +16,19 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author Karl Bennett
  */
-@Configuration
-public class JwtConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(JwtTokenParser.class)
-    public JwtTokenParser jwtTokenParser() {
-        return new JwtTokenParser();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(Bakery.class)
-    public Bakery bakery() {
-        return new Bakery();
-    }
+@Target(TYPE)
+@Retention(RUNTIME)
+@Import(SmtSpringSecurityJwtConfiguration.class)
+public @interface EnableJwtAuthentication {
 }

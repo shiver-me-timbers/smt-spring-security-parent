@@ -90,7 +90,6 @@
 
     <modules>
         <module>smt-spring-security-jwt</module>
-        <module>smt-spring-security-jwt-autoconfigure</module>
     </modules>
 
     <scm>

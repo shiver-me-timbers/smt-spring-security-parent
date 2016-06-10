@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -33,7 +32,6 @@ import javax.annotation.PostConstruct;
  */
 @Configuration
 @ConditionalOnMissingBean(SmtSpringSecurityJwtConfiguration.class)
-@Import(JwtConfiguration.class)
 public class SmtSpringSecurityJwtConfiguration {
 
     @Value("${smt.spring.security.jwt.token.name:X-AUTH-TOKEN}")
@@ -77,6 +75,18 @@ public class SmtSpringSecurityJwtConfiguration {
     @Autowired
     public SecurityFilterChainConfigurer securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
         return new SecurityFilterChainConfigurer(filterChainProxy);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtTokenParser.class)
+    public JwtTokenParser jwtTokenParser() {
+        return new JwtTokenParser();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(Bakery.class)
+    public Bakery bakery() {
+        return new Bakery();
     }
 
     @Bean

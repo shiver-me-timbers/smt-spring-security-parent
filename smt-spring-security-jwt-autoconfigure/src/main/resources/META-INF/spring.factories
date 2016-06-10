@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=shiver.me.timbers.spring.security.SmtSpringSecurityJwtConfiguration

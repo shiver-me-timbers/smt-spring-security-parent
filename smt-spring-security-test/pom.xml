@@ -75,6 +75,5 @@
 
     <modules>
         <module>smt-spring-security-jwt-integration</module>
-        <module>smt-spring-security-jwt-autoconfigure-integration</module>
     </modules>
 </project>
