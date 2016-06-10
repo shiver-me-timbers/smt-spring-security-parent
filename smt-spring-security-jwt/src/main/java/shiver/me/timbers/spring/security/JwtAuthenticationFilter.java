@@ -16,7 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -28,8 +27,7 @@ import java.io.IOException;
 /**
  * @author Karl Bennett
  */
-@Component
-class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

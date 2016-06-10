@@ -19,9 +19,9 @@ package shiver.me.timbers.spring.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
+import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -31,13 +31,14 @@ import javax.annotation.PostConstruct;
  * @author Karl Bennett
  */
 @Configuration
-@ComponentScan
-@Order(999)
 @ConditionalOnMissingBean(SmtSpringSecurityJwtConfiguration.class)
 public class SmtSpringSecurityJwtConfiguration {
 
     @Value("${smt.spring.security.jwt.token.name:X-AUTH-TOKEN}")
     private String tokenName;
+
+    @Autowired
+    private SecurityFilterChainConfigurer configurer;
 
     @Autowired
     private JwtTokenParser tokenParser;
@@ -46,16 +47,10 @@ public class SmtSpringSecurityJwtConfiguration {
     private Bakery bakery;
 
     @Autowired
-    private JwtAuthenticationFilter authenticationFilter;
-
-    @Autowired
-    private SecurityFilterChainConfigurer configurer;
-
-    @Autowired
     private FieldExtractor extractor;
 
     @PostConstruct
-    public void jwtAuthenticationSuccessHandler() {
+    public void configure() {
         configurer.updateFilters(
             UsernamePasswordAuthenticationFilter.class,
             new Updater<UsernamePasswordAuthenticationFilter>() {
@@ -72,6 +67,38 @@ public class SmtSpringSecurityJwtConfiguration {
                 }
             }
         );
-        configurer.addBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        configurer.addBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SecurityFilterChainConfigurer.class)
+    @Autowired
+    public SecurityFilterChainConfigurer securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
+        return new SecurityFilterChainConfigurer(filterChainProxy);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtTokenParser.class)
+    public JwtTokenParser jwtTokenParser() {
+        return new JwtTokenParser();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(Bakery.class)
+    public Bakery bakery() {
+        return new Bakery();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FieldExtractor.class)
+    @Autowired
+    public FieldExtractor fieldExtractor(FieldGetter fieldGetter) {
+        return new FieldExtractor(fieldGetter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FieldGetter.class)
+    public FieldGetter fieldGetter() {
+        return new FieldGetter();
     }
 }

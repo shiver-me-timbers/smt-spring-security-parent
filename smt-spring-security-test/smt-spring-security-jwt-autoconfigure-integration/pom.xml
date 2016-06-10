@@ -21,47 +21,30 @@
 
     <parent>
         <groupId>com.github.shiver-me-timbers</groupId>
-        <artifactId>smt-spring-security-parent</artifactId>
+        <artifactId>smt-spring-security-test</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smt-spring-security-jwt</artifactId>
+    <artifactId>smt-spring-security-jwt-autoconfigure-integration</artifactId>
 
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
 
     <description>
-        This library contains Spring Security configuration that can be applied to configure JWT Token authentication.
+        This project contains the integration tests for the smt-spring-security-jwt-autoconfigure library.
     </description>
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <groupId>com.github.shiver-me-timbers</groupId>
+            <artifactId>smt-spring-security-jwt-autoconfigure</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.github.shiver-me-timbers</groupId>
-            <artifactId>smt-random</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.shiver-me-timbers</groupId>
-            <artifactId>smt-matchers</artifactId>
-            <scope>test</scope>
+            <artifactId>smt-spring-security-jwt-integration</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

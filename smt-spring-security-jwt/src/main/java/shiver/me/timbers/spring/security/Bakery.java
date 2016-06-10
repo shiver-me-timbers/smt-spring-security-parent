@@ -16,17 +16,14 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.stereotype.Component;
-
 import javax.servlet.http.Cookie;
 
 /**
  * @author Karl Bennett
  */
-@Component
-class Bakery {
+public class Bakery {
 
-    Cookie bake(String name, String value) {
+    public Cookie bake(String name, String value) {
         throw new UnsupportedOperationException();
     }
 }

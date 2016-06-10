@@ -16,12 +16,19 @@
 
 package shiver.me.timbers.spring.security;
 
-import javax.servlet.Filter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Karl Bennett
  */
-interface Updater<F extends Filter> {
+public class JwtLogoutHandler implements LogoutHandler {
 
-    void update(F filter);
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.integration;
 
-import org.springframework.security.core.Authentication;
 
-/**
- * @author Karl Bennett
- */
-public class JwtTokenParser {
-
-    public String create(Authentication authentication) {
-        throw new UnsupportedOperationException();
-    }
+public class ITSpringSecurityJwt extends AbstractSpringSecurityJwt {
 }

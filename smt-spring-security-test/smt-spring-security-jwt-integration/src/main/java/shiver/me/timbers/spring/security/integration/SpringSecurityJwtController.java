@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.integration;
 
-import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @author Karl Bennett
- */
-public class JwtTokenParser {
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-    public String create(Authentication authentication) {
-        throw new UnsupportedOperationException();
+@RestController
+public class SpringSecurityJwtController {
+
+    static final String TEXT = "The request was successful.";
+
+    @RequestMapping(method = GET, produces = TEXT_PLAIN_VALUE)
+    public String request() {
+        return TEXT;
     }
 }

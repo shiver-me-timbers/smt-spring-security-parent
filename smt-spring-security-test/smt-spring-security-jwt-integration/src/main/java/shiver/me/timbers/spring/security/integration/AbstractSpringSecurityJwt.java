@@ -43,12 +43,12 @@ import static shiver.me.timbers.spring.security.integration.SpringSecurityJwtCon
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringSecurityJwtIntegrationConfiguration.class)
 @WebIntegrationTest
-public class ITSpringSecuirtyJwt {
+public abstract class AbstractSpringSecurityJwt {
 
     @Value("${local.server.port}")
     private int port;
 
-    @Value("${smt.spring.security.jwt.token.name}")
+    @Value("${smt.spring.security.jwt.tokenName}")
     private String tokenName;
 
     private WebTarget target;

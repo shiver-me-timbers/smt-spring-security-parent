@@ -16,21 +16,16 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Field;
 
 /**
  * @author Karl Bennett
  */
-@Component
-class FieldExtractor {
+public class FieldExtractor {
 
     private final FieldGetter fieldGetter;
 
-    @Autowired
-    public FieldExtractor(FieldGetter fieldGetter) {
+    FieldExtractor(FieldGetter fieldGetter) {
         this.fieldGetter = fieldGetter;
     }
 

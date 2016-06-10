@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.integration;
+package shiver.me.timbers.spring.security;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.lang.reflect.Field;
 
-import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
+/**
+ * @author Karl Bennett
+ */
+public class FieldGetter {
 
-@RestController
-public class SpringSecurityJwtController {
-
-    public static final String TEXT = "The request was successful.";
-
-    @RequestMapping(method = GET, produces = TEXT_PLAIN_VALUE)
-    public String request() {
-        return TEXT;
+    Object get(Field field, Object object) throws IllegalAccessException {
+        field.setAccessible(true);
+        return field.get(object);
     }
 }

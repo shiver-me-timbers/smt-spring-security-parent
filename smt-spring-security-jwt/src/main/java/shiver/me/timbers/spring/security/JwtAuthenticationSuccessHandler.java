@@ -27,14 +27,14 @@ import java.io.IOException;
 /**
  * @author Karl Bennett
  */
-class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final String tokenName;
     private final JwtTokenParser tokenParser;
     private final Bakery bakery;
     private final AuthenticationSuccessHandler delegate;
 
-    JwtAuthenticationSuccessHandler(
+    public JwtAuthenticationSuccessHandler(
         String tokenName,
         JwtTokenParser tokenParser,
         Bakery bakery,

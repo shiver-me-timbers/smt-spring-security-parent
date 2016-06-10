@@ -16,18 +16,12 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Field;
+import javax.servlet.Filter;
 
 /**
  * @author Karl Bennett
  */
-@Component
-class FieldGetter {
+public interface Updater<F extends Filter> {
 
-    Object get(Field field, Object object) throws IllegalAccessException {
-        field.setAccessible(true);
-        return field.get(object);
-    }
+    public void update(F filter);
 }

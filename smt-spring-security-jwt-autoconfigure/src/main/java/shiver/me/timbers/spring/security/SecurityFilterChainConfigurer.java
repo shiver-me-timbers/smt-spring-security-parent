@@ -16,10 +16,8 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
 import java.util.List;
@@ -27,18 +25,16 @@ import java.util.List;
 /**
  * @author Karl Bennett
  */
-@Component
-class SecurityFilterChainConfigurer {
+public class SecurityFilterChainConfigurer {
 
     private final FilterChainProxy filterChainProxy;
 
-    @Autowired
     public SecurityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
         this.filterChainProxy = filterChainProxy;
     }
 
     @SuppressWarnings("unchecked")
-    <F extends Filter> void updateFilters(Class<F> filterClass, Updater<F> updater) {
+    public <F extends Filter> void updateFilters(Class<F> filterClass, Updater<F> updater) {
         for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
             for (Filter filter : filterChain.getFilters()) {
                 if (filterClass.isAssignableFrom(filter.getClass())) {
@@ -48,7 +44,7 @@ class SecurityFilterChainConfigurer {
         }
     }
 
-    void addBefore(Filter filter, Class<? extends Filter> filterClass) {
+    public void addBefore(Filter filter, Class<? extends Filter> filterClass) {
         for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
             final List<Filter> filters = filterChain.getFilters();
             final int index = findFirstIndexOf(filterClass, filters);
