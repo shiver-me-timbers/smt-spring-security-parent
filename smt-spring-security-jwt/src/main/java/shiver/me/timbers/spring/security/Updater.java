@@ -23,5 +23,5 @@ import javax.servlet.Filter;
  */
 public interface Updater<F extends Filter> {
 
-    public void update(F filter);
+    void update(F filter);
 }
