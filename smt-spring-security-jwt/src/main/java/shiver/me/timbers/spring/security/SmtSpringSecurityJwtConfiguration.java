@@ -102,6 +102,6 @@ public class SmtSpringSecurityJwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(FieldGetter.class)
     public FieldGetter fieldGetter() {
-        return new FieldGetter();
+        return new ReflectionFieldGetter();
     }
 }

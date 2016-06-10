@@ -16,8 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import javax.servlet.http.Cookie;
-
 /**
  * @author Karl Bennett
  */

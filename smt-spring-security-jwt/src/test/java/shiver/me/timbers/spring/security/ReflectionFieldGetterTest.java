@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class FieldGetterTest {
+public class ReflectionFieldGetterTest {
 
     @Test
     public void Can_get_a_field() throws NoSuchFieldException, IllegalAccessException {
@@ -35,7 +35,7 @@ public class FieldGetterTest {
         final Field field = fieldTest.getClass().getDeclaredField("test");
 
         // When
-        final Object actual = new FieldGetter().get(field, fieldTest);
+        final Object actual = new ReflectionFieldGetter().get(field, fieldTest);
 
         // Then
         assertThat(actual, is((Object) expected));
