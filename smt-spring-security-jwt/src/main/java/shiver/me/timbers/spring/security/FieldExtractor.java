@@ -29,10 +29,18 @@ public class FieldExtractor {
         this.fieldGetter = fieldGetter;
     }
 
+    <T> T extract(Class<T> type, String name, Object object) {
+        return extract(type, name, object.getClass(), object);
+    }
+
     @SuppressWarnings("unchecked")
-    <T> T extract(Class<T> type, Object object) {
-        for (Field field : object.getClass().getDeclaredFields()) {
-            if (type.isAssignableFrom(field.getType())) {
+    private <T> T extract(Class<T> fieldType, String name, Class objectType, Object object) {
+        if (Object.class.equals(objectType)) {
+            return null;
+        }
+
+        for (Field field : objectType.getDeclaredFields()) {
+            if (isTheRightField(fieldType, name, field)) {
                 try {
                     return (T) fieldGetter.get(field, object);
                 } catch (IllegalAccessException e) {
@@ -40,6 +48,11 @@ public class FieldExtractor {
                 }
             }
         }
-        return null;
+
+        return extract(fieldType, name, objectType.getSuperclass(), object);
+    }
+
+    private static <T> boolean isTheRightField(Class<T> type, String name, Field field) {
+        return type.isAssignableFrom(field.getType()) && field.getName().equals(name);
     }
 }

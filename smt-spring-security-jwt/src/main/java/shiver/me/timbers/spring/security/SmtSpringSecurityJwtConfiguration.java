@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import javax.annotation.PostConstruct;
 
@@ -61,13 +62,14 @@ public class SmtSpringSecurityJwtConfiguration {
                             tokenName,
                             tokenParser,
                             bakery,
-                            extractor.extract(AuthenticationSuccessHandler.class, filter)
+                            extractor.extract(AuthenticationSuccessHandler.class, "successHandler", filter)
                         )
                     );
                 }
             }
         );
         configurer.addBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        configurer.addBefore(new JwtLogoutFilter(), LogoutFilter.class);
     }
 
     @Bean
