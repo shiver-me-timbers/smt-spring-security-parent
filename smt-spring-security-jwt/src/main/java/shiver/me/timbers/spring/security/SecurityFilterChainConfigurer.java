@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * @author Karl Bennett
  */
-public class SecurityFilterChainConfigurer {
+public class SecurityFilterChainConfigurer implements ChainConfigurer<Filter> {
 
     private final FilterChainProxy filterChainProxy;
 
@@ -33,17 +33,19 @@ public class SecurityFilterChainConfigurer {
         this.filterChainProxy = filterChainProxy;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
-    public <F extends Filter> void updateFilters(Class<F> filterClass, Updater<F> updater) {
+    public <F extends Filter> void updateFilters(Class<F> filterType, Updater<F> updater) {
         for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
             for (Filter filter : filterChain.getFilters()) {
-                if (filterClass.isAssignableFrom(filter.getClass())) {
+                if (filterType.isAssignableFrom(filter.getClass())) {
                     updater.update((F) filter);
                 }
             }
         }
     }
 
+    @Override
     public void addBefore(Filter filter, Class<? extends Filter> filterClass) {
         for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
             final List<Filter> filters = filterChain.getFilters();

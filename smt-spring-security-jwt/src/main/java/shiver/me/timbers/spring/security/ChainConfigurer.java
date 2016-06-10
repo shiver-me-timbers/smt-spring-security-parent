@@ -19,7 +19,9 @@ package shiver.me.timbers.spring.security;
 /**
  * @author Karl Bennett
  */
-public interface Updater<T> {
+public interface ChainConfigurer<T> {
+    @SuppressWarnings("unchecked")
+    <L extends T> void updateFilters(Class<L> type, Updater<L> updater);
 
-    void update(T object);
+    void addBefore(T link, Class<? extends T> filterClass);
 }

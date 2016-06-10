@@ -27,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.Filter;
 import javax.servlet.http.Cookie;
 
 /**
@@ -40,7 +41,7 @@ public class SmtSpringSecurityJwtConfiguration {
     private String tokenName;
 
     @Autowired
-    private SecurityFilterChainConfigurer configurer;
+    private ChainConfigurer<Filter> configurer;
 
     @Autowired
     private JwtTokenParser tokenParser;
@@ -74,9 +75,9 @@ public class SmtSpringSecurityJwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(SecurityFilterChainConfigurer.class)
+    @ConditionalOnMissingBean(ChainConfigurer.class)
     @Autowired
-    public SecurityFilterChainConfigurer securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
+    public ChainConfigurer<Filter> securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
         return new SecurityFilterChainConfigurer(filterChainProxy);
     }
 
