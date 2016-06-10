@@ -21,7 +21,7 @@ import javax.servlet.http.Cookie;
 /**
  * @author Karl Bennett
  */
-public class CookieBakery implements Bakery {
+public class CookieBakery implements Bakery<Cookie> {
 
     @Override
     public Cookie bake(String name, String value) {

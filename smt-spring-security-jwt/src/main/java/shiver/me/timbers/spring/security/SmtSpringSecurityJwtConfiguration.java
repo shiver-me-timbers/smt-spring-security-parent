@@ -27,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
 
 /**
  * @author Karl Bennett
@@ -45,7 +46,7 @@ public class SmtSpringSecurityJwtConfiguration {
     private JwtTokenParser tokenParser;
 
     @Autowired
-    private Bakery bakery;
+    private Bakery<Cookie> bakery;
 
     @Autowired
     private FieldExtractor extractor;
@@ -87,7 +88,7 @@ public class SmtSpringSecurityJwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(Bakery.class)
-    public Bakery bakery() {
+    public Bakery<Cookie> bakery() {
         return new CookieBakery();
     }
 

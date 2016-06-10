@@ -21,6 +21,6 @@ import javax.servlet.http.Cookie;
 /**
  * @author Karl Bennett
  */
-public interface Bakery {
-    Cookie bake(String name, String value);
+public interface Bakery<T> {
+    T bake(String name, String value);
 }

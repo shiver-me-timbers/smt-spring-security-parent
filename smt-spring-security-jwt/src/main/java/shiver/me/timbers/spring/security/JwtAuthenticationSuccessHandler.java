@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -31,13 +32,13 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
     private final String tokenName;
     private final JwtTokenParser tokenParser;
-    private final Bakery bakery;
+    private final Bakery<Cookie> bakery;
     private final AuthenticationSuccessHandler delegate;
 
     public JwtAuthenticationSuccessHandler(
         String tokenName,
         JwtTokenParser tokenParser,
-        Bakery bakery,
+        Bakery<Cookie> bakery,
         AuthenticationSuccessHandler delegate
     ) {
         this.tokenName = tokenName;

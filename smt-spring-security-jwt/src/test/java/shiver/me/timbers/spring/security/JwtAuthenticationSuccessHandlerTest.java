@@ -39,10 +39,11 @@ public class JwtAuthenticationSuccessHandlerTest {
     private String tokenName;
     private JwtTokenParser tokenParser;
     private AuthenticationSuccessHandler delegate;
-    private Bakery bakery;
+    private Bakery<Cookie> bakery;
     private JwtAuthenticationSuccessHandler successHandler;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() {
         tokenName = someString();
         tokenParser = mock(JwtTokenParser.class);
