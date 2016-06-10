@@ -95,7 +95,7 @@ public class SmtSpringSecurityJwtConfiguration {
     @ConditionalOnMissingBean(FieldExtractor.class)
     @Autowired
     public FieldExtractor fieldExtractor(FieldGetter fieldGetter) {
-        return new FieldExtractor(fieldGetter);
+        return new ReflectionFieldExtractor(fieldGetter);
     }
 
     @Bean

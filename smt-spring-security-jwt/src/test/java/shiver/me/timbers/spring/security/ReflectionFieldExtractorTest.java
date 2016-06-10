@@ -37,7 +37,7 @@ import static shiver.me.timbers.data.random.RandomDoubles.someDouble;
 import static shiver.me.timbers.data.random.RandomIntegers.someInteger;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class FieldExtractorTest {
+public class ReflectionFieldExtractorTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -47,7 +47,7 @@ public class FieldExtractorTest {
     @Before
     public void setUp() {
         fieldGetter = mock(FieldGetter.class);
-        extractor = new FieldExtractor(fieldGetter);
+        extractor = new ReflectionFieldExtractor(fieldGetter);
     }
 
     @Test
