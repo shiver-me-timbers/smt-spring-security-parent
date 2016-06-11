@@ -24,7 +24,7 @@ import java.lang.reflect.Field;
 public class ReflectionFieldGetter implements FieldGetter {
 
     @Override
-    public Object get(Field field, Object object) throws IllegalAccessException {
+    public Object get(Object object, Field field) throws IllegalAccessException {
         field.setAccessible(true);
         return field.get(object);
     }

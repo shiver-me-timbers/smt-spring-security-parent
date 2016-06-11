@@ -25,10 +25,15 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.http.Cookie;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author Karl Bennett
@@ -50,7 +55,7 @@ public class SmtSpringSecurityJwtConfiguration {
     private Bakery<Cookie> bakery;
 
     @Autowired
-    private FieldExtractor extractor;
+    private FieldMutator extractor;
 
     @PostConstruct
     public void configure() {
@@ -64,14 +69,27 @@ public class SmtSpringSecurityJwtConfiguration {
                             tokenName,
                             tokenParser,
                             bakery,
-                            extractor.extract(AuthenticationSuccessHandler.class, "successHandler", filter)
+                            extractor.retrieve(filter, "successHandler", AuthenticationSuccessHandler.class)
                         )
                     );
                 }
             }
         );
         configurer.addBefore(new CookieAndHeaderJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        configurer.addBefore(new JwtLogoutFilter(), LogoutFilter.class);
+        configurer.updateFilters(
+            LogoutFilter.class,
+            new Updater<LogoutFilter>() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public void update(final LogoutFilter filter) {
+                    final List<LogoutHandler> handlers = new ArrayList<>(
+                        extractor.retrieve(filter, "handlers", List.class)
+                    );
+                    handlers.add(0, new CookieAndHeaderJwtLogoutHandler());
+                    extractor.update(filter, "handlers", asList(handlers.toArray(new LogoutHandler[handlers.size()])));
+                }
+            }
+        );
     }
 
     @Bean
@@ -94,10 +112,10 @@ public class SmtSpringSecurityJwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(FieldExtractor.class)
+    @ConditionalOnMissingBean(FieldMutator.class)
     @Autowired
-    public FieldExtractor fieldExtractor(FieldGetter fieldGetter) {
-        return new ReflectionFieldExtractor(fieldGetter);
+    public FieldMutator fieldExtractor(FieldFinder fieldFinder, FieldGetter fieldGetter, FieldSetter fieldSetter) {
+        return new ReflectionFieldMutator(fieldFinder, fieldGetter, fieldSetter);
     }
 
     @Bean

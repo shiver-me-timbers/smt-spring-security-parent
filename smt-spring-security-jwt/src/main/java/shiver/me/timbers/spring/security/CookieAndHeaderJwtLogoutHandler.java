@@ -16,9 +16,18 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.springframework.security.core.Authentication;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @author Karl Bennett
  */
-public interface FieldExtractor {
-    <T> T extract(Class<T> type, String name, Object object);
+public class CookieAndHeaderJwtLogoutHandler implements JwtLogoutHandler {
+
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        throw new UnsupportedOperationException();
+    }
 }

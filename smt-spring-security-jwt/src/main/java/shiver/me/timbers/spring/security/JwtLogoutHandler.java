@@ -16,11 +16,10 @@
 
 package shiver.me.timbers.spring.security;
 
-import java.lang.reflect.Field;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 /**
  * @author Karl Bennett
  */
-public interface FieldGetter {
-    Object get(Object object, Field field) throws IllegalAccessException;
+public interface JwtLogoutHandler extends LogoutHandler {
 }

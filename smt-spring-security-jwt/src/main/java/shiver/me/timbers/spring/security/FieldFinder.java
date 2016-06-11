@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 /**
  * @author Karl Bennett
  */
-public interface FieldGetter {
-    Object get(Object object, Field field) throws IllegalAccessException;
+public interface FieldFinder {
+
+    Field findField(Object object, String name, Class type) throws NoSuchFieldException;
 }

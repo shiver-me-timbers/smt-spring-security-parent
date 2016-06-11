@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,10 +34,17 @@ import static org.mockito.Mockito.verify;
 
 public class SecurityFilterChainConfigurerTest {
 
+    private FilterChainProxy filterChainProxy;
+    private ChainConfigurer<Filter> configurer;
+
+    @Before
+    public void setUp() {
+        filterChainProxy = mock(FilterChainProxy.class);
+        configurer = new SecurityFilterChainConfigurer(filterChainProxy);
+    }
+
     @Test
     public void Can_update_a_filter() {
-
-        final FilterChainProxy filterChainProxy = mock(FilterChainProxy.class);
 
         final SecurityFilterChain chain1 = mock(SecurityFilterChain.class);
         final SecurityFilterChain chain2 = mock(SecurityFilterChain.class);
@@ -52,7 +60,7 @@ public class SecurityFilterChainConfigurerTest {
         given(chain3.getFilters()).willReturn(asList(mock(FilterOne.class), mock(FilterThree.class), filter2));
 
         // When
-        new SecurityFilterChainConfigurer(filterChainProxy).updateFilters(FilterTwo.class, new Updater<FilterTwo>() {
+        configurer.updateFilters(FilterTwo.class, new Updater<FilterTwo>() {
             @Override
             public void update(FilterTwo filter) {
                 filter.update();
@@ -67,7 +75,6 @@ public class SecurityFilterChainConfigurerTest {
     @Test
     public void Can_add_a_filter_before_another() {
 
-        final FilterChainProxy filterChainProxy = mock(FilterChainProxy.class);
         final FilterTwo filterTwo = mock(FilterTwo.class);
 
         final FilterOne filterOne = mock(FilterOne.class);
@@ -88,7 +95,7 @@ public class SecurityFilterChainConfigurerTest {
         given(chain3.getFilters()).willReturn(filters3);
 
         // When
-        new SecurityFilterChainConfigurer(filterChainProxy).addBefore(filterTwo, FilterThree.class);
+        configurer.addBefore(filterTwo, FilterThree.class);
 
         // Then
         assertThat(filters1, contains(filterOne, filterTwo, filterThree, filterFour));

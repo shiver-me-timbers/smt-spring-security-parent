@@ -16,11 +16,12 @@
 
 package shiver.me.timbers.spring.security;
 
-import java.lang.reflect.Field;
-
 /**
  * @author Karl Bennett
  */
-public interface FieldGetter {
-    Object get(Object object, Field field) throws IllegalAccessException;
+public interface FieldMutator {
+
+    <T> T retrieve(Object object, String name, Class<T> type);
+
+    void update(Object object, String name, Object value);
 }

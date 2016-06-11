@@ -18,42 +18,37 @@ package shiver.me.timbers.spring.security;
 
 import java.lang.reflect.Field;
 
+import static java.lang.String.format;
+
 /**
  * @author Karl Bennett
  */
-public class ReflectionFieldExtractor implements FieldExtractor {
-
-    private final FieldGetter fieldGetter;
-
-    public ReflectionFieldExtractor(FieldGetter fieldGetter) {
-        this.fieldGetter = fieldGetter;
-    }
+public class ReflectionFieldFinder implements FieldFinder {
 
     @Override
-    public <T> T extract(Class<T> type, String name, Object object) {
-        return extract(type, name, object.getClass(), object);
+    public Field findField(Object object, String name, Class type) throws NoSuchFieldException {
+        return find(object.getClass(), name, type);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T extract(Class<T> fieldType, String name, Class objectType, Object object) {
+    private Field find(Class objectType, String name, Class fieldType) throws NoSuchFieldException {
         if (Object.class.equals(objectType)) {
-            return null;
+            throw new NoSuchFieldException(
+                format("Could not find a field with name (%s) and type (%s).", name, fieldType.getName())
+            );
         }
 
         for (Field field : objectType.getDeclaredFields()) {
-            if (isTheRightField(fieldType, name, field)) {
-                try {
-                    return (T) fieldGetter.get(field, object);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(e);
-                }
+            if (isTheRightField(field, name, fieldType)) {
+                return field;
             }
         }
 
-        return extract(fieldType, name, objectType.getSuperclass(), object);
+        return find(objectType.getSuperclass(), name, fieldType);
     }
 
-    private static <T> boolean isTheRightField(Class<T> type, String name, Field field) {
+    @SuppressWarnings("unchecked")
+    private static boolean isTheRightField(Field field, String name, Class type) {
         return type.isAssignableFrom(field.getType()) && field.getName().equals(name);
     }
 }

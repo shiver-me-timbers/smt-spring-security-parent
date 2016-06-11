@@ -24,29 +24,24 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class ReflectionFieldGetterTest {
+public class ReflectionFieldSetterTest {
 
     @Test
-    public void Can_get_a_field() throws NoSuchFieldException, IllegalAccessException {
+    public void Can_set_a_field() throws NoSuchFieldException, IllegalAccessException {
 
         // Given
+        final FieldTest object = new FieldTest();
+        final Field field = object.getClass().getDeclaredField("test");
         final String expected = someString();
-        final FieldTest fieldTest = new FieldTest(expected);
-        final Field field = fieldTest.getClass().getDeclaredField("test");
 
         // When
-        final Object actual = new ReflectionFieldGetter().get(fieldTest, field);
+        new ReflectionFieldSetter().set(object, field, expected);
 
         // Then
-        assertThat(actual, is((Object) expected));
+        assertThat(object.test, is(expected));
     }
 
     private static class FieldTest {
-
-        private final String test;
-
-        private FieldTest(String test) {
-            this.test = test;
-        }
+        private final String test = someString();
     }
 }
