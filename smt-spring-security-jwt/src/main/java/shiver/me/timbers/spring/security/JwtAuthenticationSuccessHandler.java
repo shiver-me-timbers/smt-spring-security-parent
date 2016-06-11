@@ -16,46 +16,10 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * @author Karl Bennett
  */
-public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-
-    private final String tokenName;
-    private final JwtTokenParser tokenParser;
-    private final Bakery<Cookie> bakery;
-    private final AuthenticationSuccessHandler delegate;
-
-    public JwtAuthenticationSuccessHandler(
-        String tokenName,
-        JwtTokenParser tokenParser,
-        Bakery<Cookie> bakery,
-        AuthenticationSuccessHandler delegate
-    ) {
-        this.tokenName = tokenName;
-        this.tokenParser = tokenParser;
-        this.bakery = bakery;
-        this.delegate = delegate;
-    }
-
-    @Override
-    public void onAuthenticationSuccess(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        Authentication authentication
-    ) throws IOException, ServletException {
-        final String token = tokenParser.create(authentication);
-        response.addHeader(tokenName, token);
-        response.addCookie(bakery.bake(tokenName, token));
-        delegate.onAuthenticationSuccess(request, response, authentication);
-    }
+public interface JwtAuthenticationSuccessHandler extends AuthenticationSuccessHandler {
 }

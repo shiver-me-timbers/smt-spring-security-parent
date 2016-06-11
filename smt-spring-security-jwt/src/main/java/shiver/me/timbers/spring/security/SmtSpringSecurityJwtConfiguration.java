@@ -60,7 +60,7 @@ public class SmtSpringSecurityJwtConfiguration {
                 @Override
                 public void update(final UsernamePasswordAuthenticationFilter filter) {
                     filter.setAuthenticationSuccessHandler(
-                        new JwtAuthenticationSuccessHandler(
+                        new CookieAndHeaderJwtAuthenticationSuccessHandler(
                             tokenName,
                             tokenParser,
                             bakery,

@@ -33,7 +33,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class JwtAuthenticationSuccessHandlerTest {
+public class CookieAndHeaderJwtAuthenticationSuccessHandlerTest {
 
 
     private String tokenName;
@@ -49,7 +49,7 @@ public class JwtAuthenticationSuccessHandlerTest {
         tokenParser = mock(JwtTokenParser.class);
         bakery = mock(Bakery.class);
         delegate = mock(AuthenticationSuccessHandler.class);
-        successHandler = new JwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery, delegate);
+        successHandler = new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery, delegate);
     }
 
     @Test
