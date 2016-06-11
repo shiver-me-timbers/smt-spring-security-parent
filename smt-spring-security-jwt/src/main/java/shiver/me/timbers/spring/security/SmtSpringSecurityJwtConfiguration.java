@@ -86,7 +86,9 @@ public class SmtSpringSecurityJwtConfiguration {
                         extractor.retrieve(filter, "handlers", List.class)
                     );
                     handlers.add(0, new CookieAndHeaderJwtLogoutHandler());
-                    extractor.update(filter, "handlers", asList(handlers.toArray(new LogoutHandler[handlers.size()])));
+                    extractor.update(
+                        filter, "handlers", List.class, asList(handlers.toArray(new LogoutHandler[handlers.size()]))
+                    );
                 }
             }
         );
@@ -119,8 +121,20 @@ public class SmtSpringSecurityJwtConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(FieldFinder.class)
+    public FieldFinder fieldFinder() {
+        return new ReflectionFieldFinder();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(FieldGetter.class)
     public FieldGetter fieldGetter() {
         return new ReflectionFieldGetter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FieldSetter.class)
+    public FieldSetter fieldSetter() {
+        return new ReflectionFieldSetter();
     }
 }

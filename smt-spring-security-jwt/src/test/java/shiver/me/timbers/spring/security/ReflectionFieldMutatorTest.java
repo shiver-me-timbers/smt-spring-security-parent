@@ -118,15 +118,16 @@ public class ReflectionFieldMutatorTest {
 
         final Object object = someObject();
         final String name = someString();
+        final Class type = someClass();
         final Object value = someObject();
 
         final Field field = someField();
 
         // Given
-        given(fieldFinder.findField(object, name, value.getClass())).willReturn(field);
+        given(fieldFinder.findField(object, name, type)).willReturn(field);
 
         // When
-        mutator.update(object, name, value);
+        mutator.update(object, name, type, value);
 
         // Then
         verify(fieldSetter).set(object, field, value);
@@ -137,17 +138,18 @@ public class ReflectionFieldMutatorTest {
 
         final Object object = someObject();
         final String name = someString();
+        final Class type = someClass();
         final Object value = someObject();
 
         final NoSuchFieldException exception = new NoSuchFieldException();
 
         // Given
-        given(fieldFinder.findField(object, name, value.getClass())).willThrow(exception);
+        given(fieldFinder.findField(object, name, type)).willThrow(exception);
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectCause(is(exception));
 
         // When
-        mutator.update(object, name, value);
+        mutator.update(object, name, type, value);
     }
 
     @Test
@@ -155,6 +157,7 @@ public class ReflectionFieldMutatorTest {
 
         final Object object = someObject();
         final String name = someString();
+        final Class type = someClass();
         final Object value = someObject();
 
         final Field field = someField();
@@ -162,13 +165,13 @@ public class ReflectionFieldMutatorTest {
         final IllegalAccessException exception = new IllegalAccessException();
 
         // Given
-        given(fieldFinder.findField(object, name, value.getClass())).willReturn(field);
+        given(fieldFinder.findField(object, name, type)).willReturn(field);
         willThrow(exception).given(fieldSetter).set(object, field, value);
         expectedException.expect(IllegalStateException.class);
         expectedException.expectCause(is(exception));
 
         // When
-        mutator.update(object, name, value);
+        mutator.update(object, name, type, value);
     }
 
     private static Object someObject() {
