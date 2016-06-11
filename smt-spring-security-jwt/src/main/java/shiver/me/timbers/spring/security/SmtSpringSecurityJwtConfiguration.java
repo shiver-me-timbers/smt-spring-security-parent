@@ -56,36 +56,9 @@ public class SmtSpringSecurityJwtConfiguration {
 
     @PostConstruct
     public void configure() {
-        configurer.updateFilters(
-            UsernamePasswordAuthenticationFilter.class,
-            new Updater<UsernamePasswordAuthenticationFilter>() {
-                @Override
-                public void update(final UsernamePasswordAuthenticationFilter filter) {
-                    filter.setAuthenticationSuccessHandler(
-                        successHandler.withDelegate(
-                            mutator.retrieve(filter, "successHandler", AuthenticationSuccessHandler.class)
-                        )
-                    );
-                }
-            }
-        );
+        configurer.modifyFilters(LogoutFilter.class, new AddJwtLogoutHandler());
         configurer.addBefore(new CookieAndHeaderJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        configurer.updateFilters(
-            LogoutFilter.class,
-            new Updater<LogoutFilter>() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public void update(final LogoutFilter filter) {
-                    final List<LogoutHandler> handlers = new ArrayList<>(
-                        mutator.retrieve(filter, "handlers", List.class)
-                    );
-                    handlers.add(0, new CookieAndHeaderJwtLogoutHandler());
-                    mutator.replace(
-                        filter, "handlers", List.class, asList(handlers.toArray(new LogoutHandler[handlers.size()]))
-                    );
-                }
-            }
-        );
+        configurer.modifyFilters(UsernamePasswordAuthenticationFilter.class, new ReplaceSuccessHandlerWithJwt());
     }
 
     @Bean
@@ -140,5 +113,32 @@ public class SmtSpringSecurityJwtConfiguration {
     @ConditionalOnMissingBean(FieldSetter.class)
     public FieldSetter fieldSetter() {
         return new ReflectionFieldSetter();
+    }
+
+    private class ReplaceSuccessHandlerWithJwt
+        implements Modifier<UsernamePasswordAuthenticationFilter> {
+        @Override
+        public void modify(final UsernamePasswordAuthenticationFilter filter) {
+            filter.setAuthenticationSuccessHandler(
+                successHandler.withDelegate(
+                    mutator.retrieve(filter, "successHandler", AuthenticationSuccessHandler.class)
+                )
+            );
+        }
+    }
+
+    private class AddJwtLogoutHandler implements Modifier<LogoutFilter> {
+        @SuppressWarnings("unchecked")
+        @Override
+        public void modify(final LogoutFilter filter) {
+            mutator.update(filter, "handlers", List.class, new Updater<List>() {
+                @Override
+                public List update(List oldHandlers) {
+                    final List<LogoutHandler> handlers = new ArrayList<>(oldHandlers);
+                    handlers.add(0, new CookieAndHeaderJwtLogoutHandler());
+                    return asList(handlers.toArray(new LogoutHandler[handlers.size()]));
+                }
+            });
+        }
     }
 }

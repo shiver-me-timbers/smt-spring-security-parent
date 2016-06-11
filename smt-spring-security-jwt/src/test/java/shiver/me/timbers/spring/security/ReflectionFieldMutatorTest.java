@@ -174,6 +174,32 @@ public class ReflectionFieldMutatorTest {
         mutator.replace(object, name, type, value);
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    public void Can_update_a_field() throws NoSuchFieldException, IllegalAccessException {
+
+        final Object object = someObject();
+        final String name = someString();
+        final Class type = someClass();
+        final Updater updater = mock(Updater.class);
+
+        final Field field = someField();
+
+        final Object value = someObject();
+        final Object update = someObject();
+
+        // Given
+        given(fieldFinder.findField(object, name, type)).willReturn(field);
+        given(fieldGetter.get(object, field)).willReturn(value);
+        given(updater.update(value)).willReturn(update);
+
+        // When
+        mutator.update(object, name, type, updater);
+
+        // Then
+        verify(fieldSetter).set(object, field, update);
+    }
+
     private static Object someObject() {
         return someThing(someInteger(), someDouble(), someString());
     }

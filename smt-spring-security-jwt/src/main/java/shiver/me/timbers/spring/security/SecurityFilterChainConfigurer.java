@@ -35,11 +35,11 @@ public class SecurityFilterChainConfigurer implements ChainConfigurer<Filter> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <F extends Filter> void updateFilters(Class<F> filterType, Updater<F> updater) {
+    public <F extends Filter> void modifyFilters(Class<F> filterType, Modifier<F> modifier) {
         for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
             for (Filter filter : filterChain.getFilters()) {
                 if (filterType.isAssignableFrom(filter.getClass())) {
-                    updater.update((F) filter);
+                    modifier.modify((F) filter);
                 }
             }
         }

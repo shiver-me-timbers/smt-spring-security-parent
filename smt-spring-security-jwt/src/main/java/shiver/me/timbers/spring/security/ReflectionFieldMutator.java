@@ -53,4 +53,10 @@ public class ReflectionFieldMutator implements FieldMutator {
             throw new IllegalStateException(e);
         }
     }
+
+    @Override
+    public <T> void update(Object object, String name, Class<T> type, Updater<T> updater) {
+        final T value = retrieve(object, name, type);
+        replace(object, name, type, updater.update(value));
+    }
 }

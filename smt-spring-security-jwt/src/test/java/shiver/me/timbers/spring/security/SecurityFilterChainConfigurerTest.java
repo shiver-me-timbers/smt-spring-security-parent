@@ -44,7 +44,10 @@ public class SecurityFilterChainConfigurerTest {
     }
 
     @Test
-    public void Can_update_a_filter() {
+    public void Can_modify_a_filter() {
+
+        @SuppressWarnings("unchecked")
+        final Modifier<FilterTwo> modifier = mock(Modifier.class);
 
         final SecurityFilterChain chain1 = mock(SecurityFilterChain.class);
         final SecurityFilterChain chain2 = mock(SecurityFilterChain.class);
@@ -60,16 +63,11 @@ public class SecurityFilterChainConfigurerTest {
         given(chain3.getFilters()).willReturn(asList(mock(FilterOne.class), mock(FilterThree.class), filter2));
 
         // When
-        configurer.updateFilters(FilterTwo.class, new Updater<FilterTwo>() {
-            @Override
-            public void update(FilterTwo filter) {
-                filter.update();
-            }
-        });
+        configurer.modifyFilters(FilterTwo.class, modifier);
 
         // Then
-        verify(filter1).update();
-        verify(filter2).update();
+        verify(modifier).modify(filter1);
+        verify(modifier).modify(filter2);
     }
 
     @Test
@@ -107,7 +105,6 @@ public class SecurityFilterChainConfigurerTest {
     }
 
     private interface FilterTwo extends Filter {
-        void update();
     }
 
     private interface FilterThree extends Filter {

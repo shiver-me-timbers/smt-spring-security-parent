@@ -21,5 +21,5 @@ package shiver.me.timbers.spring.security;
  */
 public interface Updater<T> {
 
-    void update(T object);
+    T update(T object);
 }
