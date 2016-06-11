@@ -22,4 +22,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  * @author Karl Bennett
  */
 public interface JwtAuthenticationSuccessHandler extends AuthenticationSuccessHandler {
+
+    JwtAuthenticationSuccessHandler withDelegate(AuthenticationSuccessHandler delegate);
 }

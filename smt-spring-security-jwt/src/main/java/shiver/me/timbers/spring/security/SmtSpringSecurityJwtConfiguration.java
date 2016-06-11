@@ -49,13 +49,10 @@ public class SmtSpringSecurityJwtConfiguration {
     private ChainConfigurer<Filter> configurer;
 
     @Autowired
-    private JwtTokenParser tokenParser;
+    private JwtAuthenticationSuccessHandler successHandler;
 
     @Autowired
-    private Bakery<Cookie> bakery;
-
-    @Autowired
-    private FieldMutator extractor;
+    private FieldMutator mutator;
 
     @PostConstruct
     public void configure() {
@@ -65,11 +62,8 @@ public class SmtSpringSecurityJwtConfiguration {
                 @Override
                 public void update(final UsernamePasswordAuthenticationFilter filter) {
                     filter.setAuthenticationSuccessHandler(
-                        new CookieAndHeaderJwtAuthenticationSuccessHandler(
-                            tokenName,
-                            tokenParser,
-                            bakery,
-                            extractor.retrieve(filter, "successHandler", AuthenticationSuccessHandler.class)
+                        successHandler.withDelegate(
+                            mutator.retrieve(filter, "successHandler", AuthenticationSuccessHandler.class)
                         )
                     );
                 }
@@ -83,10 +77,10 @@ public class SmtSpringSecurityJwtConfiguration {
                 @Override
                 public void update(final LogoutFilter filter) {
                     final List<LogoutHandler> handlers = new ArrayList<>(
-                        extractor.retrieve(filter, "handlers", List.class)
+                        mutator.retrieve(filter, "handlers", List.class)
                     );
                     handlers.add(0, new CookieAndHeaderJwtLogoutHandler());
-                    extractor.update(
+                    mutator.update(
                         filter, "handlers", List.class, asList(handlers.toArray(new LogoutHandler[handlers.size()]))
                     );
                 }
@@ -99,6 +93,16 @@ public class SmtSpringSecurityJwtConfiguration {
     @Autowired
     public ChainConfigurer<Filter> securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
         return new SecurityFilterChainConfigurer(filterChainProxy);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
+    @Autowired
+    public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler(
+        JwtTokenParser tokenParser,
+        Bakery<Cookie> bakery
+    ) {
+        return new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery);
     }
 
     @Bean

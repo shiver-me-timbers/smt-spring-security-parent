@@ -33,7 +33,15 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandler implements JwtAuthen
     private final String tokenName;
     private final JwtTokenParser tokenParser;
     private final Bakery<Cookie> bakery;
-    private final AuthenticationSuccessHandler delegate;
+    private AuthenticationSuccessHandler delegate;
+
+    public CookieAndHeaderJwtAuthenticationSuccessHandler(
+        String tokenName,
+        JwtTokenParser tokenParser,
+        Bakery<Cookie> bakery
+    ) {
+        this(tokenName, tokenParser, bakery, null);
+    }
 
     public CookieAndHeaderJwtAuthenticationSuccessHandler(
         String tokenName,
@@ -56,6 +64,14 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandler implements JwtAuthen
         final String token = tokenParser.create(authentication);
         response.addHeader(tokenName, token);
         response.addCookie(bakery.bake(tokenName, token));
-        delegate.onAuthenticationSuccess(request, response, authentication);
+        if (delegate != null) {
+            delegate.onAuthenticationSuccess(request, response, authentication);
+        }
+    }
+
+    @Override
+    public JwtAuthenticationSuccessHandler withDelegate(AuthenticationSuccessHandler delegate) {
+        this.delegate = delegate;
+        return this;
     }
 }

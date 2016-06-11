@@ -75,4 +75,54 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandlerTest {
         order.verify(response).addCookie(cookie);
         order.verify(delegate).onAuthenticationSuccess(request, response, authentication);
     }
+
+    @Test
+    public void Can_handle_a_successful_authentication_with_no_delegate() throws IOException, ServletException {
+
+        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final HttpServletResponse response = mock(HttpServletResponse.class);
+        final Authentication authentication = mock(Authentication.class);
+
+        final String token = someString();
+        final Cookie cookie = mock(Cookie.class);
+
+        // Given
+        given(tokenParser.create(authentication)).willReturn(token);
+        given(bakery.bake(tokenName, token)).willReturn(cookie);
+
+        // When
+        new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery)
+            .onAuthenticationSuccess(request, response, authentication);
+
+        // Then
+        final InOrder order = inOrder(response, delegate);
+        order.verify(response).addHeader(tokenName, token);
+        order.verify(response).addCookie(cookie);
+    }
+
+    @Test
+    public void Can_update_the_delegate() throws IOException, ServletException {
+
+        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final HttpServletResponse response = mock(HttpServletResponse.class);
+        final Authentication authentication = mock(Authentication.class);
+
+        final String token = someString();
+        final Cookie cookie = mock(Cookie.class);
+        final AuthenticationSuccessHandler delegate = mock(AuthenticationSuccessHandler.class);
+
+        // Given
+        given(tokenParser.create(authentication)).willReturn(token);
+        given(bakery.bake(tokenName, token)).willReturn(cookie);
+        successHandler.withDelegate(delegate);
+
+        // When
+        successHandler.onAuthenticationSuccess(request, response, authentication);
+
+        // Then
+        final InOrder order = inOrder(response, delegate);
+        order.verify(response).addHeader(tokenName, token);
+        order.verify(response).addCookie(cookie);
+        order.verify(delegate).onAuthenticationSuccess(request, response, authentication);
+    }
 }
