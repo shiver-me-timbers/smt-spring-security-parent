@@ -80,7 +80,7 @@ public class SmtSpringSecurityJwtConfiguration {
                         mutator.retrieve(filter, "handlers", List.class)
                     );
                     handlers.add(0, new CookieAndHeaderJwtLogoutHandler());
-                    mutator.update(
+                    mutator.replace(
                         filter, "handlers", List.class, asList(handlers.toArray(new LogoutHandler[handlers.size()]))
                     );
                 }

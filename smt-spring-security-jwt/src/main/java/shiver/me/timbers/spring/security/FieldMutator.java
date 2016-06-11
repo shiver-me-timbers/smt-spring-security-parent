@@ -23,5 +23,5 @@ public interface FieldMutator {
 
     <T> T retrieve(Object object, String name, Class<T> type);
 
-    void update(Object object, String name, Class type, Object value);
+    void replace(Object object, String name, Class type, Object value);
 }

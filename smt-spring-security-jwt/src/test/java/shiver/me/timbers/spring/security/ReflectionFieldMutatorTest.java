@@ -114,7 +114,7 @@ public class ReflectionFieldMutatorTest {
     }
 
     @Test
-    public void Can_update_a_field() throws NoSuchFieldException, IllegalAccessException {
+    public void Can_replace_a_field() throws NoSuchFieldException, IllegalAccessException {
 
         final Object object = someObject();
         final String name = someString();
@@ -127,14 +127,14 @@ public class ReflectionFieldMutatorTest {
         given(fieldFinder.findField(object, name, type)).willReturn(field);
 
         // When
-        mutator.update(object, name, type, value);
+        mutator.replace(object, name, type, value);
 
         // Then
         verify(fieldSetter).set(object, field, value);
     }
 
     @Test
-    public void Can_fail_to_find_a_field_to_update() throws NoSuchFieldException {
+    public void Can_fail_to_find_a_field_to_replace() throws NoSuchFieldException {
 
         final Object object = someObject();
         final String name = someString();
@@ -149,11 +149,11 @@ public class ReflectionFieldMutatorTest {
         expectedException.expectCause(is(exception));
 
         // When
-        mutator.update(object, name, type, value);
+        mutator.replace(object, name, type, value);
     }
 
     @Test
-    public void Can_fail_to_set_a_field_to_update() throws NoSuchFieldException, IllegalAccessException {
+    public void Can_fail_to_set_a_field_to_replace() throws NoSuchFieldException, IllegalAccessException {
 
         final Object object = someObject();
         final String name = someString();
@@ -171,7 +171,7 @@ public class ReflectionFieldMutatorTest {
         expectedException.expectCause(is(exception));
 
         // When
-        mutator.update(object, name, type, value);
+        mutator.replace(object, name, type, value);
     }
 
     private static Object someObject() {

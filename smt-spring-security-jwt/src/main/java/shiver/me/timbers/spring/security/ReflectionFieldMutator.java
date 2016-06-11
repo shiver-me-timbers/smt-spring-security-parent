@@ -44,7 +44,7 @@ public class ReflectionFieldMutator implements FieldMutator {
     }
 
     @Override
-    public void update(Object object, String name, Class type, Object value) {
+    public void replace(Object object, String name, Class type, Object value) {
         try {
             fieldSetter.set(object, fieldFinder.findField(object, name, type), value);
         } catch (NoSuchFieldException e) {
