@@ -16,18 +16,22 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.junit.Test;
+import org.springframework.web.filter.GenericFilterBean;
 
-public class JwtAuthenticationFilterTest {
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
 
-    @Test
-    public void Can_authenticate_a_request() {
+/**
+ * @author Karl Bennett
+ */
+public class CookieAndHeaderJwtAuthenticationFilter extends GenericFilterBean implements JwtAuthenticationFilter {
 
-        // Given
-
-        // When
-
-
-        // Then
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+        throws IOException, ServletException {
+        throw new UnsupportedOperationException();
     }
 }

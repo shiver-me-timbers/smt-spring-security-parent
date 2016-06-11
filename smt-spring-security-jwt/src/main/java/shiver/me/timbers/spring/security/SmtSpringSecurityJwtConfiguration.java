@@ -70,7 +70,7 @@ public class SmtSpringSecurityJwtConfiguration {
                 }
             }
         );
-        configurer.addBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        configurer.addBefore(new CookieAndHeaderJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         configurer.addBefore(new JwtLogoutFilter(), LogoutFilter.class);
     }
 

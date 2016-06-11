@@ -16,10 +16,18 @@
 
 package shiver.me.timbers.spring.security;
 
-import javax.servlet.Filter;
+import org.junit.Test;
 
-/**
- * @author Karl Bennett
- */
-public interface JwtAuthenticationFilter extends Filter {
+public class CookieAndHeaderJwtAuthenticationFilterTest {
+
+    @Test
+    public void Can_authenticate_a_request() {
+
+        // Given
+
+        // When
+
+
+        // Then
+    }
 }
