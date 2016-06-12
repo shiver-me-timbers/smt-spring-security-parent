@@ -18,15 +18,27 @@ package shiver.me.timbers.spring.security;
 
 import org.junit.Test;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+
+import static org.mockito.Mockito.mock;
+
 public class CookieAndHeaderJwtAuthenticationFilterTest {
 
     @Test
-    public void Can_authenticate_a_request() {
+    public void Can_authenticate_a_request() throws IOException, ServletException {
+
+        final ServletRequest request = mock(ServletRequest.class);
+        final ServletResponse response = mock(ServletResponse.class);
+        final FilterChain chain = mock(FilterChain.class);
 
         // Given
 
         // When
-
+        new CookieAndHeaderJwtAuthenticationFilter().doFilter(request, response, chain);
 
         // Then
     }

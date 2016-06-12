@@ -31,13 +31,13 @@ import java.io.IOException;
 public class CookieAndHeaderJwtAuthenticationSuccessHandler implements JwtAuthenticationSuccessHandler {
 
     private final String tokenName;
-    private final JwtTokenParser tokenParser;
+    private final JwtTokenParser<Authentication> tokenParser;
     private final Bakery<Cookie> bakery;
     private AuthenticationSuccessHandler delegate;
 
     public CookieAndHeaderJwtAuthenticationSuccessHandler(
         String tokenName,
-        JwtTokenParser tokenParser,
+        JwtTokenParser<Authentication> tokenParser,
         Bakery<Cookie> bakery
     ) {
         this(tokenName, tokenParser, bakery, null);

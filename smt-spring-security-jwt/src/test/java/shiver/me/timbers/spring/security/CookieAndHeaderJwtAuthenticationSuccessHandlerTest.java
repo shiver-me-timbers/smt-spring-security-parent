@@ -37,7 +37,7 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandlerTest {
 
 
     private String tokenName;
-    private JwtTokenParser tokenParser;
+    private JwtTokenParser<Authentication> tokenParser;
     private AuthenticationSuccessHandler delegate;
     private Bakery<Cookie> bakery;
     private JwtAuthenticationSuccessHandler successHandler;
@@ -46,7 +46,7 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandlerTest {
     @SuppressWarnings("unchecked")
     public void setUp() {
         tokenName = someString();
-        tokenParser = mock(JwtTokenParser.class);
+        tokenParser = mock(AuthenticationRequestJwtTokenParser.class);
         bakery = mock(Bakery.class);
         delegate = mock(AuthenticationSuccessHandler.class);
         successHandler = new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery, delegate);

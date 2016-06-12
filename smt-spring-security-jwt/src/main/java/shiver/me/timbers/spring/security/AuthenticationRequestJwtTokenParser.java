@@ -16,9 +16,15 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.springframework.security.core.Authentication;
+
 /**
  * @author Karl Bennett
  */
-public interface JwtTokenParser<I> {
-    String create(I input);
+public class AuthenticationRequestJwtTokenParser implements JwtTokenParser<Authentication> {
+
+    @Override
+    public String create(Authentication authentication) {
+        throw new UnsupportedOperationException();
+    }
 }

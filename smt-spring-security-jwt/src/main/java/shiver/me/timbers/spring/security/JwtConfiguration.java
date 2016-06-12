@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.Authentication;
 
 import javax.servlet.http.Cookie;
 
@@ -50,7 +51,7 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
     @Autowired
     public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler(
-        JwtTokenParser tokenParser,
+        JwtTokenParser<Authentication> tokenParser,
         Bakery<Cookie> bakery
     ) {
         return new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery);
@@ -58,8 +59,8 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtTokenParser.class)
-    public JwtTokenParser jwtTokenParser() {
-        return new JwtTokenParser();
+    public JwtTokenParser<Authentication> jwtTokenParser() {
+        return new AuthenticationRequestJwtTokenParser();
     }
 
     @Bean
