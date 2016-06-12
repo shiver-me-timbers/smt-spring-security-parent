@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -24,7 +25,14 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class ReflectionFieldGetterTest {
+public class ReflectionFieldGetSetterTest {
+
+    private ReflectionFieldGetSetter getSetter;
+
+    @Before
+    public void setUp() {
+        getSetter = new ReflectionFieldGetSetter();
+    }
 
     @Test
     public void Can_get_a_field() throws NoSuchFieldException, IllegalAccessException {
@@ -35,10 +43,25 @@ public class ReflectionFieldGetterTest {
         final Field field = fieldTest.getClass().getDeclaredField("test");
 
         // When
-        final Object actual = new ReflectionFieldGetter().get(fieldTest, field);
+        final Object actual = getSetter.get(fieldTest, field);
 
         // Then
         assertThat(actual, is((Object) expected));
+    }
+
+    @Test
+    public void Can_set_a_field() throws NoSuchFieldException, IllegalAccessException {
+
+        // Given
+        final FieldTest object = new FieldTest(someString());
+        final Field field = object.getClass().getDeclaredField("test");
+        final String expected = someString();
+
+        // When
+        getSetter.set(object, field, expected);
+
+        // Then
+        assertThat(object.test, is(expected));
     }
 
     private static class FieldTest {

@@ -40,16 +40,14 @@ public class ReflectionFieldMutatorTest {
     public final ExpectedException expectedException = ExpectedException.none();
 
     private FieldFinder fieldFinder;
-    private FieldGetter fieldGetter;
-    private FieldSetter fieldSetter;
+    private FieldGetSetter fieldGetSetter;
     private FieldMutator mutator;
 
     @Before
     public void setUp() {
-        fieldGetter = mock(FieldGetter.class);
-        fieldSetter = mock(FieldSetter.class);
+        fieldGetSetter = mock(FieldGetSetter.class);
         fieldFinder = mock(FieldFinder.class);
-        mutator = new ReflectionFieldMutator(fieldFinder, fieldGetter, fieldSetter);
+        mutator = new ReflectionFieldMutator(fieldFinder, fieldGetSetter);
     }
 
     @Test
@@ -65,7 +63,7 @@ public class ReflectionFieldMutatorTest {
 
         // Given
         given(fieldFinder.findField(object, name, type)).willReturn(field);
-        given(fieldGetter.get(object, field)).willReturn(expected);
+        given(fieldGetSetter.get(object, field)).willReturn(expected);
 
         // When
         final Object actual = mutator.retrieve(object, name, type);
@@ -105,7 +103,7 @@ public class ReflectionFieldMutatorTest {
 
         // Given
         given(fieldFinder.findField(object, name, type)).willReturn(field);
-        given(fieldGetter.get(object, field)).willThrow(exception);
+        given(fieldGetSetter.get(object, field)).willThrow(exception);
         expectedException.expect(IllegalStateException.class);
         expectedException.expectCause(is(exception));
 
@@ -130,7 +128,7 @@ public class ReflectionFieldMutatorTest {
         mutator.replace(object, name, type, value);
 
         // Then
-        verify(fieldSetter).set(object, field, value);
+        verify(fieldGetSetter).set(object, field, value);
     }
 
     @Test
@@ -166,7 +164,7 @@ public class ReflectionFieldMutatorTest {
 
         // Given
         given(fieldFinder.findField(object, name, type)).willReturn(field);
-        willThrow(exception).given(fieldSetter).set(object, field, value);
+        willThrow(exception).given(fieldGetSetter).set(object, field, value);
         expectedException.expect(IllegalStateException.class);
         expectedException.expectCause(is(exception));
 
@@ -190,14 +188,14 @@ public class ReflectionFieldMutatorTest {
 
         // Given
         given(fieldFinder.findField(object, name, type)).willReturn(field);
-        given(fieldGetter.get(object, field)).willReturn(value);
+        given(fieldGetSetter.get(object, field)).willReturn(value);
         given(updater.update(value)).willReturn(update);
 
         // When
         mutator.update(object, name, type, updater);
 
         // Then
-        verify(fieldSetter).set(object, field, update);
+        verify(fieldGetSetter).set(object, field, update);
     }
 
     private static Object someObject() {

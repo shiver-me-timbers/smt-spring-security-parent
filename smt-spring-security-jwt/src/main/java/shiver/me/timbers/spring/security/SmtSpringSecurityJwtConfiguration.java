@@ -78,8 +78,8 @@ public class SmtSpringSecurityJwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(FieldMutator.class)
     @Autowired
-    public FieldMutator fieldExtractor(FieldFinder fieldFinder, FieldGetter fieldGetter, FieldSetter fieldSetter) {
-        return new ReflectionFieldMutator(fieldFinder, fieldGetter, fieldSetter);
+    public FieldMutator fieldExtractor(FieldFinder fieldFinder, FieldGetSetter fieldGetSetter) {
+        return new ReflectionFieldMutator(fieldFinder, fieldGetSetter);
     }
 
     @Bean
@@ -89,15 +89,9 @@ public class SmtSpringSecurityJwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(FieldGetter.class)
-    public FieldGetter fieldGetter() {
-        return new ReflectionFieldGetter();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(FieldSetter.class)
-    public FieldSetter fieldSetter() {
-        return new ReflectionFieldSetter();
+    @ConditionalOnMissingBean(FieldGetSetter.class)
+    public FieldGetSetter fieldGetSetter() {
+        return new ReflectionFieldGetSetter();
     }
 
     private class SetJwt

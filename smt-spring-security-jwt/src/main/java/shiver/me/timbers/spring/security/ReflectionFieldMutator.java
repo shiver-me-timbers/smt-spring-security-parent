@@ -22,20 +22,18 @@ package shiver.me.timbers.spring.security;
 public class ReflectionFieldMutator implements FieldMutator {
 
     private final FieldFinder fieldFinder;
-    private final FieldGetter fieldGetter;
-    private final FieldSetter fieldSetter;
+    private final FieldGetSetter fieldGetSetter;
 
-    public ReflectionFieldMutator(FieldFinder fieldFinder, FieldGetter fieldGetter, FieldSetter fieldSetter) {
+    public ReflectionFieldMutator(FieldFinder fieldFinder, FieldGetSetter fieldGetSetter) {
         this.fieldFinder = fieldFinder;
-        this.fieldGetter = fieldGetter;
-        this.fieldSetter = fieldSetter;
+        this.fieldGetSetter = fieldGetSetter;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T retrieve(Object object, String name, Class<T> type) {
         try {
-            return (T) fieldGetter.get(object, fieldFinder.findField(object, name, type));
+            return (T) fieldGetSetter.get(object, fieldFinder.findField(object, name, type));
         } catch (NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         } catch (IllegalAccessException e) {
@@ -46,7 +44,7 @@ public class ReflectionFieldMutator implements FieldMutator {
     @Override
     public void replace(Object object, String name, Class type, Object value) {
         try {
-            fieldSetter.set(object, fieldFinder.findField(object, name, type), value);
+            fieldGetSetter.set(object, fieldFinder.findField(object, name, type), value);
         } catch (NoSuchFieldException e) {
             throw new IllegalArgumentException(e);
         } catch (IllegalAccessException e) {

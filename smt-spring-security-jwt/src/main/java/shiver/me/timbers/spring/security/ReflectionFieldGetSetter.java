@@ -21,7 +21,13 @@ import java.lang.reflect.Field;
 /**
  * @author Karl Bennett
  */
-public class ReflectionFieldSetter implements FieldSetter {
+public class ReflectionFieldGetSetter implements FieldGetSetter {
+
+    @Override
+    public Object get(Object object, Field field) throws IllegalAccessException {
+        field.setAccessible(true);
+        return field.get(object);
+    }
 
     @Override
     public void set(Object object, Field field, Object value) throws IllegalAccessException {

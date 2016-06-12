@@ -21,6 +21,9 @@ import java.lang.reflect.Field;
 /**
  * @author Karl Bennett
  */
-public interface FieldGetter {
+public interface FieldGetSetter {
+
     Object get(Object object, Field field) throws IllegalAccessException;
+
+    void set(Object object, Field field, Object value) throws IllegalAccessException;
 }
