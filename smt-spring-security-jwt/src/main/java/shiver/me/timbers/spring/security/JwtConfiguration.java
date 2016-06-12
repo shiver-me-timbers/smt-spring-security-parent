@@ -19,6 +19,7 @@ package shiver.me.timbers.spring.security;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,6 +40,9 @@ public class JwtConfiguration {
 
     @Value("${smt.spring.security.jwt.tokenName:X-AUTH-TOKEN}")
     private String tokenName;
+
+    @Value("${smt.spring.security.jwt.tokenHashing:HS512}")
+    private SignatureAlgorithm tokenHashing;
 
     @Value("${smt.spring.security.jwt.token.expiryDuration:-1}")
     private int expiryDuration;
@@ -121,8 +125,15 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(PrincipleJwtTokenParser.class)
     @Autowired
-    public JwtTokenParser<String, String> principleJwtTokenParser(JwtBuilder builder, JwtParser parser, Clock clock) {
-        return new PrincipleJwtTokenParser(secret, builder, parser, expiryDuration, expiryUnit, clock);
+    public JwtTokenParser<String, String> principleJwtTokenParser(
+        JwtBuilder builder,
+        JwtParser parser,
+        KeySelector<SignatureAlgorithm> keySelector,
+        Clock clock
+    ) {
+        return new PrincipleJwtTokenParser(
+            secret, builder, parser, tokenHashing, keySelector, expiryDuration, expiryUnit, clock
+        );
     }
 
     @Bean
@@ -138,8 +149,35 @@ public class JwtConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(KeySelector.class)
+    @Autowired
+    public KeySelector<SignatureAlgorithm> keySelector(Base64Keys base64Keys, RsaKeys rsaKeys) {
+        return new SignatureAlgorithmKeySelector(base64Keys, rsaKeys);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(DateClock.class)
     public Clock clock() {
         return new DateClock();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(Base64Keys.class)
+    @Autowired
+    public Base64Keys base64Keys(Base64 base64) {
+        return new SecretKeySpecBase64Keys(base64);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RsaKeys.class)
+    @Autowired
+    public RsaKeys rsaKeys(Base64 base64) {
+        return new PrivateRsaKeys(base64);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(Base64.class)
+    public Base64 base64() {
+        return new DatatypeConverterBase64();
     }
 }

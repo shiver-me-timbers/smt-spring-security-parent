@@ -21,15 +21,16 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static io.jsonwebtoken.SignatureAlgorithm.HS512;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -49,20 +50,34 @@ public class PrincipleJwtTokenParserTest {
     private String secret;
     private JwtParser parser;
     private JwtBuilder builder;
+    private SignatureAlgorithm tokenHashing;
+    private KeySelector<SignatureAlgorithm> keySelector;
     private Integer expiryDuration;
     private TimeUnit expiryUnit;
     private Clock clock;
     private JwtTokenParser<String, String> tokenParser;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() {
         secret = someString();
         parser = mock(JwtParser.class);
         builder = mock(JwtBuilder.class);
+        tokenHashing = someEnum(SignatureAlgorithm.class);
+        keySelector = mock(KeySelector.class);
         expiryDuration = somePositiveInteger();
         expiryUnit = someEnum(TimeUnit.class);
         clock = mock(Clock.class);
-        tokenParser = new PrincipleJwtTokenParser(secret, builder, parser, expiryDuration, expiryUnit, clock);
+        tokenParser = new PrincipleJwtTokenParser(
+            secret,
+            builder,
+            parser,
+            tokenHashing,
+            keySelector,
+            expiryDuration,
+            expiryUnit,
+            clock
+        );
     }
 
     @Test
@@ -70,6 +85,7 @@ public class PrincipleJwtTokenParserTest {
 
         final String principle = someString();
 
+        final Key key = mock(Key.class);
         final Date date = mock(Date.class);
         final JwtBuilder principleBuilder = mock(JwtBuilder.class);
         final JwtBuilder expiringBuilder = mock(JwtBuilder.class);
@@ -79,8 +95,9 @@ public class PrincipleJwtTokenParserTest {
 
         // Given
         given(builder.claim(PRINCIPLE, principle)).willReturn(principleBuilder);
+        given(keySelector.select(tokenHashing, secret)).willReturn(key);
+        given(principleBuilder.signWith(tokenHashing, key)).willReturn(secretBuilder);
         given(clock.nowPlus(expiryDuration, expiryUnit)).willReturn(date);
-        given(principleBuilder.signWith(HS512, secret)).willReturn(secretBuilder);
         given(secretBuilder.setExpiration(date)).willReturn(expiringBuilder);
         given(expiringBuilder.compact()).willReturn(expected);
 
@@ -96,6 +113,7 @@ public class PrincipleJwtTokenParserTest {
 
         final String principle = someString();
 
+        final Key key = mock(Key.class);
         final JwtBuilder principleBuilder = mock(JwtBuilder.class);
         final JwtBuilder secretBuilder = mock(JwtBuilder.class);
 
@@ -103,11 +121,12 @@ public class PrincipleJwtTokenParserTest {
 
         // Given
         given(builder.claim(PRINCIPLE, principle)).willReturn(principleBuilder);
-        given(principleBuilder.signWith(HS512, secret)).willReturn(secretBuilder);
+        given(keySelector.select(tokenHashing, secret)).willReturn(key);
+        given(principleBuilder.signWith(tokenHashing, key)).willReturn(secretBuilder);
         given(secretBuilder.compact()).willReturn(expected);
 
         // When
-        final String actual = new PrincipleJwtTokenParser(secret, builder, parser, -1, expiryUnit, clock)
+        final String actual = new PrincipleJwtTokenParser(secret, builder, parser, tokenHashing, keySelector, -1, expiryUnit, clock)
             .create(principle);
 
         // Then
@@ -120,6 +139,7 @@ public class PrincipleJwtTokenParserTest {
 
         final String token = someString();
 
+        final Key key = mock(Key.class);
         final JwtParser secretParser = mock(JwtParser.class);
         @SuppressWarnings("unchecked")
         final Jws<Claims> jws = mock(Jws.class);
@@ -128,7 +148,8 @@ public class PrincipleJwtTokenParserTest {
         final String expected = someString();
 
         // Given
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
+        given(keySelector.select(tokenHashing, secret)).willReturn(key);
+        given(parser.setSigningKey(key)).willReturn(secretParser);
         given(secretParser.parseClaimsJws(token)).willReturn(jws);
         given(jws.getBody()).willReturn(claims);
         given(claims.get(PRINCIPLE)).willReturn(expected);
@@ -145,12 +166,14 @@ public class PrincipleJwtTokenParserTest {
 
         final String token = someString();
 
+        final Key key = mock(Key.class);
         final JwtParser secretParser = mock(JwtParser.class);
 
         final JwtException exception = new JwtException(someString());
 
         // Given
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
+        given(keySelector.select(tokenHashing, secret)).willReturn(key);
+        given(parser.setSigningKey(key)).willReturn(secretParser);
         given(secretParser.parseClaimsJws(token)).willThrow(exception);
         expectedException.expect(JwtInvalidTokenException.class);
         expectedException.expectCause(is(exception));
@@ -164,10 +187,12 @@ public class PrincipleJwtTokenParserTest {
 
         final JwtParser secretParser = mock(JwtParser.class);
 
+        final Key key = mock(Key.class);
         final IllegalArgumentException exception = new IllegalArgumentException();
 
         // Given
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
+        given(keySelector.select(tokenHashing, secret)).willReturn(key);
+        given(parser.setSigningKey(key)).willReturn(secretParser);
         given(secretParser.parseClaimsJws("")).willThrow(exception);
         expectedException.expect(JwtInvalidTokenException.class);
         expectedException.expectCause(is(exception));

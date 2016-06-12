@@ -70,10 +70,18 @@ Further configuration can be achieved with the following properties:
 # successful login.
 # DEFAULT: X-AUTH-TOKEN
 smt.spring.security.jwt.tokenName=some_token_name
+# The hashing algorithm used when generating the JWT token.
+# See: io.jsonwebtoken.SignatureAlgorithm
+# VALUES: NONE, HS256, HS384, HS512, RS256, RS384, RS512
+# These extra values require that a JCA provider like BouncyCastle is available in the classpath.
+# VALUES: ES256, ES384, ES512, PS256, PS384, PS512
+# DEFAULT: HS512
+smt.spring.security.jwt.tokenHashing=RS512
 # The duration that the token should be valid for.
 # DEFAULT: -1
 smt.spring.security.jwt.token.expiryDuration=30
 # The unit of time for the expiryDuration above. If the expiry is -1 this property is ignored.
+# See: java.util.concurrent.TimeUnit
 # VALUES: NANOSECONDS, MICROSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS, DAYS
 # DEFAULT: MINUTES
 smt.spring.security.jwt.token.expiryUnit=SECONDS
@@ -81,6 +89,7 @@ smt.spring.security.jwt.token.expiryUnit=SECONDS
 # DEFAULT: -1
 smt.spring.security.jwt.cookie.maxAgeDuration=5
 # The unit of time for the maxAgeDuration above. If the Max-Age is -1 this property is ignored.
+# See: java.util.concurrent.TimeUnit
 # VALUES: NANOSECONDS, MICROSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS, DAYS
 # DEFAULT: SECONDS
 smt.spring.security.jwt.cookie.maxAgeUnit=MINUTES

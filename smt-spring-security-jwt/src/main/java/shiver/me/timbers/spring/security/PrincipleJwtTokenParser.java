@@ -19,10 +19,9 @@ package shiver.me.timbers.spring.security;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.concurrent.TimeUnit;
-
-import static io.jsonwebtoken.SignatureAlgorithm.HS512;
 
 /**
  * @author Karl Bennett
@@ -34,6 +33,8 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
     private final String secret;
     private final JwtBuilder builder;
     private final JwtParser parser;
+    private final SignatureAlgorithm tokenHashing;
+    private final KeySelector<SignatureAlgorithm> keySelector;
     private final int expiryDuration;
     private final TimeUnit expiryUnit;
     private final Clock clock;
@@ -42,12 +43,16 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
         String secret,
         JwtBuilder builder,
         JwtParser parser,
+        SignatureAlgorithm tokenHashing,
+        KeySelector<SignatureAlgorithm> keySelector,
         int expiryDuration,
         TimeUnit expiryUnit,
         Clock clock) {
         this.secret = secret;
         this.builder = builder;
         this.parser = parser;
+        this.tokenHashing = tokenHashing;
+        this.keySelector = keySelector;
         this.expiryDuration = expiryDuration;
         this.expiryUnit = expiryUnit;
         this.clock = clock;
@@ -55,7 +60,8 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
 
     @Override
     public String create(String principle) {
-        final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, principle).signWith(HS512, secret);
+        final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, principle)
+            .signWith(tokenHashing, keySelector.select(tokenHashing, secret));
         if (expiryDuration >= 0) {
             return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
         }
@@ -65,7 +71,8 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
     @Override
     public String parse(String token) throws JwtInvalidTokenException {
         try {
-            return parser.setSigningKey(secret).parseClaimsJws(token).getBody().get(PRINCIPLE).toString();
+            return parser.setSigningKey(keySelector.select(tokenHashing, secret)).parseClaimsJws(token).getBody()
+                .get(PRINCIPLE).toString();
         } catch (IllegalArgumentException e) {
             throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
         } catch (JwtException e) {
