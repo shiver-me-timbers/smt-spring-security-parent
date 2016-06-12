@@ -21,11 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static shiver.me.timbers.data.random.RandomStrings.someString;
 
 @RestController
 public class SpringSecurityJwtController {
 
-    static final String TEXT = "The request was successful.";
+    static final String TEXT = someString();
 
     @RequestMapping(method = GET, produces = TEXT_PLAIN_VALUE)
     public String request() {
