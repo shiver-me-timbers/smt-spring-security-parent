@@ -101,6 +101,7 @@ public class AuthenticationRequestJwtTokenParserTest {
         final String principle = someString();
 
         // Given
+        given(request.getCookies()).willReturn(new Cookie[0]);
         given(request.getHeader(tokenName)).willReturn(token);
         given(principleTokenParser.parse(token)).willReturn(principle);
 
@@ -110,5 +111,22 @@ public class AuthenticationRequestJwtTokenParserTest {
         // Then
         assertThat(actual, hasField("principle", principle));
         assertThat(actual, hasField("authenticated", true));
+    }
+
+    @Test
+    public void Can_fail_to_find_a_jwt_token() throws JwtInvalidTokenException {
+
+        final HttpServletRequest request = mock(HttpServletRequest.class);
+
+        final JwtInvalidTokenException exception = new JwtInvalidTokenException(new Exception());
+
+        // Given
+        given(request.getCookies()).willReturn(null);
+        given(request.getHeader(tokenName)).willReturn(null);
+        given(principleTokenParser.parse("")).willThrow(exception);
+        expectedException.expect(is(exception));
+
+        // When
+        tokenParser.parse(request);
     }
 }
