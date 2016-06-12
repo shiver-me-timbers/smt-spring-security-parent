@@ -36,23 +36,27 @@ public class CookieBakeryTest {
     private TimeUnit maxAgeUnit;
     private boolean secure;
     private boolean httpOnly;
+    private String domain;
+    private String path;
     private Bakery<Cookie> bakery;
 
     @Before
     public void setUp() {
         maxAgeDuration = somePositiveInteger();
         maxAgeUnit = someEnum(TimeUnit.class);
+        domain = someAlphaNumericString(5);
+        path = someAlphaNumericString(8);
         secure = someBoolean();
         httpOnly = someBoolean();
-        bakery = new CookieBakery(maxAgeDuration, maxAgeUnit, secure, httpOnly);
+        bakery = new CookieBakery(maxAgeDuration, maxAgeUnit, domain, path, secure, httpOnly);
     }
 
     @Test
     public void Can_create_a_cookie() {
 
         // Given
-        final String name = someAlphaNumericString(5);
-        final String value = someAlphaNumericString(8);
+        final String name = someAlphaNumericString(13);
+        final String value = someAlphaNumericString(21);
 
         // When
         final Cookie actual = bakery.bake(name, value);
@@ -61,8 +65,51 @@ public class CookieBakeryTest {
         assertThat(actual.getName(), is(name));
         assertThat(actual.getValue(), is(value));
         assertThat(actual.getMaxAge(), is((int) maxAgeUnit.toSeconds(maxAgeDuration)));
+        assertThat(actual.getDomain(), is(domain.toLowerCase()));
+        assertThat(actual.getPath(), is(path));
+        assertThat(actual.getComment(), nullValue());
+        assertThat(actual.getSecure(), is(secure));
+        assertThat(actual.isHttpOnly(), is(httpOnly));
+    }
+
+    @Test
+    public void Can_create_a_cookie_with_an_empty_domain() {
+
+        // Given
+        final String name = someAlphaNumericString(13);
+        final String value = someAlphaNumericString(21);
+
+        // When
+        final Cookie actual = new CookieBakery(maxAgeDuration, maxAgeUnit, "", path, secure, httpOnly).bake(name, value);
+
+        // Then
+        assertThat(actual.getName(), is(name));
+        assertThat(actual.getValue(), is(value));
+        assertThat(actual.getMaxAge(), is((int) maxAgeUnit.toSeconds(maxAgeDuration)));
         assertThat(actual.getDomain(), nullValue());
-        assertThat(actual.getPath(), nullValue());
+        assertThat(actual.getPath(), is(path));
+        assertThat(actual.getComment(), nullValue());
+        assertThat(actual.getSecure(), is(secure));
+        assertThat(actual.isHttpOnly(), is(httpOnly));
+    }
+
+    @Test
+    public void Can_create_a_cookie_with_no_domain() {
+
+        // Given
+        final String name = someAlphaNumericString(13);
+        final String value = someAlphaNumericString(21);
+
+        // When
+        final Cookie actual = new CookieBakery(maxAgeDuration, maxAgeUnit, null, path, secure, httpOnly)
+            .bake(name, value);
+
+        // Then
+        assertThat(actual.getName(), is(name));
+        assertThat(actual.getValue(), is(value));
+        assertThat(actual.getMaxAge(), is((int) maxAgeUnit.toSeconds(maxAgeDuration)));
+        assertThat(actual.getDomain(), nullValue());
+        assertThat(actual.getPath(), is(path));
         assertThat(actual.getComment(), nullValue());
         assertThat(actual.getSecure(), is(secure));
         assertThat(actual.isHttpOnly(), is(httpOnly));
@@ -73,18 +120,19 @@ public class CookieBakeryTest {
 
         // Given
         final int maxAgeDuration = -1;
-        final String name = someAlphaNumericString(5);
-        final String value = someAlphaNumericString(8);
+        final String name = someAlphaNumericString(13);
+        final String value = someAlphaNumericString(21);
 
         // When
-        final Cookie actual = new CookieBakery(maxAgeDuration, maxAgeUnit, secure, httpOnly).bake(name, value);
+        final Cookie actual = new CookieBakery(maxAgeDuration, maxAgeUnit, domain, path, secure, httpOnly)
+            .bake(name, value);
 
         // Then
         assertThat(actual.getName(), is(name));
         assertThat(actual.getValue(), is(value));
         assertThat(actual.getMaxAge(), is(-1));
-        assertThat(actual.getDomain(), nullValue());
-        assertThat(actual.getPath(), nullValue());
+        assertThat(actual.getDomain(), is(domain.toLowerCase()));
+        assertThat(actual.getPath(), is(path));
         assertThat(actual.getComment(), nullValue());
         assertThat(actual.getSecure(), is(secure));
         assertThat(actual.isHttpOnly(), is(httpOnly));

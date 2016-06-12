@@ -46,6 +46,12 @@ public class JwtConfiguration {
     @Value("${smt.spring.security.jwt.cookie.maxAgeUnit:SECONDS}")
     private TimeUnit maxAgeUnit;
 
+    @Value("${smt.spring.security.jwt.cookie.domain:}")
+    private String domain;
+
+    @Value("${smt.spring.security.jwt.cookie.path:/}")
+    private String path;
+
     @Value("${smt.spring.security.jwt.cookie.secure:false}")
     private boolean secure;
 
@@ -58,7 +64,7 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(JwtLogoutHandler.class)
     public JwtLogoutHandler jwtLogoutHandler() {
-        return new CookieAndHeaderJwtLogoutHandler();
+        return new CookieJwtLogoutHandler(tokenName);
     }
 
     @Bean
@@ -97,7 +103,7 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(Bakery.class)
     public Bakery<Cookie> bakery() {
-        return new CookieBakery(maxAgeDuration, maxAgeUnit, secure, httpOnly);
+        return new CookieBakery(maxAgeDuration, maxAgeUnit, domain, path, secure, httpOnly);
     }
 
     @Bean

@@ -26,12 +26,23 @@ public class CookieBakery implements Bakery<Cookie> {
 
     private final int maxAgeDuration;
     private final TimeUnit maxAgeUnit;
+    private final String domain;
+    private final String path;
     private final boolean secure;
     private final boolean httpOnly;
 
-    public CookieBakery(int maxAgeDuration, TimeUnit maxAgeUnit, boolean secure, boolean httpOnly) {
+    public CookieBakery(
+        int maxAgeDuration,
+        TimeUnit maxAgeUnit,
+        String domain,
+        String path,
+        boolean secure,
+        boolean httpOnly
+    ) {
         this.maxAgeDuration = maxAgeDuration;
         this.maxAgeUnit = maxAgeUnit;
+        this.domain = domain;
+        this.path = path;
         this.secure = secure;
         this.httpOnly = httpOnly;
     }
@@ -40,6 +51,10 @@ public class CookieBakery implements Bakery<Cookie> {
     public Cookie bake(String name, String value) {
         final Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge((int) (maxAgeDuration >= 0 ? maxAgeUnit.toSeconds(maxAgeDuration) : maxAgeDuration));
+        if (domain != null && !domain.isEmpty()) {
+            cookie.setDomain(domain);
+        }
+        cookie.setPath(path);
         cookie.setSecure(secure);
         cookie.setHttpOnly(httpOnly);
         return cookie;

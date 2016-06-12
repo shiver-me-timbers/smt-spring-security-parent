@@ -24,6 +24,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import shiver.me.timbers.spring.security.EnableJwtAuthentication;
 
 import javax.servlet.ServletException;
@@ -40,7 +41,7 @@ public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.authorizeRequests().anyRequest().authenticated();
         http.formLogin().successHandler(new NoRedirectAuthenticationSuccessHandler()).loginPage("/signIn").permitAll();
-        http.logout().logoutUrl("/signOut").logoutSuccessUrl("/");
+        http.logout().logoutUrl("/signOut").logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
         http.exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint());
     }
 

@@ -34,9 +34,11 @@ import javax.ws.rs.core.Response;
 
 import static java.lang.String.format;
 import static javax.ws.rs.client.Entity.form;
+import static javax.ws.rs.client.Entity.text;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.spring.security.integration.SpringSecurityJwtController.TEXT;
 
@@ -100,5 +102,28 @@ public class ITSpringSecurityJwt {
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(actual.getStatus(), is(OK.getStatusCode()));
         assertThat(actual.readEntity(String.class), is(TEXT));
+    }
+
+    @Test
+    public void Can_logout_with_jwt_cookie() {
+
+        final Form form = new Form();
+
+        // Given
+        form.param("username", "user");
+        form.param("password", "password");
+        final Response forbidden = target.request().get();
+        final Response signIn = target.path("signIn").request().post(form(form));
+
+        // When
+        final Response actual = target.path("signOut").request().cookie(signIn.getCookies().get(tokenName))
+            .post(text(null));
+
+        // Then
+        assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(signIn.getStatus(), is(OK.getStatusCode()));
+        assertThat(actual.getStatus(), is(OK.getStatusCode()));
+        assertThat(actual.getCookies().get(tokenName).getMaxAge(), is(-1));
+        assertThat(actual.getCookies().get(tokenName).getValue(), isEmptyString());
     }
 }
