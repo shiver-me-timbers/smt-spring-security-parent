@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.servlet.http.Cookie;
@@ -31,19 +32,30 @@ import static shiver.me.timbers.data.random.RandomStrings.someAlphaNumericString
 
 public class CookieBakeryTest {
 
+    private int maxAgeDuration;
+    private TimeUnit maxAgeUnit;
+    private boolean secure;
+    private boolean httpOnly;
+    private Bakery<Cookie> bakery;
+
+    @Before
+    public void setUp() {
+        maxAgeDuration = somePositiveInteger();
+        maxAgeUnit = someEnum(TimeUnit.class);
+        secure = someBoolean();
+        httpOnly = someBoolean();
+        bakery = new CookieBakery(maxAgeDuration, maxAgeUnit, secure, httpOnly);
+    }
+
     @Test
     public void Can_create_a_cookie() {
 
         // Given
-        final int maxAgeDuration = somePositiveInteger();
-        final TimeUnit maxAgeUnit = someEnum(TimeUnit.class);
-        final boolean secure = someBoolean();
-        final boolean httpOnly = someBoolean();
         final String name = someAlphaNumericString(5);
         final String value = someAlphaNumericString(8);
 
         // When
-        final Cookie actual = new CookieBakery(maxAgeDuration, maxAgeUnit, secure, httpOnly).bake(name, value);
+        final Cookie actual = bakery.bake(name, value);
 
         // Then
         assertThat(actual.getName(), is(name));
@@ -61,14 +73,11 @@ public class CookieBakeryTest {
 
         // Given
         final int maxAgeDuration = -1;
-        final boolean secure = someBoolean();
-        final boolean httpOnly = someBoolean();
         final String name = someAlphaNumericString(5);
         final String value = someAlphaNumericString(8);
 
         // When
-        final Cookie actual = new CookieBakery(maxAgeDuration, someEnum(TimeUnit.class), secure, httpOnly)
-            .bake(name, value);
+        final Cookie actual = new CookieBakery(maxAgeDuration, maxAgeUnit, secure, httpOnly).bake(name, value);
 
         // Then
         assertThat(actual.getName(), is(name));

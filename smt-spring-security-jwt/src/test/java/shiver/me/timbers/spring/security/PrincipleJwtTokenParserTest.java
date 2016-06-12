@@ -43,7 +43,7 @@ public class PrincipleJwtTokenParserTest {
     private String secret;
     private JwtParser parser;
     private JwtBuilder builder;
-    private PrincipleJwtTokenParser tokenParser;
+    private JwtTokenParser<String, String> tokenParser;
 
     @Before
     public void setUp() {
