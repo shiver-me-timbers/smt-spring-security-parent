@@ -16,10 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.JwtParser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,7 +25,6 @@ import org.springframework.security.core.Authentication;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -42,16 +37,15 @@ public class AuthenticationRequestJwtTokenParserTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     private String tokenName;
-    private String secret;
-    private JwtParser parser;
     private AuthenticationRequestJwtTokenParser tokenParser;
+    private JwtTokenParser<String, String> principleTokenParser;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() {
         tokenName = someString();
-        secret = someString();
-        parser = mock(JwtParser.class);
-        tokenParser = new AuthenticationRequestJwtTokenParser(tokenName, secret, parser);
+        principleTokenParser = mock(JwtTokenParser.class);
+        tokenParser = new AuthenticationRequestJwtTokenParser(tokenName, principleTokenParser);
     }
 
     @Test
@@ -61,20 +55,13 @@ public class AuthenticationRequestJwtTokenParserTest {
 
         final Cookie cookie = mock(Cookie.class);
         final String token = someString();
-        final JwtParser secretParser = mock(JwtParser.class);
-        @SuppressWarnings("unchecked")
-        final Jws<Claims> jws = mock(Jws.class);
-        final Claims claims = mock(Claims.class);
         final String principle = someString();
 
         // Given
         given(request.getCookies()).willReturn(new Cookie[]{mock(Cookie.class), cookie, mock(Cookie.class)});
         given(cookie.getName()).willReturn(tokenName);
         given(cookie.getValue()).willReturn(token);
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws(token)).willReturn(jws);
-        given(jws.getBody()).willReturn(claims);
-        given(claims.get("principle")).willReturn(principle);
+        given(principleTokenParser.parse(token)).willReturn(principle);
 
         // When
         final Authentication actual = tokenParser.parse(request);
@@ -82,30 +69,6 @@ public class AuthenticationRequestJwtTokenParserTest {
         // Then
         assertThat(actual, hasField("principle", principle));
         assertThat(actual, hasField("authenticated", true));
-    }
-
-    @Test
-    public void Can_fail_parse_a_jwt_token_from_a_cookie() throws JwtInvalidTokenException {
-
-        final HttpServletRequest request = mock(HttpServletRequest.class);
-
-        final Cookie cookie = mock(Cookie.class);
-        final String token = someString();
-        final JwtParser secretParser = mock(JwtParser.class);
-
-        final JwtException exception = new JwtException(someString());
-
-        // Given
-        given(request.getCookies()).willReturn(new Cookie[]{mock(Cookie.class), cookie, mock(Cookie.class)});
-        given(cookie.getName()).willReturn(tokenName);
-        given(cookie.getValue()).willReturn(token);
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws(token)).willThrow(exception);
-        expectedException.expect(JwtInvalidTokenException.class);
-        expectedException.expectCause(is(exception));
-
-        // When
-        tokenParser.parse(request);
     }
 
     @Test
@@ -114,18 +77,11 @@ public class AuthenticationRequestJwtTokenParserTest {
         final HttpServletRequest request = mock(HttpServletRequest.class);
 
         final String token = someString();
-        final JwtParser secretParser = mock(JwtParser.class);
-        @SuppressWarnings("unchecked")
-        final Jws<Claims> jws = mock(Jws.class);
-        final Claims claims = mock(Claims.class);
         final String principle = someString();
 
         // Given
         given(request.getHeader(tokenName)).willReturn(token);
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws(token)).willReturn(jws);
-        given(jws.getBody()).willReturn(claims);
-        given(claims.get("principle")).willReturn(principle);
+        given(principleTokenParser.parse(token)).willReturn(principle);
 
         // When
         final Authentication actual = tokenParser.parse(request);
@@ -133,46 +89,5 @@ public class AuthenticationRequestJwtTokenParserTest {
         // Then
         assertThat(actual, hasField("principle", principle));
         assertThat(actual, hasField("authenticated", true));
-    }
-
-    @Test
-    public void Can_fail_parse_a_jwt_token_from_a_header() throws JwtInvalidTokenException {
-
-        final HttpServletRequest request = mock(HttpServletRequest.class);
-
-        final String token = someString();
-        final JwtParser secretParser = mock(JwtParser.class);
-
-        final JwtException exception = new JwtException(someString());
-
-        // Given
-        given(request.getHeader(tokenName)).willReturn(token);
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws(token)).willThrow(exception);
-        expectedException.expect(JwtInvalidTokenException.class);
-        expectedException.expectCause(is(exception));
-
-        // When
-        tokenParser.parse(request);
-    }
-
-    @Test
-    public void Can_fail_to_find_a_jwt_token_from_in_the_request() throws JwtInvalidTokenException {
-
-        final HttpServletRequest request = mock(HttpServletRequest.class);
-
-        final JwtParser secretParser = mock(JwtParser.class);
-
-        final IllegalArgumentException exception = new IllegalArgumentException();
-
-        // Given
-        given(request.getCookies()).willReturn(new Cookie[]{mock(Cookie.class), mock(Cookie.class), mock(Cookie.class)});
-        given(parser.setSigningKey(secret)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws("")).willThrow(exception);
-        expectedException.expect(JwtInvalidTokenException.class);
-        expectedException.expectCause(is(exception));
-
-        // When
-        tokenParser.parse(request);
     }
 }

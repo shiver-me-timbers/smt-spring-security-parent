@@ -70,9 +70,9 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(JwtTokenParser.class)
     public JwtTokenParser<Authentication, HttpServletRequest> jwtTokenParser(
-        JwtParser parser
+        JwtTokenParser<String, String> tokenParser
     ) {
-        return new AuthenticationRequestJwtTokenParser(tokenName, secret, parser);
+        return new AuthenticationRequestJwtTokenParser(tokenName, tokenParser);
     }
 
     @Bean
@@ -85,6 +85,12 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(SecurityContextHolder.class)
     public SecurityContextHolder securityContextHolder() {
         return new StaticSecurityContextHolder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtTokenParser.class)
+    public JwtTokenParser<String, String> principleJwtTokenParser(JwtParser parser) {
+        return new PrincipleJwtTokenParser(secret, parser);
     }
 
     @Bean

@@ -16,8 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.JwtParser;
 import org.springframework.security.core.Authentication;
 
 import javax.servlet.http.Cookie;
@@ -29,13 +27,11 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthenticationRequestJwtTokenParser implements JwtTokenParser<Authentication, HttpServletRequest> {
 
     private final String tokenName;
-    private final String secret;
-    private final JwtParser parser;
+    private final JwtTokenParser<String, String> tokenParser;
 
-    public AuthenticationRequestJwtTokenParser(String tokenName, String secret, JwtParser parser) {
+    public AuthenticationRequestJwtTokenParser(String tokenName, JwtTokenParser<String, String> tokenParser) {
         this.tokenName = tokenName;
-        this.secret = secret;
-        this.parser = parser;
+        this.tokenParser = tokenParser;
     }
 
     @Override
@@ -45,15 +41,7 @@ public class AuthenticationRequestJwtTokenParser implements JwtTokenParser<Authe
 
     @Override
     public Authentication parse(HttpServletRequest request) throws JwtInvalidTokenException {
-        try {
-            return new JwtAuthentication(
-                parser.setSigningKey(secret).parseClaimsJws(findToken(request)).getBody().get("principle").toString()
-            );
-        } catch (IllegalArgumentException e) {
-            throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
-        } catch (JwtException e) {
-            throw new JwtInvalidTokenException(e);
-        }
+        return new JwtAuthentication(tokenParser.parse(findToken(request)));
     }
 
     private String findToken(HttpServletRequest request) {
