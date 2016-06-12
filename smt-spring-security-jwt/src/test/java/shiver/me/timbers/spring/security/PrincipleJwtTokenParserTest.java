@@ -18,6 +18,7 @@ package shiver.me.timbers.spring.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import org.junit.Before;
@@ -25,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static io.jsonwebtoken.SignatureAlgorithm.HS512;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -33,18 +35,44 @@ import static shiver.me.timbers.data.random.RandomStrings.someString;
 
 public class PrincipleJwtTokenParserTest {
 
+    private static final String PRINCIPLE = "principle";
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     private String secret;
     private JwtParser parser;
+    private JwtBuilder builder;
     private PrincipleJwtTokenParser tokenParser;
 
     @Before
     public void setUp() {
         secret = someString();
         parser = mock(JwtParser.class);
-        tokenParser = new PrincipleJwtTokenParser(secret, parser);
+        builder = mock(JwtBuilder.class);
+        tokenParser = new PrincipleJwtTokenParser(secret, builder, parser);
+    }
+
+    @Test
+    public void Can_create_a_jwt_token_from_a_principle() throws JwtInvalidTokenException {
+
+        final String principle = someString();
+
+        final JwtBuilder principleBuilder = mock(JwtBuilder.class);
+        final JwtBuilder secretBuilder = mock(JwtBuilder.class);
+
+        final String expected = someString();
+
+        // Given
+        given(builder.claim(PRINCIPLE, principle)).willReturn(principleBuilder);
+        given(principleBuilder.signWith(HS512, secret)).willReturn(secretBuilder);
+        given(secretBuilder.compact()).willReturn(expected);
+
+        // When
+        final String actual = tokenParser.create(principle);
+
+        // Then
+        assertThat(actual, is(expected));
     }
 
     @Test
@@ -63,7 +91,7 @@ public class PrincipleJwtTokenParserTest {
         given(parser.setSigningKey(secret)).willReturn(secretParser);
         given(secretParser.parseClaimsJws(token)).willReturn(jws);
         given(jws.getBody()).willReturn(claims);
-        given(claims.get("principle")).willReturn(expected);
+        given(claims.get(PRINCIPLE)).willReturn(expected);
 
         // When
         final String actual = tokenParser.parse(token);

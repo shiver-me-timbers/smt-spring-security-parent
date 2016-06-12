@@ -25,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -46,6 +47,26 @@ public class AuthenticationRequestJwtTokenParserTest {
         tokenName = someString();
         principleTokenParser = mock(JwtTokenParser.class);
         tokenParser = new AuthenticationRequestJwtTokenParser(tokenName, principleTokenParser);
+    }
+
+    @Test
+    public void Can_create_a_jwt_token_from_an_authentication() throws JwtInvalidTokenException {
+
+        final Authentication authentication = mock(Authentication.class);
+
+        final String principle = someString();
+
+        final String expected = someString();
+
+        // Given
+        given(authentication.getPrincipal()).willReturn(principle);
+        given(principleTokenParser.create(principle)).willReturn(expected);
+
+        // When
+        final String actual = tokenParser.create(authentication);
+
+        // Then
+        assertThat(actual, is(expected));
     }
 
     @Test

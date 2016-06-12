@@ -16,31 +16,38 @@
 
 package shiver.me.timbers.spring.security;
 
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
+
+import static io.jsonwebtoken.SignatureAlgorithm.HS512;
 
 /**
  * @author Karl Bennett
  */
 public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
 
+    private static final String PRINCIPLE = "principle";
+
     private final String secret;
+    private final JwtBuilder builder;
     private final JwtParser parser;
 
-    public PrincipleJwtTokenParser(String secret, JwtParser parser) {
+    public PrincipleJwtTokenParser(String secret, JwtBuilder builder, JwtParser parser) {
         this.secret = secret;
+        this.builder = builder;
         this.parser = parser;
     }
 
     @Override
     public String create(String principle) {
-        throw new UnsupportedOperationException();
+        return builder.claim(PRINCIPLE, principle).signWith(HS512, secret).compact();
     }
 
     @Override
     public String parse(String token) throws JwtInvalidTokenException {
         try {
-            return parser.setSigningKey(secret).parseClaimsJws(token).getBody().get("principle").toString();
+            return parser.setSigningKey(secret).parseClaimsJws(token).getBody().get(PRINCIPLE).toString();
         } catch (IllegalArgumentException e) {
             throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
         } catch (JwtException e) {

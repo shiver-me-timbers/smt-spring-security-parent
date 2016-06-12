@@ -17,14 +17,31 @@
 package shiver.me.timbers.spring.security;
 
 import javax.servlet.http.Cookie;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Karl Bennett
  */
 public class CookieBakery implements Bakery<Cookie> {
 
+    private final int maxAgeDuration;
+    private final TimeUnit maxAgeUnit;
+    private final boolean secure;
+    private final boolean httpOnly;
+
+    public CookieBakery(int maxAgeDuration, TimeUnit maxAgeUnit, boolean secure, boolean httpOnly) {
+        this.maxAgeDuration = maxAgeDuration;
+        this.maxAgeUnit = maxAgeUnit;
+        this.secure = secure;
+        this.httpOnly = httpOnly;
+    }
+
     @Override
     public Cookie bake(String name, String value) {
-        throw new UnsupportedOperationException();
+        final Cookie cookie = new Cookie(name, value);
+        cookie.setMaxAge((int) (maxAgeDuration >= 0 ? maxAgeUnit.toSeconds(maxAgeDuration) : maxAgeDuration));
+        cookie.setSecure(secure);
+        cookie.setHttpOnly(httpOnly);
+        return cookie;
     }
 }

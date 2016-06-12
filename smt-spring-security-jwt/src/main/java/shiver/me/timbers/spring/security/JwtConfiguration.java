@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security;
 
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.security.core.Authentication;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Karl Bennett
@@ -37,6 +39,18 @@ public class JwtConfiguration {
 
     @Value("${smt.spring.security.jwt.tokenName:X-AUTH-TOKEN}")
     private String tokenName;
+
+    @Value("${smt.spring.security.jwt.cookie.maxAgeDuration:-1}")
+    private int maxAgeDuration;
+
+    @Value("${smt.spring.security.jwt.cookie.maxAgeUnit:SECONDS}")
+    private TimeUnit maxAgeUnit;
+
+    @Value("${smt.spring.security.jwt.cookie.secure:false}")
+    private boolean secure;
+
+    @Value("${smt.spring.security.jwt.cookie.httpOnly:false}")
+    private boolean httpOnly;
 
     @Value("${smt.spring.security.jwt.secret}")
     private String secret;
@@ -61,24 +75,29 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
     @Autowired
     public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler(
-        JwtTokenParser<Authentication, HttpServletRequest> tokenParser,
+        JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser,
         Bakery<Cookie> bakery
     ) {
-        return new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery);
+        return new CookieAndHeaderJwtAuthenticationSuccessHandler(
+            tokenName,
+            authenticationRequestJwtTokenParser,
+            bakery
+        );
     }
 
     @Bean
-    @ConditionalOnMissingBean(JwtTokenParser.class)
-    public JwtTokenParser<Authentication, HttpServletRequest> jwtTokenParser(
-        JwtTokenParser<String, String> tokenParser
+    @ConditionalOnMissingBean(AuthenticationRequestJwtTokenParser.class)
+    @Autowired
+    public JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser(
+        JwtTokenParser<String, String> principleJwtTokenParser
     ) {
-        return new AuthenticationRequestJwtTokenParser(tokenName, tokenParser);
+        return new AuthenticationRequestJwtTokenParser(tokenName, principleJwtTokenParser);
     }
 
     @Bean
     @ConditionalOnMissingBean(Bakery.class)
     public Bakery<Cookie> bakery() {
-        return new CookieBakery();
+        return new CookieBakery(maxAgeDuration, maxAgeUnit, secure, httpOnly);
     }
 
     @Bean
@@ -88,14 +107,21 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(JwtTokenParser.class)
-    public JwtTokenParser<String, String> principleJwtTokenParser(JwtParser parser) {
-        return new PrincipleJwtTokenParser(secret, parser);
+    @ConditionalOnMissingBean(PrincipleJwtTokenParser.class)
+    @Autowired
+    public JwtTokenParser<String, String> principleJwtTokenParser(JwtBuilder builder, JwtParser parser) {
+        return new PrincipleJwtTokenParser(secret, builder, parser);
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtParser.class)
     public JwtParser jwtParser() {
         return Jwts.parser();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtBuilder.class)
+    public JwtBuilder jwtBuilder() {
+        return Jwts.builder();
     }
 }

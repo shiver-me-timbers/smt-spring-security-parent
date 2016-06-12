@@ -36,7 +36,7 @@ public class AuthenticationRequestJwtTokenParser implements JwtTokenParser<Authe
 
     @Override
     public String create(Authentication authentication) {
-        throw new UnsupportedOperationException();
+        return tokenParser.create(authentication.getPrincipal().toString());
     }
 
     @Override
