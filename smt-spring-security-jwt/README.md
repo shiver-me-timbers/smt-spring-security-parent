@@ -51,7 +51,7 @@ public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 ## Configuration
 
-The JWT authentication can be configured with properties, these are defined in the libraries two configuration classes:
+The JWT authentication can be configured with properties, these are defined in two configuration classes:
 [`JwtConfiguration`](src/main/java/shiver/me/timbers/spring/security/JwtConfiguration.java) and
 [`SmtSpringSecurityJwtConfiguration`](src/main/java/shiver/me/timbers/spring/security/SmtSpringSecurityJwtConfiguration.java)
 
@@ -64,7 +64,7 @@ smt.spring.security.jwt.secret=some secret string
 
 #### Optional Properties
 
-The JWT authentication can be configured further with thew following properties:
+Further configuration can be achieved with the following properties:
 ```properties
 # The name of the JWT token, this will set the name of the head and cookie that will be returned in the response of a
 # successful login.
@@ -98,7 +98,7 @@ smt.spring.security.jwt.cookie.secure=true
 smt.spring.security.jwt.cookie.httpOnly=true
 ```
 
-#### Further Configuration
+#### Advanced Configuration
 
 Every class that is used to compose this library can be overridden by adding your own implementation to the Spring
 context.
