@@ -61,7 +61,7 @@ public class ITSpringSecurityJwt {
     }
 
     @Test
-    public void Can_login_with_jwt() {
+    public void Can_login_with_jwt_cookie() {
 
         final Form form = new Form();
 
@@ -73,6 +73,27 @@ public class ITSpringSecurityJwt {
 
         // When
         final Response actual = target.request().cookie(signIn.getCookies().get(tokenName)).get();
+
+        // Then
+        assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(signIn.getStatus(), is(OK.getStatusCode()));
+        assertThat(actual.getStatus(), is(OK.getStatusCode()));
+        assertThat(actual.readEntity(String.class), is(TEXT));
+    }
+
+    @Test
+    public void Can_login_with_jwt_header() {
+
+        final Form form = new Form();
+
+        // Given
+        form.param("username", "user");
+        form.param("password", "password");
+        final Response forbidden = target.request().get();
+        final Response signIn = target.path("signIn").request().post(form(form));
+
+        // When
+        final Response actual = target.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
 
         // Then
         assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
