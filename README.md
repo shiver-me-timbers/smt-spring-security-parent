@@ -15,5 +15,42 @@ limitations under the License.
 -->
 smt-spring-security-parent
 ===========
+[![Build Status](https://travis-ci.org/shiver-me-timbers/smt-spring-security-parent.svg)](https://travis-ci.org/shiver-me-timbers/smt-spring-security-parent) [![Coverage Status](https://coveralls.io/repos/shiver-me-timbers/smt-spring-security-parent/badge.svg?branch=master&service=github)](https://coveralls.io/github/shiver-me-timbers/smt-spring-security-parent?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.shiver-me-timbers/smt-spring-security-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.shiver-me-timbers/smt-spring-security-parent/)
 
-This is the parent project that groups all the smt-spring-security projects.
+This is the parent project that groups all the smt-spring-security libraries.
+
+## Libraries
+
+### [smt-spring-security](smt-spring-security)
+
+This library will automatically enable stateless JWT authentication for any Spring Security configuration. It is applied
+with an annotation and weaves itself into your existing configuration so will not override any of your current
+configuration e.g. AuthenticationSuccessHandlers, LogoutSuccessHandlers.
+
+#### Usage
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import shiver.me.timbers.spring.security.EnableJwtAuthentication;
+
+@EnableWebSecurity
+@EnableJwtAuthentication // Just add this annotation and configure Spring Security how ever you normally would.
+public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected final void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests().anyRequest().authenticated();
+        http.formLogin().loginPage("/signIn").defaultSuccessUrl("/").permitAll();
+        http.logout().logoutUrl("/signOut").logoutSuccessUrl("/");
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
+    }
+}
+```
