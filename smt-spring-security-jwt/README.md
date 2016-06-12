@@ -70,6 +70,13 @@ The JWT authentication can be configured further with thew following properties:
 # successful login.
 # DEFAULT: X-AUTH-TOKEN
 smt.spring.security.jwt.tokenName=some_token_name
+# The duration that the token should be valid for.
+# DEFAULT: -1
+smt.spring.security.jwt.token.expiryDuration=30
+# The unit of time for the expiryDuration above. If the expiry is -1 this property is ignored.
+# VALUES: NANOSECONDS, MICROSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS, DAYS
+# DEFAULT: MINUTES
+smt.spring.security.jwt.token.expiryUnit=SECONDS
 # The Max-Age of the JWT cookie.
 # DEFAULT: -1
 smt.spring.security.jwt.cookie.maxAgeDuration=5

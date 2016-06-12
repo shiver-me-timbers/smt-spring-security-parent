@@ -20,6 +20,8 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 
+import java.util.concurrent.TimeUnit;
+
 import static io.jsonwebtoken.SignatureAlgorithm.HS512;
 
 /**
@@ -32,16 +34,32 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
     private final String secret;
     private final JwtBuilder builder;
     private final JwtParser parser;
+    private final int expiryDuration;
+    private final TimeUnit expiryUnit;
+    private final Clock clock;
 
-    public PrincipleJwtTokenParser(String secret, JwtBuilder builder, JwtParser parser) {
+    public PrincipleJwtTokenParser(
+        String secret,
+        JwtBuilder builder,
+        JwtParser parser,
+        int expiryDuration,
+        TimeUnit expiryUnit,
+        Clock clock) {
         this.secret = secret;
         this.builder = builder;
         this.parser = parser;
+        this.expiryDuration = expiryDuration;
+        this.expiryUnit = expiryUnit;
+        this.clock = clock;
     }
 
     @Override
     public String create(String principle) {
-        return builder.claim(PRINCIPLE, principle).signWith(HS512, secret).compact();
+        final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, principle).signWith(HS512, secret);
+        if (expiryDuration >= 0) {
+            return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
+        }
+        return signedBuilder.compact();
     }
 
     @Override

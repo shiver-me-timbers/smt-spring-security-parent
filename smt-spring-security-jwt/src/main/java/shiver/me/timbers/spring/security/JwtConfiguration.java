@@ -40,6 +40,12 @@ public class JwtConfiguration {
     @Value("${smt.spring.security.jwt.tokenName:X-AUTH-TOKEN}")
     private String tokenName;
 
+    @Value("${smt.spring.security.jwt.token.expiryDuration:-1}")
+    private int expiryDuration;
+
+    @Value("${smt.spring.security.jwt.token.expiryUnit:MINUTES}")
+    private TimeUnit expiryUnit;
+
     @Value("${smt.spring.security.jwt.cookie.maxAgeDuration:-1}")
     private int maxAgeDuration;
 
@@ -115,8 +121,8 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(PrincipleJwtTokenParser.class)
     @Autowired
-    public JwtTokenParser<String, String> principleJwtTokenParser(JwtBuilder builder, JwtParser parser) {
-        return new PrincipleJwtTokenParser(secret, builder, parser);
+    public JwtTokenParser<String, String> principleJwtTokenParser(JwtBuilder builder, JwtParser parser, Clock clock) {
+        return new PrincipleJwtTokenParser(secret, builder, parser, expiryDuration, expiryUnit, clock);
     }
 
     @Bean
@@ -129,5 +135,11 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(JwtBuilder.class)
     public JwtBuilder jwtBuilder() {
         return Jwts.builder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DateClock.class)
+    public Clock clock() {
+        return new DateClock();
     }
 }

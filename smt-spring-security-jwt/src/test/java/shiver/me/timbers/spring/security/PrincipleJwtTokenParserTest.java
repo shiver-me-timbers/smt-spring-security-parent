@@ -26,11 +26,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import static io.jsonwebtoken.SignatureAlgorithm.HS512;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static shiver.me.timbers.data.random.RandomEnums.someEnum;
+import static shiver.me.timbers.data.random.RandomIntegers.somePositiveInteger;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
 public class PrincipleJwtTokenParserTest {
@@ -43,6 +49,9 @@ public class PrincipleJwtTokenParserTest {
     private String secret;
     private JwtParser parser;
     private JwtBuilder builder;
+    private Integer expiryDuration;
+    private TimeUnit expiryUnit;
+    private Clock clock;
     private JwtTokenParser<String, String> tokenParser;
 
     @Before
@@ -50,11 +59,40 @@ public class PrincipleJwtTokenParserTest {
         secret = someString();
         parser = mock(JwtParser.class);
         builder = mock(JwtBuilder.class);
-        tokenParser = new PrincipleJwtTokenParser(secret, builder, parser);
+        expiryDuration = somePositiveInteger();
+        expiryUnit = someEnum(TimeUnit.class);
+        clock = mock(Clock.class);
+        tokenParser = new PrincipleJwtTokenParser(secret, builder, parser, expiryDuration, expiryUnit, clock);
     }
 
     @Test
     public void Can_create_a_jwt_token_from_a_principle() throws JwtInvalidTokenException {
+
+        final String principle = someString();
+
+        final Date date = mock(Date.class);
+        final JwtBuilder principleBuilder = mock(JwtBuilder.class);
+        final JwtBuilder expiringBuilder = mock(JwtBuilder.class);
+        final JwtBuilder secretBuilder = mock(JwtBuilder.class);
+
+        final String expected = someString();
+
+        // Given
+        given(builder.claim(PRINCIPLE, principle)).willReturn(principleBuilder);
+        given(clock.nowPlus(expiryDuration, expiryUnit)).willReturn(date);
+        given(principleBuilder.signWith(HS512, secret)).willReturn(secretBuilder);
+        given(secretBuilder.setExpiration(date)).willReturn(expiringBuilder);
+        given(expiringBuilder.compact()).willReturn(expected);
+
+        // When
+        final String actual = tokenParser.create(principle);
+
+        // Then
+        assertThat(actual, is(expected));
+    }
+
+    @Test
+    public void Can_create_a_jwt_token_with_no_expiry() throws JwtInvalidTokenException {
 
         final String principle = someString();
 
@@ -69,9 +107,11 @@ public class PrincipleJwtTokenParserTest {
         given(secretBuilder.compact()).willReturn(expected);
 
         // When
-        final String actual = tokenParser.create(principle);
+        final String actual = new PrincipleJwtTokenParser(secret, builder, parser, -1, expiryUnit, clock)
+            .create(principle);
 
         // Then
+        verifyZeroInteractions(clock);
         assertThat(actual, is(expected));
     }
 
