@@ -16,6 +16,8 @@
 
 package shiver.me.timbers.spring.security;
 
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -24,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Karl Bennett
@@ -32,8 +35,11 @@ import javax.servlet.http.Cookie;
 @ConditionalOnMissingBean(JwtConfiguration.class)
 public class JwtConfiguration {
 
-    @Value("${smt.spring.security.jwt.token.name:X-AUTH-TOKEN}")
+    @Value("${smt.spring.security.jwt.tokenName:X-AUTH-TOKEN}")
     private String tokenName;
+
+    @Value("${smt.spring.security.jwt.secret}")
+    private String secret;
 
     @Bean
     @ConditionalOnMissingBean(JwtLogoutHandler.class)
@@ -43,15 +49,19 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationFilter.class)
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new CookieAndHeaderJwtAuthenticationFilter();
+    @Autowired
+    public JwtAuthenticationFilter jwtAuthenticationFilter(
+        JwtTokenParser<Authentication, HttpServletRequest> tokenParser,
+        SecurityContextHolder securityContextHolder
+    ) {
+        return new CookieAndHeaderJwtAuthenticationFilter(tokenParser, securityContextHolder);
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
     @Autowired
     public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler(
-        JwtTokenParser<Authentication> tokenParser,
+        JwtTokenParser<Authentication, HttpServletRequest> tokenParser,
         Bakery<Cookie> bakery
     ) {
         return new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery);
@@ -59,13 +69,27 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtTokenParser.class)
-    public JwtTokenParser<Authentication> jwtTokenParser() {
-        return new AuthenticationRequestJwtTokenParser();
+    public JwtTokenParser<Authentication, HttpServletRequest> jwtTokenParser(
+        JwtParser parser
+    ) {
+        return new AuthenticationRequestJwtTokenParser(tokenName, secret, parser);
     }
 
     @Bean
     @ConditionalOnMissingBean(Bakery.class)
     public Bakery<Cookie> bakery() {
         return new CookieBakery();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SecurityContextHolder.class)
+    public SecurityContextHolder securityContextHolder() {
+        return new StaticSecurityContextHolder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtParser.class)
+    public JwtParser jwtParser() {
+        return Jwts.parser();
     }
 }

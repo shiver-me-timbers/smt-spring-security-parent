@@ -16,12 +16,28 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+
 /**
  * @author Karl Bennett
  */
-public interface JwtTokenParser<I, S> {
+public class JwtAuthentication extends AbstractAuthenticationToken {
 
-    String create(I input);
+    private final String principle;
 
-    I parse(S source) throws JwtInvalidTokenException;
+    public JwtAuthentication(String principle) {
+        super(null);
+        this.principle = principle;
+        setAuthenticated(true);
+    }
+
+    @Override
+    public Object getCredentials() {
+        return null;
+    }
+
+    @Override
+    public Object getPrincipal() {
+        return principle;
+    }
 }

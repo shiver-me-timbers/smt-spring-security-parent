@@ -19,9 +19,13 @@ package shiver.me.timbers.spring.security;
 /**
  * @author Karl Bennett
  */
-public interface JwtTokenParser<I, S> {
+public class JwtInvalidTokenException extends Exception {
 
-    String create(I input);
+    public JwtInvalidTokenException(Throwable cause) {
+        super(cause);
+    }
 
-    I parse(S source) throws JwtInvalidTokenException;
+    public JwtInvalidTokenException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

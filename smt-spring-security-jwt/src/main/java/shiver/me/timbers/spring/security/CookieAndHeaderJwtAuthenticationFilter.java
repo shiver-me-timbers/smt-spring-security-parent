@@ -16,12 +16,16 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
@@ -29,9 +33,27 @@ import java.io.IOException;
  */
 public class CookieAndHeaderJwtAuthenticationFilter extends GenericFilterBean implements JwtAuthenticationFilter {
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    private final JwtTokenParser<Authentication, HttpServletRequest> tokenParser;
+    private final SecurityContextHolder securityContextHolder;
+
+    public CookieAndHeaderJwtAuthenticationFilter(
+        JwtTokenParser<Authentication, HttpServletRequest> tokenParser,
+        SecurityContextHolder securityContextHolder
+    ) {
+        this.tokenParser = tokenParser;
+        this.securityContextHolder = securityContextHolder;
+    }
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException {
-        throw new UnsupportedOperationException();
+        try {
+            securityContextHolder.getContext().setAuthentication(tokenParser.parse((HttpServletRequest) request));
+        } catch (JwtInvalidTokenException e) {
+            log.debug("Failed JWT authentication.", e);
+        }
+        chain.doFilter(request, response);
     }
 }

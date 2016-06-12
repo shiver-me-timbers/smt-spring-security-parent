@@ -37,7 +37,7 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandlerTest {
 
 
     private String tokenName;
-    private JwtTokenParser<Authentication> tokenParser;
+    private JwtTokenParser<Authentication, ?> tokenParser;
     private AuthenticationSuccessHandler delegate;
     private Bakery<Cookie> bakery;
     private JwtAuthenticationSuccessHandler successHandler;

@@ -16,12 +16,15 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.springframework.security.core.context.SecurityContext;
+
 /**
  * @author Karl Bennett
  */
-public interface JwtTokenParser<I, S> {
+public class StaticSecurityContextHolder implements SecurityContextHolder {
 
-    String create(I input);
-
-    I parse(S source) throws JwtInvalidTokenException;
+    @Override
+    public SecurityContext getContext() {
+        return org.springframework.security.core.context.SecurityContextHolder.getContext();
+    }
 }

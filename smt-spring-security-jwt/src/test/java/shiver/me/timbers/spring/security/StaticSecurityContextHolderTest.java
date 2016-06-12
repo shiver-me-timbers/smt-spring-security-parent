@@ -16,12 +16,22 @@
 
 package shiver.me.timbers.spring.security;
 
-/**
- * @author Karl Bennett
- */
-public interface JwtTokenParser<I, S> {
+import org.junit.Test;
+import org.springframework.security.core.context.SecurityContext;
 
-    String create(I input);
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
 
-    I parse(S source) throws JwtInvalidTokenException;
+public class StaticSecurityContextHolderTest {
+
+    @Test
+    public void Can_get_a_security_context() {
+
+        // When
+        final SecurityContext actual = new StaticSecurityContextHolder().getContext();
+
+        // Then
+        assertThat(actual, not(nullValue()));
+    }
 }
