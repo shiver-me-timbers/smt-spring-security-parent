@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -29,7 +30,6 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
-import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +40,7 @@ import static java.util.Arrays.asList;
  */
 @Configuration
 @ConditionalOnMissingBean(SmtSpringSecurityJwtConfiguration.class)
+@Import(JwtConfiguration.class)
 public class SmtSpringSecurityJwtConfiguration {
 
     @Value("${smt.spring.security.jwt.token.name:X-AUTH-TOKEN}")
@@ -49,6 +50,12 @@ public class SmtSpringSecurityJwtConfiguration {
     private ChainConfigurer<Filter> configurer;
 
     @Autowired
+    private JwtLogoutHandler logoutHandler;
+
+    @Autowired
+    private JwtAuthenticationFilter authenticationFilter;
+
+    @Autowired
     private JwtAuthenticationSuccessHandler successHandler;
 
     @Autowired
@@ -56,9 +63,9 @@ public class SmtSpringSecurityJwtConfiguration {
 
     @PostConstruct
     public void configure() {
-        configurer.modifyFilters(LogoutFilter.class, new AddJwtLogoutHandler());
-        configurer.addBefore(new CookieAndHeaderJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        configurer.modifyFilters(UsernamePasswordAuthenticationFilter.class, new ReplaceSuccessHandlerWithJwt());
+        configurer.modifyFilters(LogoutFilter.class, new AddJwt(logoutHandler));
+        configurer.addBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        configurer.modifyFilters(UsernamePasswordAuthenticationFilter.class, new SetJwt(successHandler));
     }
 
     @Bean
@@ -66,28 +73,6 @@ public class SmtSpringSecurityJwtConfiguration {
     @Autowired
     public ChainConfigurer<Filter> securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
         return new SecurityFilterChainConfigurer(filterChainProxy);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
-    @Autowired
-    public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler(
-        JwtTokenParser tokenParser,
-        Bakery<Cookie> bakery
-    ) {
-        return new CookieAndHeaderJwtAuthenticationSuccessHandler(tokenName, tokenParser, bakery);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(JwtTokenParser.class)
-    public JwtTokenParser jwtTokenParser() {
-        return new JwtTokenParser();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(Bakery.class)
-    public Bakery<Cookie> bakery() {
-        return new CookieBakery();
     }
 
     @Bean
@@ -115,8 +100,15 @@ public class SmtSpringSecurityJwtConfiguration {
         return new ReflectionFieldSetter();
     }
 
-    private class ReplaceSuccessHandlerWithJwt
+    private class SetJwt
         implements Modifier<UsernamePasswordAuthenticationFilter> {
+
+        private final JwtAuthenticationSuccessHandler successHandler;
+
+        public SetJwt(JwtAuthenticationSuccessHandler successHandler) {
+            this.successHandler = successHandler;
+        }
+
         @Override
         public void modify(final UsernamePasswordAuthenticationFilter filter) {
             filter.setAuthenticationSuccessHandler(
@@ -127,7 +119,14 @@ public class SmtSpringSecurityJwtConfiguration {
         }
     }
 
-    private class AddJwtLogoutHandler implements Modifier<LogoutFilter> {
+    private class AddJwt implements Modifier<LogoutFilter> {
+
+        private final JwtLogoutHandler logoutHandler;
+
+        public AddJwt(JwtLogoutHandler logoutHandler) {
+            this.logoutHandler = logoutHandler;
+        }
+
         @SuppressWarnings("unchecked")
         @Override
         public void modify(final LogoutFilter filter) {
@@ -135,7 +134,7 @@ public class SmtSpringSecurityJwtConfiguration {
                 @Override
                 public List update(List oldHandlers) {
                     final List<LogoutHandler> handlers = new ArrayList<>(oldHandlers);
-                    handlers.add(0, new CookieAndHeaderJwtLogoutHandler());
+                    handlers.add(0, logoutHandler);
                     return asList(handlers.toArray(new LogoutHandler[handlers.size()]));
                 }
             });
