@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,6 +31,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +65,7 @@ public class SmtSpringSecurityJwtConfiguration {
 
     @PostConstruct
     public void configure() {
+        Security.addProvider(new BouncyCastleProvider()); // Enable support for all the hashing algorithms.
         configurer.modifyFilters(LogoutFilter.class, new AddJwt(logoutHandler));
         configurer.addBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         configurer.modifyFilters(UsernamePasswordAuthenticationFilter.class, new SetJwt(successHandler));

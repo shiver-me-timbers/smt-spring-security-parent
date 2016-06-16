@@ -16,12 +16,13 @@
 
 package shiver.me.timbers.spring.security;
 
-import java.security.Key;
+import java.io.IOException;
+import java.security.KeyPair;
 
 /**
  * @author Karl Bennett
  */
-public interface KeySelector<I> {
+public interface KeySelector {
 
-    Key select(I input, String value);
+    KeyPair select(String secret) throws IOException;
 }

@@ -29,6 +29,8 @@ import org.springframework.security.core.Authentication;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.security.KeyPair;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,8 +43,8 @@ public class JwtConfiguration {
     @Value("${smt.spring.security.jwt.tokenName:X-AUTH-TOKEN}")
     private String tokenName;
 
-    @Value("${smt.spring.security.jwt.tokenHashing:HS512}")
-    private SignatureAlgorithm tokenHashing;
+    @Value("${smt.spring.security.jwt.algorithm:HS512}")
+    private SignatureAlgorithm algorithm;
 
     @Value("${smt.spring.security.jwt.token.expiryDuration:-1}")
     private int expiryDuration;
@@ -81,10 +83,10 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(JwtAuthenticationFilter.class)
     @Autowired
     public JwtAuthenticationFilter jwtAuthenticationFilter(
-        JwtTokenParser<Authentication, HttpServletRequest> tokenParser,
+        JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser,
         SecurityContextHolder securityContextHolder
     ) {
-        return new CookieAndHeaderJwtAuthenticationFilter(tokenParser, securityContextHolder);
+        return new CookieAndHeaderJwtAuthenticationFilter(authenticationRequestJwtTokenParser, securityContextHolder);
     }
 
     @Bean
@@ -128,11 +130,11 @@ public class JwtConfiguration {
     public JwtTokenParser<String, String> principleJwtTokenParser(
         JwtBuilder builder,
         JwtParser parser,
-        KeySelector<SignatureAlgorithm> keySelector,
+        KeyPair keyPair,
         Clock clock
     ) {
         return new PrincipleJwtTokenParser(
-            secret, builder, parser, tokenHashing, keySelector, expiryDuration, expiryUnit, clock
+            secret, builder, parser, algorithm, keyPair, expiryDuration, expiryUnit, clock
         );
     }
 
@@ -151,8 +153,8 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(KeySelector.class)
     @Autowired
-    public KeySelector<SignatureAlgorithm> keySelector(Base64Keys base64Keys, RsaKeys rsaKeys) {
-        return new SignatureAlgorithmKeySelector(base64Keys, rsaKeys);
+    public KeyPair keyPair(KeySelector keySelector) throws IOException {
+        return keySelector.select(secret);
     }
 
     @Bean
@@ -162,17 +164,23 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(Base64Keys.class)
+    @ConditionalOnMissingBean(KeySelector.class)
     @Autowired
-    public Base64Keys base64Keys(Base64 base64) {
-        return new SecretKeySpecBase64Keys(base64);
+    public KeySelector keySelector(Base64KeyPairs base64KeyPairs, PemKeyPairs pemKeyPairs) {
+        return new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs);
     }
 
     @Bean
-    @ConditionalOnMissingBean(RsaKeys.class)
+    @ConditionalOnMissingBean(Base64KeyPairs.class)
     @Autowired
-    public RsaKeys rsaKeys(Base64 base64) {
-        return new PrivateRsaKeys(base64);
+    public Base64KeyPairs base64KeyPairs(Base64 base64) {
+        return new SecretBase64KeyPairs(base64, algorithm);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(PemKeyPairs.class)
+    public PemKeyPairs pemKeyPairs() {
+        return new BouncyCastlePemKeyPairs();
     }
 
     @Bean

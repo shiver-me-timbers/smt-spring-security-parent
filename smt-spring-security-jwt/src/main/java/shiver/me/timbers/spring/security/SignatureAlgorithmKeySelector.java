@@ -18,31 +18,33 @@ package shiver.me.timbers.spring.security;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 
-import java.security.InvalidKeyException;
-import java.security.Key;
+import java.io.IOException;
+import java.security.KeyPair;
 
 /**
  * @author Karl Bennett
  */
-public class SignatureAlgorithmKeySelector implements KeySelector<SignatureAlgorithm> {
+public class SignatureAlgorithmKeySelector implements KeySelector {
 
-    private final Base64Keys base64Keys;
-    private final RsaKeys rsaKeys;
+    private final SignatureAlgorithm algorithm;
+    private final Base64KeyPairs base64KeyPairs;
+    private final PemKeyPairs pemKeyPairs;
 
-    public SignatureAlgorithmKeySelector(Base64Keys base64Keys, RsaKeys rsaKeys) {
-        this.base64Keys = base64Keys;
-        this.rsaKeys = rsaKeys;
+    public SignatureAlgorithmKeySelector(
+        SignatureAlgorithm algorithm,
+        Base64KeyPairs base64KeyPairs,
+        PemKeyPairs pemKeyPairs
+    ) {
+        this.algorithm = algorithm;
+        this.base64KeyPairs = base64KeyPairs;
+        this.pemKeyPairs = pemKeyPairs;
     }
 
     @Override
-    public Key select(SignatureAlgorithm algorithm, String secret) {
-        if (algorithm.isRsa()) {
-            try {
-                return rsaKeys.createKey(secret);
-            } catch (InvalidKeyException e) {
-                throw new IllegalArgumentException(e);
-            }
+    public KeyPair select(String secret) throws IOException {
+        if (algorithm.isRsa() || algorithm.isEllipticCurve()) {
+            return pemKeyPairs.createPair(secret);
         }
-        return base64Keys.createKey(algorithm, secret.getBytes());
+        return base64KeyPairs.createPair(secret);
     }
 }

@@ -18,13 +18,16 @@ package shiver.me.timbers.spring.security;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import java.security.InvalidKeyException;
-import java.security.Key;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
+import static io.jsonwebtoken.SignatureAlgorithm.ES256;
+import static io.jsonwebtoken.SignatureAlgorithm.ES384;
+import static io.jsonwebtoken.SignatureAlgorithm.ES512;
 import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 import static io.jsonwebtoken.SignatureAlgorithm.HS384;
 import static io.jsonwebtoken.SignatureAlgorithm.HS512;
@@ -38,77 +41,78 @@ import static io.jsonwebtoken.SignatureAlgorithm.RS512;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 import static shiver.me.timbers.data.random.RandomThings.someThing;
 
 public class SignatureAlgorithmKeySelectorTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    private Base64Keys base64Keys;
-    private RsaKeys rsaKeys;
-    private KeySelector<SignatureAlgorithm> keySelector;
+    private Base64KeyPairs base64KeyPairs;
+    private PemKeyPairs pemKeyPairs;
 
     @Before
     public void setUp() {
-        base64Keys = mock(Base64Keys.class);
-        rsaKeys = mock(RsaKeys.class);
-        keySelector = new SignatureAlgorithmKeySelector(base64Keys, rsaKeys);
+        base64KeyPairs = mock(Base64KeyPairs.class);
+        pemKeyPairs = mock(PemKeyPairs.class);
     }
 
     @Test
-    public void Can_select_an_hmac_key() {
+    public void Can_select_an_hmac_key() throws IOException {
 
         final SignatureAlgorithm algorithm = someThing(NONE, HS256, HS384, HS512);
         final String secret = someString(5);
 
-        final Key expected = mock(Key.class);
+        final KeyPair expected = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
 
         // Given
-        given(base64Keys.createKey(eq(algorithm), eq(secret.getBytes()))).willReturn(expected);
+        given(base64KeyPairs.createPair(secret)).willReturn(expected);
 
         // When
-        final Key actual = keySelector.select(algorithm, secret);
+        final KeyPair actual = new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs)
+            .select(secret);
 
         // Then
         assertThat(actual, is(expected));
     }
 
     @Test
-    public void Can_select_an_rsa_key() throws InvalidKeyException {
+    public void Can_select_an_rsa_key() throws IOException {
 
         final SignatureAlgorithm algorithm = someThing(RS256, RS384, RS512, PS256, PS384, PS512);
         final String secret = someString(5);
 
-        final Key expected = mock(Key.class);
+        final KeyPair expected = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
 
         // Given
-        given(rsaKeys.createKey(secret)).willReturn(expected);
+        given(pemKeyPairs.createPair(secret)).willReturn(expected);
 
         // When
-        final Key actual = keySelector.select(algorithm, secret);
+        final KeyPair actual = new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs)
+            .select(secret);
 
         // Then
+        verifyZeroInteractions(base64KeyPairs);
         assertThat(actual, is(expected));
     }
 
     @Test
-    public void Can_fail_to_select_an_rsa_key() throws InvalidKeyException {
+    public void Can_select_an_dsa_key() throws IOException {
 
-        final SignatureAlgorithm algorithm = someThing(RS256, RS384, RS512, PS256, PS384, PS512);
+        final SignatureAlgorithm algorithm = someThing(ES256, ES384, ES512);
         final String secret = someString(5);
 
-        final InvalidKeyException exception = new InvalidKeyException();
+        final KeyPair expected = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
 
         // Given
-        given(rsaKeys.createKey(secret)).willThrow(exception);
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectCause(is(exception));
+        given(pemKeyPairs.createPair(secret)).willReturn(expected);
 
         // When
-        keySelector.select(algorithm, secret);
+        final KeyPair actual = new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs)
+            .select(secret);
+
+        // Then
+        verifyZeroInteractions(base64KeyPairs);
+        assertThat(actual, is(expected));
     }
 }

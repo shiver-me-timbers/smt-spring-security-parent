@@ -29,7 +29,8 @@
 
     <name>${project.artifactId}</name>
 
-    <description>This is the parent project that groups all the smt-spring-security integration test projects.
+    <description>
+        This is the parent project that groups all the smt-spring-security integration test projects.
     </description>
 
     <build>
@@ -75,5 +76,8 @@
 
     <modules>
         <module>smt-spring-security-jwt-integration</module>
+        <module>smt-spring-security-jwt-hmac-integration</module>
+        <module>smt-spring-security-jwt-rsa-integration</module>
+        <module>smt-spring-security-jwt-ecdsa-integration</module>
     </modules>
 </project>

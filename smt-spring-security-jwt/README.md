@@ -72,11 +72,9 @@ Further configuration can be achieved with the following properties:
 smt.spring.security.jwt.tokenName=some_token_name
 # The hashing algorithm used when generating the JWT token.
 # See: io.jsonwebtoken.SignatureAlgorithm
-# VALUES: NONE, HS256, HS384, HS512, RS256, RS384, RS512
-# These extra values require that a JCA provider like BouncyCastle is available in the classpath.
-# VALUES: ES256, ES384, ES512, PS256, PS384, PS512
+# VALUES: NONE, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
 # DEFAULT: HS512
-smt.spring.security.jwt.tokenHashing=RS512
+smt.spring.security.jwt.algorithm=RS512
 # The duration that the token should be valid for.
 # DEFAULT: -1
 smt.spring.security.jwt.token.expiryDuration=30

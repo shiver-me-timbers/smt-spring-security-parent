@@ -21,6 +21,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import java.security.KeyPair;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,7 +35,7 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
     private final JwtBuilder builder;
     private final JwtParser parser;
     private final SignatureAlgorithm tokenHashing;
-    private final KeySelector<SignatureAlgorithm> keySelector;
+    private final KeyPair keyPair;
     private final int expiryDuration;
     private final TimeUnit expiryUnit;
     private final Clock clock;
@@ -44,15 +45,16 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
         JwtBuilder builder,
         JwtParser parser,
         SignatureAlgorithm tokenHashing,
-        KeySelector<SignatureAlgorithm> keySelector,
+        KeyPair keyPair,
         int expiryDuration,
         TimeUnit expiryUnit,
-        Clock clock) {
+        Clock clock
+    ) {
         this.secret = secret;
         this.builder = builder;
         this.parser = parser;
         this.tokenHashing = tokenHashing;
-        this.keySelector = keySelector;
+        this.keyPair = keyPair;
         this.expiryDuration = expiryDuration;
         this.expiryUnit = expiryUnit;
         this.clock = clock;
@@ -60,8 +62,7 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
 
     @Override
     public String create(String principle) {
-        final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, principle)
-            .signWith(tokenHashing, keySelector.select(tokenHashing, secret));
+        final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, principle).signWith(tokenHashing, keyPair.getPrivate());
         if (expiryDuration >= 0) {
             return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
         }
@@ -71,8 +72,7 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
     @Override
     public String parse(String token) throws JwtInvalidTokenException {
         try {
-            return parser.setSigningKey(keySelector.select(tokenHashing, secret)).parseClaimsJws(token).getBody()
-                .get(PRINCIPLE).toString();
+            return parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPLE).toString();
         } catch (IllegalArgumentException e) {
             throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
         } catch (JwtException e) {
