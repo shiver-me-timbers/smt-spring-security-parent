@@ -75,22 +75,15 @@ smt.spring.security.jwt.tokenName=some_token_name
 # VALUES: NONE, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
 # DEFAULT: HS512
 smt.spring.security.jwt.algorithm=RS512
-# The duration that the token should be valid for.
-# DEFAULT: -1
+# The duration that the token will be valid for. It is in relation to the expiryUnit below. This will also be the
+# Max-Age of the JWT token cookie.
+# DEFAULT: -1 (does not expire/session cookie)
 smt.spring.security.jwt.token.expiryDuration=30
 # The unit of time for the expiryDuration above. If the expiry is -1 this property is ignored.
 # See: java.util.concurrent.TimeUnit
 # VALUES: NANOSECONDS, MICROSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS, DAYS
 # DEFAULT: MINUTES
 smt.spring.security.jwt.token.expiryUnit=SECONDS
-# The Max-Age of the JWT cookie.
-# DEFAULT: -1
-smt.spring.security.jwt.cookie.maxAgeDuration=5
-# The unit of time for the maxAgeDuration above. If the Max-Age is -1 this property is ignored.
-# See: java.util.concurrent.TimeUnit
-# VALUES: NANOSECONDS, MICROSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS, DAYS
-# DEFAULT: SECONDS
-smt.spring.security.jwt.cookie.maxAgeUnit=MINUTES
 # Domain of the JWT cookie.
 # DEFAULT: (empty)
 smt.spring.security.jwt.cookie.domain=shiver.me.timbers

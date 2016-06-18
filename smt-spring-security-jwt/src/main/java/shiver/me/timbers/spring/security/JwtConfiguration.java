@@ -52,12 +52,6 @@ public class JwtConfiguration {
     @Value("${smt.spring.security.jwt.token.expiryUnit:MINUTES}")
     private TimeUnit expiryUnit;
 
-    @Value("${smt.spring.security.jwt.cookie.maxAgeDuration:-1}")
-    private int maxAgeDuration;
-
-    @Value("${smt.spring.security.jwt.cookie.maxAgeUnit:SECONDS}")
-    private TimeUnit maxAgeUnit;
-
     @Value("${smt.spring.security.jwt.cookie.domain:}")
     private String domain;
 
@@ -115,7 +109,7 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(Bakery.class)
     public Bakery<Cookie> bakery() {
-        return new CookieBakery(maxAgeDuration, maxAgeUnit, domain, path, secure, httpOnly);
+        return new CookieBakery(expiryDuration, expiryUnit, domain, path, secure, httpOnly);
     }
 
     @Bean
