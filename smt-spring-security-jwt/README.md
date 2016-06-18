@@ -18,7 +18,7 @@ smt-spring-security-jwt
 [![Build Status](https://travis-ci.org/shiver-me-timbers/smt-spring-security-parent.svg)](https://travis-ci.org/shiver-me-timbers/smt-spring-security-parent) [![Coverage Status](https://coveralls.io/repos/shiver-me-timbers/smt-spring-security-parent/badge.svg?branch=master&service=github)](https://coveralls.io/github/shiver-me-timbers/smt-spring-security-parent?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.shiver-me-timbers/smt-spring-security-jwt/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.shiver-me-timbers/smt-spring-security-jwt/)
 
 This library will automatically enable stateless JWT authentication for any Spring Security configuration. It is applied
-with an annotation and weaves itself into your existing configuration so will not override any of your current
+with an annotation and weaves itself into your existing Spring Security setup so will not override any of your current
 configuration e.g. AuthenticationSuccessHandlers, LogoutSuccessHandlers.
 
 ## Usage

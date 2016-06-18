@@ -24,7 +24,7 @@ This is the parent project that groups all the smt-spring-security libraries.
 ### [smt-spring-security-jwt](smt-spring-security-jwt)
 
 This library will automatically enable stateless JWT authentication for any Spring Security configuration. It is applied
-with an annotation and weaves itself into your existing configuration so will not override any of your current
+with an annotation and weaves itself into your existing Spring Security setup so will not override any of your current
 configuration e.g. AuthenticationSuccessHandlers, LogoutSuccessHandlers.
 
 #### Usage
