@@ -16,8 +16,14 @@
 
 package shiver.me.timbers.spring.security.integration;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@SpringBootApplication
-public class SpringSecurityJwtIntegrationConfiguration {
+@Configuration
+public class SpringSecurityControllerConfiguration {
+
+    @Bean
+    public SpringSecurityJwtController controller() {
+        return new SpringSecurityJwtController();
+    }
 }

@@ -43,7 +43,7 @@ import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.spring.security.integration.SpringSecurityJwtController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = SpringSecurityJwtIntegrationConfiguration.class)
+@SpringApplicationConfiguration(classes = JwtSecurityConfiguration.class)
 @WebIntegrationTest
 public abstract class AbstractSpringSecurityJwt {
 
