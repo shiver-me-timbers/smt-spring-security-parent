@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 import static shiver.me.timbers.data.random.RandomThings.someThing;
 
-public class SignatureAlgorithmKeySelectorTest {
+public class SignatureAlgorithmKeyParserTest {
 
     private Base64KeyPairs base64KeyPairs;
     private PemKeyPairs pemKeyPairs;
@@ -69,8 +69,8 @@ public class SignatureAlgorithmKeySelectorTest {
         given(base64KeyPairs.createPair(secret)).willReturn(expected);
 
         // When
-        final KeyPair actual = new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs)
-            .select(secret);
+        final KeyPair actual = new SignatureAlgorithmKeyParser(algorithm, base64KeyPairs, pemKeyPairs)
+            .parse(secret);
 
         // Then
         assertThat(actual, is(expected));
@@ -88,8 +88,8 @@ public class SignatureAlgorithmKeySelectorTest {
         given(pemKeyPairs.createPair(secret)).willReturn(expected);
 
         // When
-        final KeyPair actual = new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs)
-            .select(secret);
+        final KeyPair actual = new SignatureAlgorithmKeyParser(algorithm, base64KeyPairs, pemKeyPairs)
+            .parse(secret);
 
         // Then
         verifyZeroInteractions(base64KeyPairs);
@@ -108,8 +108,8 @@ public class SignatureAlgorithmKeySelectorTest {
         given(pemKeyPairs.createPair(secret)).willReturn(expected);
 
         // When
-        final KeyPair actual = new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs)
-            .select(secret);
+        final KeyPair actual = new SignatureAlgorithmKeyParser(algorithm, base64KeyPairs, pemKeyPairs)
+            .parse(secret);
 
         // Then
         verifyZeroInteractions(base64KeyPairs);

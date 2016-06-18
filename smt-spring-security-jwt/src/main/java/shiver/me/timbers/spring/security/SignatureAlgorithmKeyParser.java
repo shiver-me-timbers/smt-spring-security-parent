@@ -24,13 +24,13 @@ import java.security.KeyPair;
 /**
  * @author Karl Bennett
  */
-public class SignatureAlgorithmKeySelector implements KeySelector {
+public class SignatureAlgorithmKeyParser implements KeyParser {
 
     private final SignatureAlgorithm algorithm;
     private final Base64KeyPairs base64KeyPairs;
     private final PemKeyPairs pemKeyPairs;
 
-    public SignatureAlgorithmKeySelector(
+    public SignatureAlgorithmKeyParser(
         SignatureAlgorithm algorithm,
         Base64KeyPairs base64KeyPairs,
         PemKeyPairs pemKeyPairs
@@ -41,7 +41,7 @@ public class SignatureAlgorithmKeySelector implements KeySelector {
     }
 
     @Override
-    public KeyPair select(String secret) throws IOException {
+    public KeyPair parse(String secret) throws IOException {
         if (algorithm.isRsa() || algorithm.isEllipticCurve()) {
             return pemKeyPairs.createPair(secret);
         }

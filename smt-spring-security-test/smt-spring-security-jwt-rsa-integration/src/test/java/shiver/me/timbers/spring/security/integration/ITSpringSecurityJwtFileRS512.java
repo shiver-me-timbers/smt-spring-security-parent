@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.integration;
 
-import java.io.IOException;
-import java.security.KeyPair;
+import org.springframework.test.context.ActiveProfiles;
 
-/**
- * @author Karl Bennett
- */
-public interface KeySelector {
-
-    KeyPair select(String secret) throws IOException;
+@ActiveProfiles({"file", "RS512"})
+public class ITSpringSecurityJwtFileRS512 extends AbstractSpringSecurityJwt {
 }

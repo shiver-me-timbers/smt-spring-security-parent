@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.integration;
+package shiver.me.timbers.spring.security;
 
-import org.springframework.test.context.ActiveProfiles;
+/**
+ * @author Karl Bennett
+ */
+public interface SecretKeeper {
 
-@ActiveProfiles({"test", "RS384"})
-public class ITSpringSecurityJwtRS384 extends AbstractSpringSecurityJwt {
+    String getSecret();
 }

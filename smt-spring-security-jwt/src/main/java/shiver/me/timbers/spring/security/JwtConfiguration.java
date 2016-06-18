@@ -64,8 +64,11 @@ public class JwtConfiguration {
     @Value("${smt.spring.security.jwt.cookie.httpOnly:false}")
     private boolean httpOnly;
 
-    @Value("${smt.spring.security.jwt.secret}")
+    @Value("${smt.spring.security.jwt.secret:}")
     private String secret;
+
+    @Value("${smt.spring.security.jwt.secretFile:}")
+    private String secretFile;
 
     @Bean
     @ConditionalOnMissingBean(JwtLogoutHandler.class)
@@ -122,14 +125,21 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(PrincipleJwtTokenParser.class)
     @Autowired
     public JwtTokenParser<String, String> principleJwtTokenParser(
+        SecretKeeper secretKeeper,
         JwtBuilder builder,
         JwtParser parser,
         KeyPair keyPair,
         Clock clock
     ) {
         return new PrincipleJwtTokenParser(
-            secret, builder, parser, algorithm, keyPair, expiryDuration, expiryUnit, clock
+            secretKeeper.getSecret(), builder, parser, algorithm, keyPair, expiryDuration, expiryUnit, clock
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SecretKeeper.class)
+    public SecretKeeper secretKeeper(FileReader fileReader) {
+        return new ChoosingSecretKeeper(secret, secretFile, fileReader);
     }
 
     @Bean
@@ -145,23 +155,29 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(KeySelector.class)
+    @ConditionalOnMissingBean(KeyPair.class)
     @Autowired
-    public KeyPair keyPair(KeySelector keySelector) throws IOException {
-        return keySelector.select(secret);
+    public KeyPair keyPair(SecretKeeper secretKeeper, KeyParser keyParser) throws IOException {
+        return keyParser.parse(secretKeeper.getSecret());
     }
 
     @Bean
-    @ConditionalOnMissingBean(DateClock.class)
+    @ConditionalOnMissingBean(Clock.class)
     public Clock clock() {
         return new DateClock();
     }
 
     @Bean
-    @ConditionalOnMissingBean(KeySelector.class)
+    @ConditionalOnMissingBean(FileReader.class)
+    public FileReader fileReader() {
+        return new ResourceFileReader();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(KeyParser.class)
     @Autowired
-    public KeySelector keySelector(Base64KeyPairs base64KeyPairs, PemKeyPairs pemKeyPairs) {
-        return new SignatureAlgorithmKeySelector(algorithm, base64KeyPairs, pemKeyPairs);
+    public KeyParser keyParser(Base64KeyPairs base64KeyPairs, PemKeyPairs pemKeyPairs) {
+        return new SignatureAlgorithmKeyParser(algorithm, base64KeyPairs, pemKeyPairs);
     }
 
     @Bean

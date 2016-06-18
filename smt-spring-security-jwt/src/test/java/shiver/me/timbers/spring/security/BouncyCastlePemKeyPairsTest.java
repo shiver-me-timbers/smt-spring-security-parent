@@ -16,7 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,8 +24,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.Security;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
@@ -34,6 +31,7 @@ import java.security.interfaces.RSAPublicKey;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
+import static shiver.me.timbers.spring.security.TestFiles.readFile;
 
 public class BouncyCastlePemKeyPairsTest {
 
@@ -61,17 +59,6 @@ public class BouncyCastlePemKeyPairsTest {
     }
 
     @Test
-    public void Can_create_an_dsa_key_pair() throws IOException {
-
-        // When
-        final KeyPair actual = keyPairs.createPair(privateKey("dsa"));
-
-        // Then
-        assertThat(actual.getPrivate(), instanceOf(DSAPrivateKey.class));
-        assertThat(actual.getPublic(), instanceOf(DSAPublicKey.class));
-    }
-
-    @Test
     public void Can_create_an_ecdsa_key_pair() throws IOException {
 
         // When
@@ -83,11 +70,6 @@ public class BouncyCastlePemKeyPairsTest {
     }
 
     private static String privateKey(String name) {
-        try {
-            return IOUtils.toString(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("id_" + name), "UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return readFile("id_" + name);
     }
 }

@@ -57,13 +57,23 @@ The JWT authentication can be configured with properties, these are defined in t
 
 #### Compulsory Properties
 
-The only property that must be set for this library to run is the JWT secret.
+A secret value must be provided for generating the JWT tokens. This can be done by setting either one of the following
+two properties.
 ```properties
 smt.spring.security.jwt.secret=some secret
+smt.spring.security.jwt.secretFile=the/path/to/some/secret/file
 ```
 
-This property must be set with different values depending on the `smt.spring.security.jwt.algorithm`
-(see properties below) that is chosen.
+##### smt.spring.security.jwt.secret
+This property can be set with the secret value of your choosing.
+
+##### smt.spring.security.jwt.secretFile
+This property must contain the path to a file that only contains the value that you would have otherwise set with the
+`smt.spring.security.jwt.secret` property.
+
+##### The secret value
+Different secret values must be used depending on the `smt.spring.security.jwt.algorithm`
+(see Optional Properties below) that is chosen.
 
 HMAC algorithms (`HS256`, `HS384`, `HS512`): The value can be
 [any string you like](src/test/resources/application-test.properties).

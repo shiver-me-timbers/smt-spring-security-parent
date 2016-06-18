@@ -18,6 +18,6 @@ package shiver.me.timbers.spring.security.integration;
 
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles({"test", "PS512"})
-public class ITSpringSecurityJwtPS512 extends AbstractSpringSecurityJwt {
+@ActiveProfiles({"file", "RS384"})
+public class ITSpringSecurityJwtFileRS384 extends AbstractSpringSecurityJwt {
 }

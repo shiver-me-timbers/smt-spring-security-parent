@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.integration;
+package shiver.me.timbers.spring.security;
 
-import org.springframework.test.context.ActiveProfiles;
+import java.io.IOException;
+import java.security.KeyPair;
 
-@ActiveProfiles({"test", "HS265"})
-public class ITSpringSecurityJwtHS265 extends AbstractSpringSecurityJwt {
+/**
+ * @author Karl Bennett
+ */
+public interface KeyParser {
+
+    KeyPair parse(String secret) throws IOException;
 }

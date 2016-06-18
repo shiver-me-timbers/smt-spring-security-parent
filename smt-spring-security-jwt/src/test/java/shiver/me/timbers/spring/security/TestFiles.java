@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.integration;
+package shiver.me.timbers.spring.security;
 
-import org.springframework.test.context.ActiveProfiles;
+import org.apache.commons.io.IOUtils;
 
-@ActiveProfiles({"test", "RS256"})
-public class ITSpringSecurityJwtRS256 extends AbstractSpringSecurityJwt {
+import java.io.IOException;
+
+public class TestFiles {
+
+    public static String readFile(String name) {
+        try {
+            return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(name), "UTF-8");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
