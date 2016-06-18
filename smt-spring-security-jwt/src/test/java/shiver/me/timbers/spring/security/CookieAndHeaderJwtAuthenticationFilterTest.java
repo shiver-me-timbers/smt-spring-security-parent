@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
+import shiver.me.timbers.spring.security.jwt.JwtInvalidTokenException;
+import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

@@ -28,6 +28,13 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import shiver.me.timbers.spring.security.fields.FieldFinder;
+import shiver.me.timbers.spring.security.fields.FieldGetSetter;
+import shiver.me.timbers.spring.security.fields.FieldMutator;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldFinder;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldGetSetter;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldMutator;
+import shiver.me.timbers.spring.security.fields.Updater;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;

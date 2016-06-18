@@ -26,6 +26,25 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
+import shiver.me.timbers.spring.security.cookies.Bakery;
+import shiver.me.timbers.spring.security.cookies.CookieBakery;
+import shiver.me.timbers.spring.security.io.FileReader;
+import shiver.me.timbers.spring.security.io.ResourceFileReader;
+import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.PrincipleJwtTokenParser;
+import shiver.me.timbers.spring.security.keys.Base64;
+import shiver.me.timbers.spring.security.keys.Base64KeyPairs;
+import shiver.me.timbers.spring.security.keys.BouncyCastlePemKeyPairs;
+import shiver.me.timbers.spring.security.keys.DatatypeConverterBase64;
+import shiver.me.timbers.spring.security.keys.KeyParser;
+import shiver.me.timbers.spring.security.keys.PemKeyPairs;
+import shiver.me.timbers.spring.security.keys.SecretBase64KeyPairs;
+import shiver.me.timbers.spring.security.keys.SignatureAlgorithmKeyParser;
+import shiver.me.timbers.spring.security.secret.ChoosingSecretKeeper;
+import shiver.me.timbers.spring.security.secret.SecretKeeper;
+import shiver.me.timbers.spring.security.time.Clock;
+import shiver.me.timbers.spring.security.time.DateClock;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;

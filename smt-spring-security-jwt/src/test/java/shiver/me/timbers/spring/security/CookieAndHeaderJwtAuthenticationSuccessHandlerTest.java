@@ -21,6 +21,9 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import shiver.me.timbers.spring.security.cookies.Bakery;
+import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
