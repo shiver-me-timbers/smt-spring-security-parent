@@ -65,7 +65,7 @@ public class SecurityFilterChainWeaverTest {
 
         // Then
         verify(modifier).modifyLink(filterChain, LogoutFilter.class, logoutHandlerAdder);
-        verify(modifier).addBefore(filterChain, authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        verify(modifier).addBefore(filterChain, UsernamePasswordAuthenticationFilter.class, authenticationFilter);
         verify(modifier).modifyLink(filterChain, UsernamePasswordAuthenticationFilter.class, successHandlerWrapper);
     }
 }

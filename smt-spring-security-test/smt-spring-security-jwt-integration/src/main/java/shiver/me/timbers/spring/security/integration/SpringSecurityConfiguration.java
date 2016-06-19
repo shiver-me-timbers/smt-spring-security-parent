@@ -16,30 +16,26 @@
 
 package shiver.me.timbers.spring.security.integration;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-import shiver.me.timbers.spring.security.EnableJwtAuthentication;
 
-@Configuration
-@EnableAutoConfiguration
 @EnableWebSecurity
-@EnableJwtAuthentication
-@Import(SpringSecurityControllerConfiguration.class)
-public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@Order(101)
+public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {
+        http.antMatcher("/normal/**");
         http.csrf().disable();
         http.authorizeRequests().anyRequest().authenticated();
-        http.formLogin().successHandler(new NoRedirectAuthenticationSuccessHandler()).loginPage("/signIn").permitAll();
-        http.logout().logoutUrl("/signOut").logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
+        http.formLogin().successHandler(new NoRedirectAuthenticationSuccessHandler()).loginPage("/normal/signIn")
+            .permitAll();
+        http.logout().logoutUrl("/normal/signOut").logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
         http.exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint());
     }
 

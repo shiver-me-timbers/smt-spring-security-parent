@@ -75,7 +75,7 @@ public class SecurityFilterChainModifierTest {
         given(chain.getFilters()).willReturn(filters);
 
         // When
-        configurer.addBefore(chain, filterTwo, FilterThree.class);
+        configurer.addBefore(chain, FilterThree.class, filterTwo);
 
         // Then
         assertThat(filters, contains(filterOne, filterTwo, filterThree, filterFour, filterThree));
@@ -97,7 +97,7 @@ public class SecurityFilterChainModifierTest {
         given(chain.getFilters()).willReturn(filters);
 
         // When
-        configurer.addBefore(chain, filterTwo, FilterThree.class);
+        configurer.addBefore(chain, FilterThree.class, filterTwo);
 
         // Then
         assertThat(filters, contains(filterOne, filterFour));

@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.ws.rs.client.WebTarget;
@@ -43,8 +44,9 @@ import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.spring.security.integration.SpringSecurityJwtController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = JwtSecurityConfiguration.class)
+@SpringApplicationConfiguration(classes = JwtAnnotationSecurityConfiguration.class)
 @WebIntegrationTest
+@DirtiesContext
 public abstract class AbstractSpringSecurityJwt {
 
     @Value("${local.server.port}")
@@ -53,55 +55,67 @@ public abstract class AbstractSpringSecurityJwt {
     @Value("${smt.spring.security.jwt.tokenName}")
     private String tokenName;
 
-    private WebTarget target;
+    private WebTarget annotationTarget;
+    private WebTarget normalTarget;
 
     @Before
     public void setUp() {
         final JerseyClient client = JerseyClientBuilder.createClient();
         client.property(ClientProperties.FOLLOW_REDIRECTS, false);
-        target = client.target(format("http://localhost:%d/", port));
+        annotationTarget = client.target(format("http://localhost:%d/jwt", port));
+        normalTarget = client.target(format("http://localhost:%d/normal", port));
     }
 
     @Test
-    public void Can_login_with_jwt_cookie() {
+    public void Can_login_to_all_security_contexts_with_jwt_cookie() {
 
         final Form form = new Form();
 
         // Given
         form.param("username", "user");
         form.param("password", "password");
-        final Response forbidden = target.request().get();
-        final Response signIn = target.path("signIn").request().post(form(form));
+        final Response annotationForbidden = annotationTarget.request().get();
+        final Response normalForbidden = normalTarget.request().get();
+        final Response signIn = annotationTarget.path("signIn").request().post(form(form));
 
         // When
-        final Response actual = target.request().cookie(signIn.getCookies().get(tokenName)).get();
+        final Response annotation = annotationTarget.request().cookie(signIn.getCookies().get(tokenName)).get();
+        final Response normal = normalTarget.request().cookie(signIn.getCookies().get(tokenName)).get();
 
         // Then
-        assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(normalForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
-        assertThat(actual.getStatus(), is(OK.getStatusCode()));
-        assertThat(actual.readEntity(String.class), is(TEXT));
+        assertThat(annotation.getStatus(), is(OK.getStatusCode()));
+        assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(normal.getStatus(), is(OK.getStatusCode()));
+        assertThat(normal.readEntity(String.class), is(TEXT));
     }
 
     @Test
-    public void Can_login_with_jwt_header() {
+    public void Can_login_to_all_security_contexts_with_jwt_header() {
 
         final Form form = new Form();
 
         // Given
         form.param("username", "user");
         form.param("password", "password");
-        final Response forbidden = target.request().get();
-        final Response signIn = target.path("signIn").request().post(form(form));
+        final Response annotationForbidden = annotationTarget.request().get();
+        final Response normalForbidden = annotationTarget.request().get();
+        final Response signIn = annotationTarget.path("signIn").request().post(form(form));
 
         // When
-        final Response actual = target.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
+        final Response annotation = annotationTarget.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
+        final Response normal = normalTarget.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
 
         // Then
-        assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(normalForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
-        assertThat(actual.getStatus(), is(OK.getStatusCode()));
-        assertThat(actual.readEntity(String.class), is(TEXT));
+        assertThat(annotation.getStatus(), is(OK.getStatusCode()));
+        assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(normal.getStatus(), is(OK.getStatusCode()));
+        assertThat(normal.readEntity(String.class), is(TEXT));
     }
 
     @Test
@@ -112,18 +126,21 @@ public abstract class AbstractSpringSecurityJwt {
         // Given
         form.param("username", "user");
         form.param("password", "password");
-        final Response forbidden = target.request().get();
-        final Response signIn = target.path("signIn").request().post(form(form));
+        final Response signIn = annotationTarget.path("signIn").request().post(form(form));
 
         // When
-        final Response actual = target.path("signOut").request().cookie(signIn.getCookies().get(tokenName))
+        final Response annotation = annotationTarget.path("signOut").request().cookie(signIn.getCookies().get(tokenName))
+            .post(text(null));
+        final Response normal = normalTarget.path("signOut").request().cookie(signIn.getCookies().get(tokenName))
             .post(text(null));
 
         // Then
-        assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
-        assertThat(actual.getStatus(), is(OK.getStatusCode()));
-        assertThat(actual.getCookies().get(tokenName).getMaxAge(), is(-1));
-        assertThat(actual.getCookies().get(tokenName).getValue(), isEmptyString());
+        assertThat(annotation.getStatus(), is(OK.getStatusCode()));
+        assertThat(annotation.getCookies().get(tokenName).getMaxAge(), is(-1));
+        assertThat(annotation.getCookies().get(tokenName).getValue(), isEmptyString());
+        assertThat(normal.getStatus(), is(OK.getStatusCode()));
+        assertThat(normal.getCookies().get(tokenName).getMaxAge(), is(-1));
+        assertThat(normal.getCookies().get(tokenName).getValue(), isEmptyString());
     }
 }

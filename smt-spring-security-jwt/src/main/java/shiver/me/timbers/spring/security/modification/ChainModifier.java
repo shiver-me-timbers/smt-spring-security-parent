@@ -23,5 +23,5 @@ public interface ChainModifier<C, T> {
 
     <L extends T> void modifyLink(C chain, Class<L> type, Modifier<L> modifier);
 
-    void addBefore(C chain, T link, Class<? extends T> filterClass);
+    void addBefore(C chain, Class<? extends T> filterClass, T link);
 }

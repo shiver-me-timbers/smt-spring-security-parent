@@ -51,7 +51,7 @@ public class SecurityFilterChainWeaver implements ChainWeaver<SecurityFilterChai
     @Override
     public void weave(SecurityFilterChain filterChain) {
         modifier.modifyLink(filterChain, LogoutFilter.class, logoutHandlerAdder);
-        modifier.addBefore(filterChain, authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        modifier.addBefore(filterChain, UsernamePasswordAuthenticationFilter.class, authenticationFilter);
         modifier.modifyLink(filterChain, UsernamePasswordAuthenticationFilter.class, successHandlerWrapper);
     }
 }

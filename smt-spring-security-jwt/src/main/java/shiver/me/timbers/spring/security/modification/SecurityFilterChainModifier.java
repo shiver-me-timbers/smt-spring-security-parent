@@ -37,7 +37,7 @@ public class SecurityFilterChainModifier implements ChainModifier<SecurityFilter
     }
 
     @Override
-    public void addBefore(SecurityFilterChain filterChain, Filter filter, Class<? extends Filter> filterClass) {
+    public void addBefore(SecurityFilterChain filterChain, Class<? extends Filter> filterClass, Filter filter) {
         final List<Filter> filters = filterChain.getFilters();
         final int index = findFirstIndexOf(filterClass, filters);
         if (index >= 0) {
