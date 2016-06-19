@@ -26,6 +26,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.security.web.SecurityFilterChain;
 import shiver.me.timbers.spring.security.cookies.Bakery;
 import shiver.me.timbers.spring.security.cookies.CookieBakery;
 import shiver.me.timbers.spring.security.fields.FieldFinder;
@@ -97,6 +99,25 @@ public class JwtConfiguration {
     private String secretFile;
 
     @Bean
+    @ConditionalOnMissingBean(Weaver.class)
+    @Autowired
+    public Weaver weaver(FilterChainProxy filterChainProxy, ChainWeaver<SecurityFilterChain> chainWeaver) {
+        return new FilterChainProxyWeaver(filterChainProxy, chainWeaver);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ChainWeaver.class)
+    @Autowired
+    public ChainWeaver<SecurityFilterChain> securityFilterChainWeaver(
+        LogoutHandlerAdder logoutHandlerAdder,
+        SuccessHandlerWrapper successHandlerWrapper,
+        ChainModifier<SecurityFilterChain, Filter> modifier,
+        JwtAuthenticationFilter authenticationFilter
+    ) {
+        return new SecurityFilterChainWeaver(logoutHandlerAdder, successHandlerWrapper, modifier, authenticationFilter);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(LogoutHandlerAdder.class)
     @Autowired
     public LogoutHandlerAdder logoutHandlerAdder(FieldMutator mutator, JwtLogoutHandler logoutHandler) {
@@ -115,7 +136,7 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ChainModifier.class)
-    public ChainModifier<Filter> securityFilterChainConfigurer() {
+    public ChainModifier<SecurityFilterChain, Filter> modifier() {
         return new SecurityFilterChainModifier();
     }
 

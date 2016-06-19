@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * @author Karl Bennett
  */
-public class SecurityFilterChainModifier implements ChainModifier<Filter> {
+public class SecurityFilterChainModifier implements ChainModifier<SecurityFilterChain, Filter> {
 
     @Override
     @SuppressWarnings("unchecked")

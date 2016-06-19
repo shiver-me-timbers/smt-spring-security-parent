@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 
 public class SecurityFilterChainModifierTest {
 
-    private ChainModifier<Filter> configurer;
+    private ChainModifier<SecurityFilterChain, Filter> configurer;
 
     @Before
     public void setUp() {
