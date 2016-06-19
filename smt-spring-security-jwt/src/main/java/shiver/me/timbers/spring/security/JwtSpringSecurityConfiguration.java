@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import shiver.me.timbers.spring.security.weaving.Weaver;
 
-import javax.annotation.PostConstruct;
 import java.security.Security;
 
 /**
@@ -35,10 +34,7 @@ import java.security.Security;
 public class JwtSpringSecurityConfiguration {
 
     @Autowired
-    private Weaver weaver;
-
-    @PostConstruct
-    public void configure() {
+    public void weaveInJwtConfiguration(Weaver weaver) {
         Security.addProvider(new BouncyCastleProvider()); // Enable support for all the hashing algorithms.
         weaver.weave();
     }
