@@ -54,9 +54,8 @@ public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 ## Configuration
 
-The JWT authentication can be configured with properties, these are defined in two configuration classes:
-[`JwtConfiguration`](src/main/java/shiver/me/timbers/spring/security/JwtConfiguration.java) and
-[`SmtSpringSecurityJwtConfiguration`](src/main/java/shiver/me/timbers/spring/security/SmtSpringSecurityJwtConfiguration.java)
+The JWT authentication can be configured with properties, these are defined in the
+[`JwtConfiguration`](src/main/java/shiver/me/timbers/spring/security/JwtConfiguration.java) class.
 
 #### Compulsory Properties
 
