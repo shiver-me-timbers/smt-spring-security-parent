@@ -30,9 +30,9 @@ import java.security.Security;
  * @author Karl Bennett
  */
 @Configuration
-@ConditionalOnMissingBean(SmtSpringSecurityJwtConfiguration.class)
-@Import(JwtConfiguration.class)
-public class SmtSpringSecurityJwtConfiguration {
+@ConditionalOnMissingBean(JwtSpringSecurityConfiguration.class)
+@Import({JwtConfiguration.class, JwtModificationConfiguration.class, JwtWeavingConfiguration.class})
+public class JwtSpringSecurityConfiguration {
 
     @Autowired
     private Weaver weaver;

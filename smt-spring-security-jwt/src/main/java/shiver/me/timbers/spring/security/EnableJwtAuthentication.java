@@ -29,6 +29,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Target(TYPE)
 @Retention(RUNTIME)
-@Import(SmtSpringSecurityJwtConfiguration.class)
+@Import(JwtSpringSecurityConfiguration.class)
 public @interface EnableJwtAuthentication {
 }
