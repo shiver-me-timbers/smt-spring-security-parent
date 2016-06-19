@@ -21,6 +21,9 @@ This library will automatically enable stateless JWT authentication for any Spri
 with an annotation and weaves itself into your existing Spring Security setup so will not override any of your current
 configuration e.g. AuthenticationSuccessHandlers, LogoutSuccessHandlers.
 
+**Note:** *The JWT configuration will be weaved into to EVERY Spring Security configuration within the Spring
+application.*
+
 ## Usage
 
 ```java
