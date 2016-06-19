@@ -78,17 +78,17 @@ Different secret values must be used depending on the `smt.spring.security.jwt.a
 (see Optional Properties below) that is chosen.
 
 HMAC algorithms (`HS256`, `HS384`, `HS512`): The value can be
-[any string you like](src/test/resources/application-test.properties).
+[any string you like](src/test/resources/application-value.properties).
 
 RSA algorithms (`RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `PS512`): The value must be a valid
-[Base64 RSA private key](src/test/resources/application-test.properties) in the standard file format that includes the
+[Base64 RSA private key](src/test/resources/application-value.properties) in the standard file format that includes the
 `BEGIN` and `END` strings and line breaks. The easiest way to produce one of these keys is with the following command.
 ```bash
 ssh-keygen -t rsa
 ```
 
 ECDSA algorithms (`ES256`, `ES384`, `ES512`): The value must be a valid
-[Base64 ECDSA private key](src/test/resources/application-test.properties) with the same requirements as the RSA key.
+[Base64 ECDSA private key](src/test/resources/application-value.properties) with the same requirements as the RSA key.
 The command for generating one of these keys is also similar.
 ```bash
 ssh-keygen -t ecdsa
