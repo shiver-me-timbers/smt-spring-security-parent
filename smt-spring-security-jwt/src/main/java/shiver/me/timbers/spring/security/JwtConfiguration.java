@@ -26,8 +26,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.FilterChainProxy;
 import shiver.me.timbers.spring.security.cookies.Bakery;
 import shiver.me.timbers.spring.security.cookies.CookieBakery;
+import shiver.me.timbers.spring.security.fields.FieldFinder;
+import shiver.me.timbers.spring.security.fields.FieldGetSetter;
+import shiver.me.timbers.spring.security.fields.FieldMutator;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldFinder;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldGetSetter;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldMutator;
 import shiver.me.timbers.spring.security.io.FileReader;
 import shiver.me.timbers.spring.security.io.ResourceFileReader;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
@@ -46,6 +53,7 @@ import shiver.me.timbers.spring.security.secret.SecretKeeper;
 import shiver.me.timbers.spring.security.time.Clock;
 import shiver.me.timbers.spring.security.time.DateClock;
 
+import javax.servlet.Filter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -88,6 +96,49 @@ public class JwtConfiguration {
 
     @Value("${smt.spring.security.jwt.secretFile:}")
     private String secretFile;
+
+    @Bean
+    @ConditionalOnMissingBean(LogoutHandlerAdder.class)
+    @Autowired
+    public LogoutHandlerAdder logoutHandlerAdder(FieldMutator mutator, JwtLogoutHandler logoutHandler) {
+        return new JwtLogoutHandlerAdder(mutator, logoutHandler);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SuccessHandlerWrapper.class)
+    @Autowired
+    public SuccessHandlerWrapper successHandlerWrapper(
+        FieldMutator mutator,
+        JwtAuthenticationSuccessHandler successHandler
+    ) {
+        return new JwtSuccessHandlerWrapper(mutator, successHandler);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ChainConfigurer.class)
+    @Autowired
+    public ChainConfigurer<Filter> securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
+        return new SecurityFilterChainConfigurer(filterChainProxy);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FieldMutator.class)
+    @Autowired
+    public FieldMutator fieldExtractor(FieldFinder fieldFinder, FieldGetSetter fieldGetSetter) {
+        return new ReflectionFieldMutator(fieldFinder, fieldGetSetter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FieldFinder.class)
+    public FieldFinder fieldFinder() {
+        return new ReflectionFieldFinder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FieldGetSetter.class)
+    public FieldGetSetter fieldGetSetter() {
+        return new ReflectionFieldGetSetter();
+    }
 
     @Bean
     @ConditionalOnMissingBean(JwtLogoutHandler.class)
