@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.FilterChainProxy;
 import shiver.me.timbers.spring.security.cookies.Bakery;
 import shiver.me.timbers.spring.security.cookies.CookieBakery;
 import shiver.me.timbers.spring.security.fields.FieldFinder;
@@ -115,10 +114,9 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(ChainConfigurer.class)
-    @Autowired
-    public ChainConfigurer<Filter> securityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
-        return new SecurityFilterChainConfigurer(filterChainProxy);
+    @ConditionalOnMissingBean(ChainModifier.class)
+    public ChainModifier<Filter> securityFilterChainConfigurer() {
+        return new SecurityFilterChainModifier();
     }
 
     @Bean

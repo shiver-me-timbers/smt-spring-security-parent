@@ -16,7 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.servlet.Filter;
@@ -25,34 +24,24 @@ import java.util.List;
 /**
  * @author Karl Bennett
  */
-public class SecurityFilterChainConfigurer implements ChainConfigurer<Filter> {
-
-    private final FilterChainProxy filterChainProxy;
-
-    public SecurityFilterChainConfigurer(FilterChainProxy filterChainProxy) {
-        this.filterChainProxy = filterChainProxy;
-    }
+public class SecurityFilterChainModifier implements ChainModifier<Filter> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <F extends Filter> void modifyFilters(Class<F> filterType, Modifier<F> modifier) {
-        for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
-            for (Filter filter : filterChain.getFilters()) {
-                if (filterType.isAssignableFrom(filter.getClass())) {
-                    modifier.modify((F) filter);
-                }
+    public <F extends Filter> void modifyLink(SecurityFilterChain filterChain, Class<F> filterType, Modifier<F> modifier) {
+        for (Filter filter : filterChain.getFilters()) {
+            if (filterType.isAssignableFrom(filter.getClass())) {
+                modifier.modify((F) filter);
             }
         }
     }
 
     @Override
-    public void addBefore(Filter filter, Class<? extends Filter> filterClass) {
-        for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
-            final List<Filter> filters = filterChain.getFilters();
-            final int index = findFirstIndexOf(filterClass, filters);
-            if (index >= 0) {
-                filters.add(index, filter);
-            }
+    public void addBefore(SecurityFilterChain filterChain, Filter filter, Class<? extends Filter> filterClass) {
+        final List<Filter> filters = filterChain.getFilters();
+        final int index = findFirstIndexOf(filterClass, filters);
+        if (index >= 0) {
+            filters.add(index, filter);
         }
     }
 

@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
@@ -37,13 +39,16 @@ import java.security.Security;
 public class SmtSpringSecurityJwtConfiguration {
 
     @Autowired
+    private FilterChainProxy filterChainProxy;
+
+    @Autowired
     private LogoutHandlerAdder logoutHandlerAdder;
 
     @Autowired
     private SuccessHandlerWrapper successHandlerWrapper;
 
     @Autowired
-    private ChainConfigurer<Filter> configurer;
+    private ChainModifier<Filter> modifier;
 
     @Autowired
     private JwtAuthenticationFilter authenticationFilter;
@@ -51,8 +56,10 @@ public class SmtSpringSecurityJwtConfiguration {
     @PostConstruct
     public void configure() {
         Security.addProvider(new BouncyCastleProvider()); // Enable support for all the hashing algorithms.
-        configurer.modifyFilters(LogoutFilter.class, logoutHandlerAdder);
-        configurer.addBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        configurer.modifyFilters(UsernamePasswordAuthenticationFilter.class, successHandlerWrapper);
+        for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
+            modifier.modifyLink(filterChain, LogoutFilter.class, logoutHandlerAdder);
+            modifier.addBefore(filterChain, authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            modifier.modifyLink(filterChain, UsernamePasswordAuthenticationFilter.class, successHandlerWrapper);
+        }
     }
 }
