@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.context;
 
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.core.context.SecurityContext;
 
 /**
  * @author Karl Bennett
  */
-public interface SuccessHandlerWrapper extends Modifier<UsernamePasswordAuthenticationFilter> {
+public class StaticSecurityContextHolder implements SecurityContextHolder {
+
+    @Override
+    public SecurityContext getContext() {
+        return org.springframework.security.core.context.SecurityContextHolder.getContext();
+    }
 }

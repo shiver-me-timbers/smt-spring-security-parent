@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.context;
 
-/**
- * @author Karl Bennett
- */
-public interface Modifier<T> {
+import org.junit.Test;
+import org.springframework.security.core.context.SecurityContext;
 
-    void modify(T object);
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+
+public class StaticSecurityContextHolderTest {
+
+    @Test
+    public void Can_get_a_security_context() {
+
+        // When
+        final SecurityContext actual = new StaticSecurityContextHolder().getContext();
+
+        // Then
+        assertThat(actual, not(nullValue()));
+    }
 }

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.filter.GenericFilterBean;
+import shiver.me.timbers.spring.security.context.SecurityContextHolder;
 import shiver.me.timbers.spring.security.jwt.JwtInvalidTokenException;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
 

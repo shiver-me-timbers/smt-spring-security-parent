@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.modification;
 
-import org.junit.Test;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-
-public class StaticSecurityContextHolderTest {
-
-    @Test
-    public void Can_get_a_security_context() {
-
-        // When
-        final SecurityContext actual = new StaticSecurityContextHolder().getContext();
-
-        // Then
-        assertThat(actual, not(nullValue()));
-    }
+/**
+ * @author Karl Bennett
+ */
+public interface SuccessHandlerWrapper extends Modifier<UsernamePasswordAuthenticationFilter> {
 }

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.modification;
 
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import shiver.me.timbers.spring.security.JwtAuthenticationSuccessHandler;
 import shiver.me.timbers.spring.security.fields.FieldMutator;
 
 /**

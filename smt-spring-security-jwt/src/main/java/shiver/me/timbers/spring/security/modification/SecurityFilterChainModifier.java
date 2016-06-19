@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.modification;
 
 import org.springframework.security.web.SecurityFilterChain;
 

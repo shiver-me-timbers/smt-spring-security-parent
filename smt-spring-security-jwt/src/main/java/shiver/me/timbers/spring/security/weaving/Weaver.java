@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.weaving;
 
 /**
  * @author Karl Bennett

@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.weaving;
 
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import shiver.me.timbers.spring.security.JwtAuthenticationFilter;
+import shiver.me.timbers.spring.security.modification.ChainModifier;
+import shiver.me.timbers.spring.security.modification.LogoutHandlerAdder;
+import shiver.me.timbers.spring.security.modification.SuccessHandlerWrapper;
 
 import javax.servlet.Filter;
 

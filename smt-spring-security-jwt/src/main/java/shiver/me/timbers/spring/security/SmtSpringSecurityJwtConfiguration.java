@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import shiver.me.timbers.spring.security.weaving.Weaver;
 
 import javax.annotation.PostConstruct;
 import java.security.Security;

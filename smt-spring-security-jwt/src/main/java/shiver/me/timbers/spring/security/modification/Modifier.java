@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.modification;
 
 /**
  * @author Karl Bennett
  */
-public interface ChainModifier<C, T> {
+public interface Modifier<T> {
 
-    <L extends T> void modifyLink(C chain, Class<L> type, Modifier<L> modifier);
-
-    void addBefore(C chain, T link, Class<? extends T> filterClass);
+    void modify(T object);
 }

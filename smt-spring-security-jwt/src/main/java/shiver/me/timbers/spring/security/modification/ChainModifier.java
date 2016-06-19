@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
-
-import org.springframework.security.core.context.SecurityContext;
+package shiver.me.timbers.spring.security.modification;
 
 /**
  * @author Karl Bennett
  */
-public class StaticSecurityContextHolder implements SecurityContextHolder {
+public interface ChainModifier<C, T> {
 
-    @Override
-    public SecurityContext getContext() {
-        return org.springframework.security.core.context.SecurityContextHolder.getContext();
-    }
+    <L extends T> void modifyLink(C chain, Class<L> type, Modifier<L> modifier);
+
+    void addBefore(C chain, T link, Class<? extends T> filterClass);
 }

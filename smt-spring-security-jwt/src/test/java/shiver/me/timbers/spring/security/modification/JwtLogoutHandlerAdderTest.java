@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.modification;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +22,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import shiver.me.timbers.spring.security.JwtLogoutHandler;
 import shiver.me.timbers.spring.security.fields.FieldMutator;
 import shiver.me.timbers.spring.security.fields.Updater;
 
