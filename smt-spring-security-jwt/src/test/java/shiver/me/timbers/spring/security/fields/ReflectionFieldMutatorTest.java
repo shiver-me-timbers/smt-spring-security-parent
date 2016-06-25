@@ -29,12 +29,19 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static shiver.me.timbers.data.random.RandomDoubles.someDouble;
 import static shiver.me.timbers.data.random.RandomIntegers.someInteger;
+import static shiver.me.timbers.data.random.RandomShorts.someShort;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 import static shiver.me.timbers.data.random.RandomThings.someThing;
 
 public class ReflectionFieldMutatorTest {
+
+    private static final Field ONE = getField("one");
+    private static final Field TWO = getField("two");
+    private static final Field THREE = getField("three");
+    private static final Field FOUR = getField("four");
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -198,13 +205,66 @@ public class ReflectionFieldMutatorTest {
         verify(fieldGetSetter).set(object, field, update);
     }
 
+    @Test
+    public void Can_copy_fields() throws IllegalAccessException {
+
+        final FieldTest from = new FieldTest();
+        final FieldTest to = new FieldTest();
+
+        final Object value1 = new Object();
+        final Object value2 = new Object();
+        final Object value3 = new Object();
+        final Object value4 = new Object();
+
+        // Given
+        given(fieldGetSetter.get(from, ONE)).willReturn(value1);
+        given(fieldGetSetter.get(from, TWO)).willReturn(value2);
+        given(fieldGetSetter.get(from, THREE)).willReturn(value3);
+        given(fieldGetSetter.get(from, FOUR)).willReturn(value4);
+
+        // When
+        mutator.copy(from, to);
+
+        // Then
+        verify(fieldGetSetter).get(from, ONE);
+        verify(fieldGetSetter).get(from, TWO);
+        verify(fieldGetSetter).get(from, THREE);
+        verify(fieldGetSetter).get(from, FOUR);
+        verify(fieldGetSetter).set(to, ONE, value1);
+        verify(fieldGetSetter).set(to, TWO, value2);
+        verify(fieldGetSetter).set(to, THREE, value3);
+        verify(fieldGetSetter).set(to, FOUR, value4);
+        verifyNoMoreInteractions(fieldGetSetter);
+    }
+
+    @Test
+    public void Can_fail_to_copy_fields() throws IllegalAccessException {
+
+        final FieldTest from = new FieldTest();
+        final FieldTest to = new FieldTest();
+
+        final IllegalAccessException exception = new IllegalAccessException();
+
+        // Given
+        given(fieldGetSetter.get(from, ONE)).willThrow(exception);
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectCause(is(exception));
+
+        // When
+        mutator.copy(from, to);
+    }
+
     private static Object someObject() {
         return someThing(someInteger(), someDouble(), someString());
     }
 
     private static Field someField() {
+        return getField(someThing("one", "two", "three", "four"));
+    }
+
+    private static Field getField(String name) {
         try {
-            return FieldTest.class.getDeclaredField(someThing("one", "two", "three", "four"));
+            return FieldTest.class.getDeclaredField(name);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
@@ -215,6 +275,8 @@ public class ReflectionFieldMutatorTest {
     }
 
     private static class FieldTest {
+        private static final short ZERO = someShort();
+
         private final int one = someInteger();
         private final String two = someString();
         private final double three = someDouble();

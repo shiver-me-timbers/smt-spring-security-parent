@@ -18,9 +18,7 @@ package shiver.me.timbers.spring.security;
 
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import shiver.me.timbers.spring.security.fields.FieldMutator;
 
 /**
  * @author Karl Bennett
@@ -30,41 +28,13 @@ public class WrappedUsernamePasswordAuthenticationFilter extends UsernamePasswor
     private final JwtAuthenticationSuccessHandler jwtSuccessHandler;
 
     public WrappedUsernamePasswordAuthenticationFilter(
+        FieldMutator reflectionFieldMutator,
         UsernamePasswordAuthenticationFilter filter,
         JwtAuthenticationSuccessHandler jwtSuccessHandler
     ) {
-        copyFields(filter, this);
+        reflectionFieldMutator.copy(filter, this);
         super.setAuthenticationSuccessHandler(jwtSuccessHandler.withDelegate(super.getSuccessHandler()));
         this.jwtSuccessHandler = jwtSuccessHandler;
-    }
-
-    private static void copyFields(Object from, Object to) {
-        copyFields(from.getClass(), from, to);
-    }
-
-    private static void copyFields(Class type, Object from, Object to) {
-        if (Object.class.equals(type)) {
-            return;
-        }
-
-        for (Field field : type.getDeclaredFields()) {
-            copyField(field, from, to);
-        }
-
-        copyFields(type.getSuperclass(), from, to);
-    }
-
-    private static void copyField(Field field, Object from, Object to) {
-        if (Modifier.isStatic(field.getModifiers())) {
-            return;
-        }
-
-        field.setAccessible(true);
-        try {
-            field.set(to, field.get(from));
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 
     @Override

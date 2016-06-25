@@ -16,6 +16,9 @@
 
 package shiver.me.timbers.spring.security.fields;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 /**
  * @author Karl Bennett
  */
@@ -57,4 +60,34 @@ public class ReflectionFieldMutator implements FieldMutator {
         final T value = retrieve(object, name, type);
         replace(object, name, type, updater.update(value));
     }
+
+    @Override
+    public void copy(Object from, Object to) {
+        try {
+            copyFields(from.getClass(), from, to);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private void copyFields(Class type, Object from, Object to) throws IllegalAccessException {
+        if (Object.class.equals(type)) {
+            return;
+        }
+
+        for (Field field : type.getDeclaredFields()) {
+            copyField(field, from, to);
+        }
+
+        copyFields(type.getSuperclass(), from, to);
+    }
+
+    private void copyField(Field field, Object from, Object to) throws IllegalAccessException {
+        if (Modifier.isStatic(field.getModifiers())) {
+            return;
+        }
+
+        fieldGetSetter.set(to, field, fieldGetSetter.get(from, field));
+    }
+
 }

@@ -20,6 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldFinder;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldGetSetter;
+import shiver.me.timbers.spring.security.fields.ReflectionFieldMutator;
 
 import java.lang.reflect.Field;
 
@@ -32,15 +35,20 @@ import static shiver.me.timbers.matchers.Matchers.hasField;
 
 public class WrappedUsernamePasswordAuthenticationFilterTest {
 
+    private ReflectionFieldMutator reflectionFieldMutator;
     private UsernamePasswordAuthenticationFilter filter;
     private JwtAuthenticationSuccessHandler jwtSuccessHandler;
 
     @Before
     public void setUp() {
+        reflectionFieldMutator = new ReflectionFieldMutator(new ReflectionFieldFinder(), new ReflectionFieldGetSetter());
         filter = new UsernamePasswordAuthenticationFilter();
         jwtSuccessHandler = mock(JwtAuthenticationSuccessHandler.class);
     }
 
+    /**
+     * This test isn't technically needed, but I really want to make sure everything is copied.
+     */
     @Test
     public void Can_wrap_a_username_password_authentication_filter() throws IllegalAccessException {
 
@@ -70,7 +78,7 @@ public class WrappedUsernamePasswordAuthenticationFilterTest {
 
         // When
         final WrappedUsernamePasswordAuthenticationFilter wrappedFilter
-            = new WrappedUsernamePasswordAuthenticationFilter(filter, jwtSuccessHandler);
+            = new WrappedUsernamePasswordAuthenticationFilter(reflectionFieldMutator, filter, jwtSuccessHandler);
 
         // Then
         assertThat(wrappedFilter, hasField("usernameParameter", usernameParameter));
@@ -108,7 +116,7 @@ public class WrappedUsernamePasswordAuthenticationFilterTest {
 
         // When
         final WrappedUsernamePasswordAuthenticationFilter wrappedFilter
-            = new WrappedUsernamePasswordAuthenticationFilter(filter, jwtSuccessHandler);
+            = new WrappedUsernamePasswordAuthenticationFilter(reflectionFieldMutator, filter, jwtSuccessHandler);
         wrappedFilter.setAuthenticationSuccessHandler(newSuccessHandler);
 
         // Then
