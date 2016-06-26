@@ -179,8 +179,8 @@ smt.spring.security.jwt.cookie.httpOnly=true
 #### Advanced Configuration
 
 Every class that is used to compose this library can be overridden by adding your own implementation to the Spring
-context. So for example, if you wished to use your own custom principal class you could supply your own `MapConverter`,
-`JwtTokenParser`, and `AuthenticationConverter` beans.
+context. So for example, if you wished to use your own custom principal class you could supply your own `JwtTokenParser`
+and `AuthenticationConverter` beans.
 
 ```java
 @Configuration
@@ -224,7 +224,7 @@ public class JwtCustomPrincipalSecurityConfigurationAnnotation extends WebSecuri
         JwtParser parser,
         KeyPair keyPair,
         Clock clock,
-        MapConverter<CustomPrincipal> mapConverter
+        ObjectMapper objectMapper
     ) {
         return new JJwtTokenParser<>(
             CustomPrincipal.class,
@@ -235,13 +235,8 @@ public class JwtCustomPrincipalSecurityConfigurationAnnotation extends WebSecuri
             expiryDuration,
             expiryUnit,
             clock,
-            mapConverter
+            objectMapper
         );
-    }
-
-    @Bean
-    public MapConverter<CustomPrincipal> mapConverter() {
-        return new CustomPrincipalMapConverter();
     }
 }
 ```

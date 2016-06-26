@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,7 +27,6 @@ import org.springframework.context.annotation.Configuration;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.JJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
-import shiver.me.timbers.spring.security.jwt.MapConverter;
 import shiver.me.timbers.spring.security.time.Clock;
 
 import java.security.KeyPair;
@@ -58,7 +58,7 @@ public class JwtCustomPrincipleConfiguration {
         JwtParser parser,
         KeyPair keyPair,
         Clock clock,
-        MapConverter<CustomPrincipal> mapConverter
+        ObjectMapper objectMapper
     ) {
         return new JJwtTokenParser<>(
             CustomPrincipal.class,
@@ -69,12 +69,7 @@ public class JwtCustomPrincipleConfiguration {
             expiryDuration,
             expiryUnit,
             clock,
-            mapConverter
+            objectMapper
         );
-    }
-
-    @Bean
-    public MapConverter<CustomPrincipal> mapConverter() {
-        return new CustomPrincipalMapConverter();
     }
 }

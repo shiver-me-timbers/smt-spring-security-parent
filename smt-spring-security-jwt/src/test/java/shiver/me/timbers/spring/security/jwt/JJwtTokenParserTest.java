@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtBuilder;
@@ -61,7 +62,7 @@ public class JJwtTokenParserTest {
     private Integer expiryDuration;
     private TimeUnit expiryUnit;
     private Clock clock;
-    private MapConverter<Object> mapConverter;
+    private ObjectMapper objectMapper;
     private JwtTokenParser<Object, String> tokenParser;
 
     @Before
@@ -76,7 +77,7 @@ public class JJwtTokenParserTest {
         expiryDuration = somePositiveInteger();
         expiryUnit = someEnum(TimeUnit.class);
         clock = mock(Clock.class);
-        mapConverter = mock(MapConverter.class);
+        objectMapper = mock(ObjectMapper.class);
         tokenParser = new JJwtTokenParser<>(
             Object.class,
             builder,
@@ -86,7 +87,7 @@ public class JJwtTokenParserTest {
             expiryDuration,
             expiryUnit,
             clock,
-            mapConverter
+            objectMapper
         );
     }
 
@@ -133,8 +134,8 @@ public class JJwtTokenParserTest {
 
         // When
         final String actual = new JJwtTokenParser<>(
-            Object.class, builder, parser, algorithm, keyPair, -1, expiryUnit, clock,
-            mapConverter).create(principal);
+            Object.class, builder, parser, algorithm, keyPair, -1, expiryUnit, clock, objectMapper
+        ).create(principal);
 
         // Then
         verifyZeroInteractions(clock);
@@ -159,7 +160,7 @@ public class JJwtTokenParserTest {
         given(secretParser.parseClaimsJws(token)).willReturn(jws);
         given(jws.getBody()).willReturn(claims);
         given(claims.get(PRINCIPAL, Map.class)).willReturn(map);
-        given(mapConverter.convert(map)).willReturn(expected);
+        given(objectMapper.convertValue(map, Object.class)).willReturn(expected);
 
         // When
         final Object actual = tokenParser.parse(token);

@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -38,9 +39,7 @@ import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.jwt.JJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipal;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipalAuthenticationConverter;
-import shiver.me.timbers.spring.security.jwt.JwtPrincipalMapConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
-import shiver.me.timbers.spring.security.jwt.MapConverter;
 import shiver.me.timbers.spring.security.jwt.RolesGrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.keys.Base64KeyPairs;
 import shiver.me.timbers.spring.security.keys.BouncyCastlePemKeyPairs;
@@ -166,7 +165,7 @@ public class JwtConfiguration {
         JwtParser parser,
         KeyPair keyPair,
         Clock clock,
-        MapConverter<JwtPrincipal> mapConverter
+        ObjectMapper objectMapper
     ) {
         return new JJwtTokenParser<>(
             JwtPrincipal.class,
@@ -177,7 +176,7 @@ public class JwtConfiguration {
             expiryDuration,
             expiryUnit,
             clock,
-            mapConverter
+            objectMapper
         );
     }
 
@@ -213,9 +212,9 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(MapConverter.class)
-    public MapConverter<JwtPrincipal> mapConverter() {
-        return new JwtPrincipalMapConverter();
+    @ConditionalOnMissingBean(ObjectMapper.class)
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
     @Bean

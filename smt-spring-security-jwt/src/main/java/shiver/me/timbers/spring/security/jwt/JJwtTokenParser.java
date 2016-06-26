@@ -16,6 +16,7 @@
 
 package shiver.me.timbers.spring.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
@@ -41,7 +42,7 @@ public class JJwtTokenParser<T> implements JwtTokenParser<T, String> {
     private final int expiryDuration;
     private final TimeUnit expiryUnit;
     private final Clock clock;
-    private final MapConverter<T> mapConverter;
+    private final ObjectMapper objectMapper;
 
     public JJwtTokenParser(
         Class<T> type,
@@ -52,7 +53,7 @@ public class JJwtTokenParser<T> implements JwtTokenParser<T, String> {
         int expiryDuration,
         TimeUnit expiryUnit,
         Clock clock,
-        MapConverter<T> mapConverter
+        ObjectMapper objectMapper
     ) {
         this.type = type;
         this.builder = builder;
@@ -62,7 +63,7 @@ public class JJwtTokenParser<T> implements JwtTokenParser<T, String> {
         this.expiryDuration = expiryDuration;
         this.expiryUnit = expiryUnit;
         this.clock = clock;
-        this.mapConverter = mapConverter;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -78,8 +79,9 @@ public class JJwtTokenParser<T> implements JwtTokenParser<T, String> {
     @Override
     public T parse(String token) throws JwtInvalidTokenException {
         try {
-            return mapConverter.convert(
-                parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPAL, Map.class)
+            return objectMapper.convertValue(
+                parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPAL, Map.class),
+                type
             );
         } catch (IllegalArgumentException e) {
             throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
