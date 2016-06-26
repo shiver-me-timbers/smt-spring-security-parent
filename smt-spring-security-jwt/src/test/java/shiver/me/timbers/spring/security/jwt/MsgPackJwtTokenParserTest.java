@@ -56,7 +56,7 @@ public class MsgPackJwtTokenParserTest {
 
     private JwtParser parser;
     private JwtBuilder builder;
-    private SignatureAlgorithm tokenHashing;
+    private SignatureAlgorithm algorithm;
     private PublicKey publicKey;
     private PrivateKey privateKey;
     private KeyPair keyPair;
@@ -72,7 +72,7 @@ public class MsgPackJwtTokenParserTest {
     public void setUp() {
         parser = mock(JwtParser.class);
         builder = mock(JwtBuilder.class);
-        tokenHashing = someEnum(SignatureAlgorithm.class);
+        algorithm = someEnum(SignatureAlgorithm.class);
         publicKey = mock(PublicKey.class);
         privateKey = mock(PrivateKey.class);
         keyPair = new KeyPair(publicKey, privateKey);
@@ -85,7 +85,7 @@ public class MsgPackJwtTokenParserTest {
             Object.class,
             builder,
             parser,
-            tokenHashing,
+            algorithm,
             keyPair,
             expiryDuration,
             expiryUnit,
@@ -113,7 +113,7 @@ public class MsgPackJwtTokenParserTest {
         given(messagePack.write(principle)).willReturn(bytes);
         given(base64.encode(bytes)).willReturn(packedPrinciple);
         given(builder.claim(PRINCIPLE, packedPrinciple)).willReturn(principleBuilder);
-        given(principleBuilder.signWith(tokenHashing, privateKey)).willReturn(secretBuilder);
+        given(principleBuilder.signWith(algorithm, privateKey)).willReturn(secretBuilder);
         given(clock.nowPlus(expiryDuration, expiryUnit)).willReturn(date);
         given(secretBuilder.setExpiration(date)).willReturn(expiringBuilder);
         given(expiringBuilder.compact()).willReturn(expected);
@@ -141,12 +141,12 @@ public class MsgPackJwtTokenParserTest {
         given(messagePack.write(principle)).willReturn(bytes);
         given(base64.encode(bytes)).willReturn(packedPrinciple);
         given(builder.claim(PRINCIPLE, packedPrinciple)).willReturn(principleBuilder);
-        given(principleBuilder.signWith(tokenHashing, privateKey)).willReturn(secretBuilder);
+        given(principleBuilder.signWith(algorithm, privateKey)).willReturn(secretBuilder);
         given(secretBuilder.compact()).willReturn(expected);
 
         // When
         final String actual = new MsgPackJwtTokenParser<>(
-            Object.class, builder, parser, tokenHashing, keyPair, -1, expiryUnit, clock,
+            Object.class, builder, parser, algorithm, keyPair, -1, expiryUnit, clock,
             messagePack, base64).create(principle);
 
         // Then

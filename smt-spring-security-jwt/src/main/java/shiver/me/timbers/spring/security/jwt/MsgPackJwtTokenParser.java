@@ -38,7 +38,7 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
     private final Class<T> type;
     private final JwtBuilder builder;
     private final JwtParser parser;
-    private final SignatureAlgorithm tokenHashing;
+    private final SignatureAlgorithm algorithm;
     private final KeyPair keyPair;
     private final int expiryDuration;
     private final TimeUnit expiryUnit;
@@ -50,7 +50,7 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
         Class<T> type,
         JwtBuilder builder,
         JwtParser parser,
-        SignatureAlgorithm tokenHashing,
+        SignatureAlgorithm algorithm,
         KeyPair keyPair,
         int expiryDuration,
         TimeUnit expiryUnit,
@@ -61,7 +61,7 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
         this.type = type;
         this.builder = builder;
         this.parser = parser;
-        this.tokenHashing = tokenHashing;
+        this.algorithm = algorithm;
         this.keyPair = keyPair;
         this.expiryDuration = expiryDuration;
         this.expiryUnit = expiryUnit;
@@ -74,7 +74,7 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
     public String create(T principle) throws JwtInvalidTokenException {
         try {
             final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, base64.encode(messagePack.write(principle)))
-                .signWith(tokenHashing, keyPair.getPrivate());
+                .signWith(algorithm, keyPair.getPrivate());
             if (expiryDuration >= 0) {
                 return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
             }

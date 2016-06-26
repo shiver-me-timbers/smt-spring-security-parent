@@ -177,42 +177,73 @@ smt.spring.security.jwt.cookie.httpOnly=true
 #### Advanced Configuration
 
 Every class that is used to compose this library can be overridden by adding your own implementation to the Spring
-context.
+context. So for example, if you wished to use your own custom principle class you could supply your own `MessagePack`,
+`JwtTokenParser`, and `AuthenticationConverter` beans.
 
 ```java
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.Authentication;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-
 @Configuration
-public class CustomJwtConfiguration {
+@EnableAutoConfiguration
+@EnableWebSecurity
+@EnableJwtAuthentication
+public class JwtCustomPrincipalSecurityConfigurationAnnotation extends WebSecurityConfigurerAdapter {
+
+    @Value("${smt.spring.security.jwt.algorithm:HS512}")
+    private SignatureAlgorithm algorithm;
+
+    @Value("${smt.spring.security.jwt.token.expiryDuration:-1}")
+    private int expiryDuration;
+
+    @Value("${smt.spring.security.jwt.token.expiryUnit:MINUTES}")
+    private TimeUnit expiryUnit;
+
+    @Override
+    protected final void configure(HttpSecurity http) throws Exception {
+        http.antMatcher("/custom/**");
+        http.csrf().disable();
+        http.authorizeRequests().anyRequest().authenticated();
+        http.formLogin().loginPage("/custom/signIn").defaultSuccessUrl("/").permitAll();
+        http.logout().logoutUrl("/custom/signOut").logoutSuccessUrl("/");
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
+    }
+
+    @Bean
+    public AuthenticationConverter<CustomPrincipal> authenticationConverter() {
+        return new CustomPrincipleAuthenticationConverter();
+    }
 
     @Bean
     @Autowired
-    public JwtAuthenticationFilter jwtAuthenticationFilter(
-        JwtTokenParser<Authentication, HttpServletRequest> tokenParser,
-        SecurityContextHolder securityContextHolder
+    public JwtTokenParser<CustomPrincipal, String> jwtTokenParser(
+        JwtBuilder builder,
+        JwtParser parser,
+        KeyPair keyPair,
+        Clock clock,
+        MessagePack messagePack,
+        Base64 base64
     ) {
-        return new CookieAndHeaderJwtAuthenticationFilter(tokenParser, securityContextHolder) {
+        return new MsgPackJwtTokenParser<>(
+            CustomPrinciple.class,
+            builder,
+            parser,
+            algorithm,
+            keyPair,
+            expiryDuration,
+            expiryUnit,
+            clock,
+            messagePack,
+            base64
+        );
+    }
 
-            final Logger log = LoggerFactory.getLogger(CookieAndHeaderJwtAuthenticationFilter.class);
-
-            @Override
-            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-                log.info("JWT authentication attempt for: " + ((HttpServletRequest) request).getPathInfo());
-                super.doFilter(request, response, chain);
-            }
-        };
+    @Bean
+    public MessagePack messagePack() {
+        final MessagePack messagePack = new MessagePack();
+        messagePack.register(CustomPrinciple.class);
+        return messagePack;
     }
 }
 ```

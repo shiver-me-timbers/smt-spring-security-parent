@@ -33,11 +33,11 @@ import shiver.me.timbers.spring.security.cookies.Bakery;
 import shiver.me.timbers.spring.security.cookies.CookieBakery;
 import shiver.me.timbers.spring.security.io.FileReader;
 import shiver.me.timbers.spring.security.io.ResourceFileReader;
-import shiver.me.timbers.spring.security.jwt.AuthenticationAuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.jwt.JwtPrinciple;
+import shiver.me.timbers.spring.security.jwt.JwtPrincipleAuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.MsgPackJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.RolesGrantedAuthorityConverter;
@@ -151,16 +151,16 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(AuthenticationConverter.class)
     @Autowired
-    public AuthenticationConverter<JwtPrinciple> jwtPrincipleConverter(
+    public AuthenticationConverter<JwtPrinciple> authenticationConverter(
         GrantedAuthorityConverter<List<String>> grantedAuthorityConverter
     ) {
-        return new AuthenticationAuthenticationConverter(grantedAuthorityConverter);
+        return new JwtPrincipleAuthenticationConverter(grantedAuthorityConverter);
     }
 
     @Bean
     @ConditionalOnMissingBean(MsgPackJwtTokenParser.class)
     @Autowired
-    public JwtTokenParser<JwtPrinciple, String> principleJwtTokenParser(
+    public JwtTokenParser<JwtPrinciple, String> jwtTokenParser(
         JwtBuilder builder,
         JwtParser parser,
         KeyPair keyPair,
