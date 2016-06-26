@@ -26,8 +26,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.msgpack.MessagePack;
+import shiver.me.timbers.spring.security.Base64;
 import shiver.me.timbers.spring.security.time.Clock;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -39,59 +42,66 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static shiver.me.timbers.data.random.RandomBytes.someBytes;
 import static shiver.me.timbers.data.random.RandomEnums.someEnum;
 import static shiver.me.timbers.data.random.RandomIntegers.somePositiveInteger;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class PrincipleJwtTokenParserTest {
+public class MsgPackJwtTokenParserTest {
 
     private static final String PRINCIPLE = "principle";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private String secret;
     private JwtParser parser;
     private JwtBuilder builder;
     private SignatureAlgorithm tokenHashing;
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
     private KeyPair keyPair;
     private Integer expiryDuration;
     private TimeUnit expiryUnit;
     private Clock clock;
-    private JwtTokenParser<String, String> tokenParser;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
+    private MessagePack messagePack;
+    private Base64 base64;
+    private JwtTokenParser<Object, String> tokenParser;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
-        secret = someString();
         parser = mock(JwtParser.class);
         builder = mock(JwtBuilder.class);
         tokenHashing = someEnum(SignatureAlgorithm.class);
-        expiryDuration = somePositiveInteger();
-        expiryUnit = someEnum(TimeUnit.class);
-        clock = mock(Clock.class);
         publicKey = mock(PublicKey.class);
         privateKey = mock(PrivateKey.class);
         keyPair = new KeyPair(publicKey, privateKey);
-        tokenParser = new PrincipleJwtTokenParser(
-            secret,
+        expiryDuration = somePositiveInteger();
+        expiryUnit = someEnum(TimeUnit.class);
+        clock = mock(Clock.class);
+        messagePack = mock(MessagePack.class);
+        base64 = mock(Base64.class);
+        tokenParser = new MsgPackJwtTokenParser<>(
+            Object.class,
             builder,
             parser,
             tokenHashing,
             keyPair,
             expiryDuration,
             expiryUnit,
-            clock
+            clock,
+            messagePack,
+            base64
         );
     }
 
     @Test
-    public void Can_create_a_jwt_token_from_a_principle() throws JwtInvalidTokenException {
+    public void Can_create_a_jwt_token_from_a_principle() throws IOException {
 
         final String principle = someString();
 
+        final byte[] bytes = new byte[0];
+        final String packedPrinciple = someString();
         final JwtBuilder principleBuilder = mock(JwtBuilder.class);
         final JwtBuilder secretBuilder = mock(JwtBuilder.class);
         final Date date = mock(Date.class);
@@ -100,7 +110,9 @@ public class PrincipleJwtTokenParserTest {
         final String expected = someString();
 
         // Given
-        given(builder.claim(PRINCIPLE, principle)).willReturn(principleBuilder);
+        given(messagePack.write(principle)).willReturn(bytes);
+        given(base64.encode(bytes)).willReturn(packedPrinciple);
+        given(builder.claim(PRINCIPLE, packedPrinciple)).willReturn(principleBuilder);
         given(principleBuilder.signWith(tokenHashing, privateKey)).willReturn(secretBuilder);
         given(clock.nowPlus(expiryDuration, expiryUnit)).willReturn(date);
         given(secretBuilder.setExpiration(date)).willReturn(expiringBuilder);
@@ -114,24 +126,28 @@ public class PrincipleJwtTokenParserTest {
     }
 
     @Test
-    public void Can_create_a_jwt_token_with_no_expiry() throws JwtInvalidTokenException {
+    public void Can_create_a_jwt_token_with_no_expiry() throws IOException {
 
         final String principle = someString();
 
+        final byte[] bytes = someBytes();
+        final String packedPrinciple = someString();
         final JwtBuilder principleBuilder = mock(JwtBuilder.class);
         final JwtBuilder secretBuilder = mock(JwtBuilder.class);
 
         final String expected = someString();
 
         // Given
-        given(builder.claim(PRINCIPLE, principle)).willReturn(principleBuilder);
+        given(messagePack.write(principle)).willReturn(bytes);
+        given(base64.encode(bytes)).willReturn(packedPrinciple);
+        given(builder.claim(PRINCIPLE, packedPrinciple)).willReturn(principleBuilder);
         given(principleBuilder.signWith(tokenHashing, privateKey)).willReturn(secretBuilder);
         given(secretBuilder.compact()).willReturn(expected);
 
         // When
-        final String actual = new PrincipleJwtTokenParser(
-            secret, builder, parser, tokenHashing, keyPair, -1, expiryUnit, clock
-        ).create(principle);
+        final String actual = new MsgPackJwtTokenParser<>(
+            Object.class, builder, parser, tokenHashing, keyPair, -1, expiryUnit, clock,
+            messagePack, base64).create(principle);
 
         // Then
         verifyZeroInteractions(clock);
@@ -139,7 +155,23 @@ public class PrincipleJwtTokenParserTest {
     }
 
     @Test
-    public void Can_parse_a_jwt_token() throws JwtInvalidTokenException {
+    public void Can_fail_to_pack_a_jwt_token() throws IOException {
+
+        final String principle = someString();
+
+        final IOException exception = new IOException();
+
+        // Given
+        given(messagePack.write(principle)).willThrow(exception);
+        expectedException.expect(JwtInvalidTokenException.class);
+        expectedException.expectCause(is(exception));
+
+        // When
+        tokenParser.create(principle);
+    }
+
+    @Test
+    public void Can_parse_a_jwt_token() throws IOException {
 
         final String token = someString();
 
@@ -147,17 +179,21 @@ public class PrincipleJwtTokenParserTest {
         @SuppressWarnings("unchecked")
         final Jws<Claims> jws = mock(Jws.class);
         final Claims claims = mock(Claims.class);
+        final String principle = someString();
+        final byte[] bytes = someBytes();
 
-        final String expected = someString();
+        final Object expected = new Object();
 
         // Given
         given(parser.setSigningKey(publicKey)).willReturn(secretParser);
         given(secretParser.parseClaimsJws(token)).willReturn(jws);
         given(jws.getBody()).willReturn(claims);
-        given(claims.get(PRINCIPLE)).willReturn(expected);
+        given(claims.get(PRINCIPLE)).willReturn(principle);
+        given(base64.decode(principle)).willReturn(bytes);
+        given(messagePack.<Object>read(bytes, Object.class)).willReturn(expected);
 
         // When
-        final String actual = tokenParser.parse(token);
+        final Object actual = tokenParser.parse(token);
 
         // Then
         assertThat(actual, is(expected));
@@ -197,5 +233,32 @@ public class PrincipleJwtTokenParserTest {
 
         // When
         tokenParser.parse("");
+    }
+
+    @Test
+    public void Can_fail_unpack_a_jwt_token() throws IOException {
+
+        final String token = someString();
+
+        final JwtParser secretParser = mock(JwtParser.class);
+        @SuppressWarnings("unchecked")
+        final Jws<Claims> jws = mock(Jws.class);
+        final Claims claims = mock(Claims.class);
+        final String principle = someString();
+        final byte[] bytes = someBytes();
+        final IOException exception = new IOException();
+
+        // Given
+        given(parser.setSigningKey(publicKey)).willReturn(secretParser);
+        given(secretParser.parseClaimsJws(token)).willReturn(jws);
+        given(jws.getBody()).willReturn(claims);
+        given(claims.get(PRINCIPLE)).willReturn(principle);
+        given(base64.decode(principle)).willReturn(bytes);
+        given(messagePack.<Object>read(bytes, Object.class)).willThrow(exception);
+        expectedException.expect(JwtInvalidTokenException.class);
+        expectedException.expectCause(is(exception));
+
+        // When
+        tokenParser.parse(token);
     }
 }

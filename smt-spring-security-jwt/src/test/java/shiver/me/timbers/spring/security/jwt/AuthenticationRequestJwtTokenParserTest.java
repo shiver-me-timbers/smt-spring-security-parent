@@ -30,7 +30,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
-import static shiver.me.timbers.matchers.Matchers.hasField;
 
 public class AuthenticationRequestJwtTokenParserTest {
 
@@ -38,15 +37,21 @@ public class AuthenticationRequestJwtTokenParserTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     private String tokenName;
+    private JwtPrincipleConverter<Authentication> jwtPrincipleConverter;
+    private JwtTokenParser<JwtPrinciple, String> principleTokenParser;
     private AuthenticationRequestJwtTokenParser tokenParser;
-    private JwtTokenParser<String, String> principleTokenParser;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
         tokenName = someString();
+        jwtPrincipleConverter = mock(JwtPrincipleConverter.class);
         principleTokenParser = mock(JwtTokenParser.class);
-        tokenParser = new AuthenticationRequestJwtTokenParser(tokenName, principleTokenParser);
+        tokenParser = new AuthenticationRequestJwtTokenParser(
+            tokenName,
+            jwtPrincipleConverter,
+            principleTokenParser
+        );
     }
 
     @Test
@@ -54,12 +59,12 @@ public class AuthenticationRequestJwtTokenParserTest {
 
         final Authentication authentication = mock(Authentication.class);
 
-        final String principle = someString();
+        final JwtPrinciple principle = mock(JwtPrinciple.class);
 
         final String expected = someString();
 
         // Given
-        given(authentication.getPrincipal()).willReturn(principle);
+        given(jwtPrincipleConverter.convert(authentication)).willReturn(principle);
         given(principleTokenParser.create(principle)).willReturn(expected);
 
         // When
@@ -70,47 +75,51 @@ public class AuthenticationRequestJwtTokenParserTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void Can_parse_a_jwt_token_from_a_cookie() throws JwtInvalidTokenException {
 
         final HttpServletRequest request = mock(HttpServletRequest.class);
 
         final Cookie cookie = mock(Cookie.class);
         final String token = someString();
-        final String principle = someString();
+        final JwtPrinciple principle = mock(JwtPrinciple.class);
+        final Authentication expected = mock(Authentication.class);
 
         // Given
         given(request.getCookies()).willReturn(new Cookie[]{mock(Cookie.class), cookie, mock(Cookie.class)});
         given(cookie.getName()).willReturn(tokenName);
         given(cookie.getValue()).willReturn(token);
         given(principleTokenParser.parse(token)).willReturn(principle);
+        given(jwtPrincipleConverter.convert(principle)).willReturn(expected);
 
         // When
         final Authentication actual = tokenParser.parse(request);
 
         // Then
-        assertThat(actual, hasField("principle", principle));
-        assertThat(actual, hasField("authenticated", true));
+        assertThat(actual, is(expected));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void Can_parse_a_jwt_token_from_a_header() throws JwtInvalidTokenException {
 
         final HttpServletRequest request = mock(HttpServletRequest.class);
 
         final String token = someString();
-        final String principle = someString();
+        final JwtPrinciple principle = mock(JwtPrinciple.class);
+        final Authentication expected = mock(Authentication.class);
 
         // Given
         given(request.getCookies()).willReturn(new Cookie[0]);
         given(request.getHeader(tokenName)).willReturn(token);
         given(principleTokenParser.parse(token)).willReturn(principle);
+        given(jwtPrincipleConverter.convert(principle)).willReturn(expected);
 
         // When
         final Authentication actual = tokenParser.parse(request);
 
         // Then
-        assertThat(actual, hasField("principle", principle));
-        assertThat(actual, hasField("authenticated", true));
+        assertThat(actual, is(expected));
     }
 
     @Test

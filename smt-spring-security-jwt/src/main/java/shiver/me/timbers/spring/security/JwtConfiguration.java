@@ -20,6 +20,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.msgpack.MessagePack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,13 +33,16 @@ import shiver.me.timbers.spring.security.cookies.Bakery;
 import shiver.me.timbers.spring.security.cookies.CookieBakery;
 import shiver.me.timbers.spring.security.io.FileReader;
 import shiver.me.timbers.spring.security.io.ResourceFileReader;
+import shiver.me.timbers.spring.security.jwt.AuthenticationJwtPrincipleConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
+import shiver.me.timbers.spring.security.jwt.JwtPrinciple;
+import shiver.me.timbers.spring.security.jwt.JwtPrincipleConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
-import shiver.me.timbers.spring.security.jwt.PrincipleJwtTokenParser;
-import shiver.me.timbers.spring.security.keys.Base64;
+import shiver.me.timbers.spring.security.jwt.MsgPackJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.RolesGrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.keys.Base64KeyPairs;
 import shiver.me.timbers.spring.security.keys.BouncyCastlePemKeyPairs;
-import shiver.me.timbers.spring.security.keys.DatatypeConverterBase64;
 import shiver.me.timbers.spring.security.keys.KeyParser;
 import shiver.me.timbers.spring.security.keys.PemKeyPairs;
 import shiver.me.timbers.spring.security.keys.SecretBase64KeyPairs;
@@ -52,6 +56,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -125,9 +130,10 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(AuthenticationRequestJwtTokenParser.class)
     @Autowired
     public JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser(
-        JwtTokenParser<String, String> principleJwtTokenParser
+        JwtPrincipleConverter<Authentication> jwtPrincipleConverter,
+        JwtTokenParser<JwtPrinciple, String> principleJwtTokenParser
     ) {
-        return new AuthenticationRequestJwtTokenParser(tokenName, principleJwtTokenParser);
+        return new AuthenticationRequestJwtTokenParser(tokenName, jwtPrincipleConverter, principleJwtTokenParser);
     }
 
     @Bean
@@ -143,36 +149,55 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(PrincipleJwtTokenParser.class)
+    @ConditionalOnMissingBean(JwtPrincipleConverter.class)
     @Autowired
-    public JwtTokenParser<String, String> principleJwtTokenParser(
-        SecretKeeper secretKeeper,
+    public JwtPrincipleConverter<Authentication> jwtPrincipleConverter(
+        GrantedAuthorityConverter<List<String>> grantedAuthorityConverter
+    ) {
+        return new AuthenticationJwtPrincipleConverter(grantedAuthorityConverter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(MsgPackJwtTokenParser.class)
+    @Autowired
+    public JwtTokenParser<JwtPrinciple, String> principleJwtTokenParser(
         JwtBuilder builder,
         JwtParser parser,
         KeyPair keyPair,
-        Clock clock
+        Clock clock,
+        MessagePack messagePack,
+        Base64 base64
     ) {
-        return new PrincipleJwtTokenParser(
-            secretKeeper.getSecret(), builder, parser, algorithm, keyPair, expiryDuration, expiryUnit, clock
+        return new MsgPackJwtTokenParser<>(
+            JwtPrinciple.class,
+            builder,
+            parser,
+            algorithm,
+            keyPair,
+            expiryDuration,
+            expiryUnit,
+            clock,
+            messagePack,
+            base64
         );
     }
 
     @Bean
-    @ConditionalOnMissingBean(SecretKeeper.class)
-    public SecretKeeper secretKeeper(FileReader fileReader) {
-        return new ChoosingSecretKeeper(secret, secretFile, fileReader);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(JwtParser.class)
-    public JwtParser jwtParser() {
-        return Jwts.parser();
+    @ConditionalOnMissingBean(GrantedAuthorityConverter.class)
+    public GrantedAuthorityConverter<List<String>> grantedAuthorityConverter() {
+        return new RolesGrantedAuthorityConverter();
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtBuilder.class)
     public JwtBuilder jwtBuilder() {
         return Jwts.builder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtParser.class)
+    public JwtParser jwtParser() {
+        return Jwts.parser();
     }
 
     @Bean
@@ -189,9 +214,17 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(FileReader.class)
-    public FileReader fileReader() {
-        return new ResourceFileReader();
+    @ConditionalOnMissingBean(MessagePack.class)
+    public MessagePack messagePack() {
+        final MessagePack messagePack = new MessagePack();
+        messagePack.register(JwtPrinciple.class);
+        return messagePack;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SecretKeeper.class)
+    public SecretKeeper secretKeeper(FileReader fileReader) {
+        return new ChoosingSecretKeeper(secret, secretFile, fileReader);
     }
 
     @Bean
@@ -199,6 +232,12 @@ public class JwtConfiguration {
     @Autowired
     public KeyParser keyParser(Base64KeyPairs base64KeyPairs, PemKeyPairs pemKeyPairs) {
         return new SignatureAlgorithmKeyParser(algorithm, base64KeyPairs, pemKeyPairs);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FileReader.class)
+    public FileReader fileReader() {
+        return new ResourceFileReader();
     }
 
     @Bean

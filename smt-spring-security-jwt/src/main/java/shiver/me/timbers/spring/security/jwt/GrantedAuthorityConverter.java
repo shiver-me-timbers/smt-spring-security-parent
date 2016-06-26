@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.jwt;
 
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -24,23 +23,9 @@ import java.util.Collection;
 /**
  * @author Karl Bennett
  */
-public class JwtAuthentication extends AbstractAuthenticationToken {
+public interface GrantedAuthorityConverter<I> {
 
-    private final String principle;
+    Collection<? extends GrantedAuthority> convert(I input);
 
-    public JwtAuthentication(String principle, Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.principle = principle;
-        setAuthenticated(true);
-    }
-
-    @Override
-    public Object getCredentials() {
-        return null;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return principle;
-    }
+    I convert(Collection<? extends GrantedAuthority> authorities);
 }

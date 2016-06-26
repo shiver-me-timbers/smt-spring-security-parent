@@ -20,19 +20,22 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.msgpack.MessagePack;
+import shiver.me.timbers.spring.security.Base64;
 import shiver.me.timbers.spring.security.time.Clock;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Karl Bennett
  */
-public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
+public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
 
     private static final String PRINCIPLE = "principle";
 
-    private final String secret;
+    private final Class<T> type;
     private final JwtBuilder builder;
     private final JwtParser parser;
     private final SignatureAlgorithm tokenHashing;
@@ -40,18 +43,22 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
     private final int expiryDuration;
     private final TimeUnit expiryUnit;
     private final Clock clock;
+    private final MessagePack messagePack;
+    private final Base64 base64;
 
-    public PrincipleJwtTokenParser(
-        String secret,
+    public MsgPackJwtTokenParser(
+        Class<T> type,
         JwtBuilder builder,
         JwtParser parser,
         SignatureAlgorithm tokenHashing,
         KeyPair keyPair,
         int expiryDuration,
         TimeUnit expiryUnit,
-        Clock clock
+        Clock clock,
+        MessagePack messagePack,
+        Base64 base64
     ) {
-        this.secret = secret;
+        this.type = type;
         this.builder = builder;
         this.parser = parser;
         this.tokenHashing = tokenHashing;
@@ -59,23 +66,37 @@ public class PrincipleJwtTokenParser implements JwtTokenParser<String, String> {
         this.expiryDuration = expiryDuration;
         this.expiryUnit = expiryUnit;
         this.clock = clock;
+        this.messagePack = messagePack;
+        this.base64 = base64;
     }
 
     @Override
-    public String create(String principle) {
-        final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, principle).signWith(tokenHashing, keyPair.getPrivate());
-        if (expiryDuration >= 0) {
-            return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
-        }
-        return signedBuilder.compact();
-    }
-
-    @Override
-    public String parse(String token) throws JwtInvalidTokenException {
+    public String create(T principle) throws JwtInvalidTokenException {
         try {
-            return parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPLE).toString();
+            final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, base64.encode(messagePack.write(principle)))
+                .signWith(tokenHashing, keyPair.getPrivate());
+            if (expiryDuration >= 0) {
+                return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
+            }
+            return signedBuilder.compact();
+        } catch (IOException e) {
+            throw new JwtInvalidTokenException("Could not pack the JWT token principle into a " + type.getName(), e);
+        }
+    }
+
+    @Override
+    public T parse(String token) throws JwtInvalidTokenException {
+        try {
+            return messagePack.read(
+                base64.decode(
+                    parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPLE).toString()
+                ),
+                type
+            );
         } catch (IllegalArgumentException e) {
             throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
+        } catch (IOException e) {
+            throw new JwtInvalidTokenException("Could not unpack the JWT token principle into a " + type.getName(), e);
         } catch (JwtException e) {
             throw new JwtInvalidTokenException(e);
         }

@@ -18,6 +18,7 @@ package shiver.me.timbers.spring.security.keys;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Test;
+import shiver.me.timbers.spring.security.Base64;
 
 import java.io.IOException;
 import java.security.KeyPair;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.keys;
+package shiver.me.timbers.spring.security;
 
 /**
  * @author Karl Bennett

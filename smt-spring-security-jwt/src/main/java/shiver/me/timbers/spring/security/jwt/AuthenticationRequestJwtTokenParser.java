@@ -17,7 +17,6 @@
 package shiver.me.timbers.spring.security.jwt;
 
 import org.springframework.security.core.Authentication;
-import shiver.me.timbers.spring.security.JwtAuthentication;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -28,21 +27,27 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthenticationRequestJwtTokenParser implements JwtTokenParser<Authentication, HttpServletRequest> {
 
     private final String tokenName;
-    private final JwtTokenParser<String, String> tokenParser;
+    private final JwtPrincipleConverter<Authentication> jwtPrincipleConverter;
+    private final JwtTokenParser<JwtPrinciple, String> tokenParser;
 
-    public AuthenticationRequestJwtTokenParser(String tokenName, JwtTokenParser<String, String> tokenParser) {
+    public AuthenticationRequestJwtTokenParser(
+        String tokenName,
+        JwtPrincipleConverter<Authentication> jwtPrincipleConverter,
+        JwtTokenParser<JwtPrinciple, String> tokenParser
+    ) {
         this.tokenName = tokenName;
+        this.jwtPrincipleConverter = jwtPrincipleConverter;
         this.tokenParser = tokenParser;
     }
 
     @Override
-    public String create(Authentication authentication) {
-        return tokenParser.create(authentication.getPrincipal().toString());
+    public String create(Authentication authentication) throws JwtInvalidTokenException {
+        return tokenParser.create(jwtPrincipleConverter.convert(authentication));
     }
 
     @Override
     public Authentication parse(HttpServletRequest request) throws JwtInvalidTokenException {
-        return new JwtAuthentication(tokenParser.parse(findToken(request)));
+        return jwtPrincipleConverter.convert(tokenParser.parse(findToken(request)));
     }
 
     private String findToken(HttpServletRequest request) {

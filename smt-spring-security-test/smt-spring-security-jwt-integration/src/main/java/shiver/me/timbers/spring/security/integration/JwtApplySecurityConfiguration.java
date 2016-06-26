@@ -41,7 +41,10 @@ public class JwtApplySecurityConfiguration extends WebSecurityConfigurerAdapter 
         http.apply(jwt());
         http.antMatcher("/jwt/**");
         http.csrf().disable();
-        http.authorizeRequests().anyRequest().authenticated();
+        http.authorizeRequests()
+            .antMatchers("/jwt/one").access("hasRole('ONE')")
+            .antMatchers("/jwt/two").access("hasRole('TWO')")
+            .anyRequest().authenticated();
         http.formLogin().successHandler(new NoRedirectAuthenticationSuccessHandler()).loginPage("/jwt/signIn")
             .permitAll();
         http.logout().logoutUrl("/jwt/signOut")
@@ -52,5 +55,7 @@ public class JwtApplySecurityConfiguration extends WebSecurityConfigurerAdapter 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
+        auth.inMemoryAuthentication().withUser("role1").password("password").roles("ONE");
+        auth.inMemoryAuthentication().withUser("role2").password("password").roles("TWO");
     }
 }

@@ -143,4 +143,50 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         assertThat(normal.getCookies().get(tokenName).getMaxAge(), is(-1));
         assertThat(normal.getCookies().get(tokenName).getValue(), isEmptyString());
     }
+
+    @Test
+    public void Can_use_roles_to_restrict_access_to_certain_paths() {
+
+        final Form role1Form = new Form();
+        final Form role2Form = new Form();
+
+        // Given
+        role1Form.param("username", "role1");
+        role1Form.param("password", "password");
+        role2Form.param("username", "role2");
+        role2Form.param("password", "password");
+        final Response forbidden = annotationTarget.request().get();
+        final Response role1Forbidden = annotationTarget.path("one").request().get();
+        final Response role2Forbidden = annotationTarget.path("two").request().get();
+        final Response role1SignIn = annotationTarget.path("signIn").request().post(form(role1Form));
+        final Response role2SignIn = annotationTarget.path("signIn").request().post(form(role2Form));
+        final Response normalForbidden = annotationTarget.request().get();
+
+        // When
+        final Response role1Success = annotationTarget.path("one").request()
+            .cookie(role1SignIn.getCookies().get(tokenName)).get();
+        final Response role1Failure = annotationTarget.path("two").request()
+            .cookie(role1SignIn.getCookies().get(tokenName)).get();
+        final Response role2Success = annotationTarget.path("two").request()
+            .cookie(role2SignIn.getCookies().get(tokenName)).get();
+        final Response role2Failure = annotationTarget.path("one").request()
+            .cookie(role2SignIn.getCookies().get(tokenName)).get();
+        final Response normal = normalTarget.request().header(tokenName, role1SignIn.getHeaderString(tokenName)).get();
+
+        // Then
+        assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(role1Forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(role2Forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(normalForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(role1SignIn.getStatus(), is(OK.getStatusCode()));
+        assertThat(role2SignIn.getStatus(), is(OK.getStatusCode()));
+        assertThat(role1Success.getStatus(), is(OK.getStatusCode()));
+        assertThat(role1Success.readEntity(String.class), is(TEXT));
+        assertThat(role1Failure.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(role2Success.getStatus(), is(OK.getStatusCode()));
+        assertThat(role2Success.readEntity(String.class), is(TEXT));
+        assertThat(role2Failure.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(normal.getStatus(), is(OK.getStatusCode()));
+        assertThat(normal.readEntity(String.class), is(TEXT));
+    }
 }
