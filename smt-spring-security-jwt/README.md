@@ -177,7 +177,7 @@ smt.spring.security.jwt.cookie.httpOnly=true
 #### Advanced Configuration
 
 Every class that is used to compose this library can be overridden by adding your own implementation to the Spring
-context. So for example, if you wished to use your own custom principle class you could supply your own `MessagePack`,
+context. So for example, if you wished to use your own custom principal class you could supply your own `MessagePack`,
 `JwtTokenParser`, and `AuthenticationConverter` beans.
 
 ```java

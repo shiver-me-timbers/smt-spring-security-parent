@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
 
-    private static final String PRINCIPLE = "principle";
+    private static final String PRINCIPAL = "principal";
 
     private final Class<T> type;
     private final JwtBuilder builder;
@@ -71,16 +71,16 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
     }
 
     @Override
-    public String create(T principle) throws JwtInvalidTokenException {
+    public String create(T principal) throws JwtInvalidTokenException {
         try {
-            final JwtBuilder signedBuilder = builder.claim(PRINCIPLE, base64.encode(messagePack.write(principle)))
+            final JwtBuilder signedBuilder = builder.claim(PRINCIPAL, base64.encode(messagePack.write(principal)))
                 .signWith(algorithm, keyPair.getPrivate());
             if (expiryDuration >= 0) {
                 return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
             }
             return signedBuilder.compact();
         } catch (IOException e) {
-            throw new JwtInvalidTokenException("Could not pack the JWT token principle into a " + type.getName(), e);
+            throw new JwtInvalidTokenException("Could not pack the JWT token principal into a " + type.getName(), e);
         }
     }
 
@@ -89,14 +89,14 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
         try {
             return messagePack.read(
                 base64.decode(
-                    parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPLE).toString()
+                    parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPAL).toString()
                 ),
                 type
             );
         } catch (IllegalArgumentException e) {
             throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
         } catch (IOException e) {
-            throw new JwtInvalidTokenException("Could not unpack the JWT token principle into a " + type.getName(), e);
+            throw new JwtInvalidTokenException("Could not unpack the JWT token principal into a " + type.getName(), e);
         } catch (JwtException e) {
             throw new JwtInvalidTokenException(e);
         }

@@ -59,13 +59,13 @@ public class AuthenticationRequestJwtTokenParserTest {
 
         final Authentication authentication = mock(Authentication.class);
 
-        final Object principle = new Object();
+        final Object principal = new Object();
 
         final String expected = someString();
 
         // Given
-        given(authenticationConverter.convert(authentication)).willReturn(principle);
-        given(principleTokenParser.create(principle)).willReturn(expected);
+        given(authenticationConverter.convert(authentication)).willReturn(principal);
+        given(principleTokenParser.create(principal)).willReturn(expected);
 
         // When
         final String actual = tokenParser.create(authentication);
@@ -82,15 +82,15 @@ public class AuthenticationRequestJwtTokenParserTest {
 
         final Cookie cookie = mock(Cookie.class);
         final String token = someString();
-        final Object principle = new Object();
+        final Object principal = new Object();
         final Authentication expected = mock(Authentication.class);
 
         // Given
         given(request.getCookies()).willReturn(new Cookie[]{mock(Cookie.class), cookie, mock(Cookie.class)});
         given(cookie.getName()).willReturn(tokenName);
         given(cookie.getValue()).willReturn(token);
-        given(principleTokenParser.parse(token)).willReturn(principle);
-        given(authenticationConverter.convert(principle)).willReturn(expected);
+        given(principleTokenParser.parse(token)).willReturn(principal);
+        given(authenticationConverter.convert(principal)).willReturn(expected);
 
         // When
         final Authentication actual = tokenParser.parse(request);
@@ -106,14 +106,14 @@ public class AuthenticationRequestJwtTokenParserTest {
         final HttpServletRequest request = mock(HttpServletRequest.class);
 
         final String token = someString();
-        final Object principle = new Object();
+        final Object principal = new Object();
         final Authentication expected = mock(Authentication.class);
 
         // Given
         given(request.getCookies()).willReturn(new Cookie[0]);
         given(request.getHeader(tokenName)).willReturn(token);
-        given(principleTokenParser.parse(token)).willReturn(principle);
-        given(authenticationConverter.convert(principle)).willReturn(expected);
+        given(principleTokenParser.parse(token)).willReturn(principal);
+        given(authenticationConverter.convert(principal)).willReturn(expected);
 
         // When
         final Authentication actual = tokenParser.parse(request);

@@ -51,17 +51,17 @@ public class JwtPrincipleTest {
     @Test
     public void Can_set_values() throws IOException {
 
-        final JwtPrinciple principle = new JwtPrinciple();
+        final JwtPrinciple principal = new JwtPrinciple();
         final String username = someString();
         final List roles = mock(List.class);
 
         // Given
-        principle.setUsername(username);
-        principle.setRoles(roles);
+        principal.setUsername(username);
+        principal.setRoles(roles);
 
         // When
-        final String actualUsername = principle.getUsername();
-        final List<String> actualRoles = principle.getRoles();
+        final String actualUsername = principal.getUsername();
+        final List<String> actualRoles = principal.getRoles();
 
         // Then
         assertThat(actualUsername, is(username));

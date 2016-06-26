@@ -29,7 +29,7 @@ public class CustomPrincipleAuthenticationConverter implements AuthenticationCon
     }
 
     @Override
-    public Authentication convert(CustomPrincipal principle) {
-        return new JwtAuthentication(principle.getUsername(), null);
+    public Authentication convert(CustomPrincipal principal) {
+        return new JwtAuthentication(principal.getUsername(), null);
     }
 }

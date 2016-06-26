@@ -24,5 +24,5 @@ import org.springframework.security.core.Authentication;
 public interface AuthenticationConverter<T> {
     T convert(Authentication input);
 
-    Authentication convert(T principle);
+    Authentication convert(T principal);
 }

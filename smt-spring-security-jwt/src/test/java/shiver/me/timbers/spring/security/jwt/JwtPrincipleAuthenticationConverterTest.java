@@ -73,7 +73,7 @@ public class JwtPrincipleAuthenticationConverterTest {
     @SuppressWarnings("unchecked")
     public void Can_convert_a_jwt_principle_to_a_jwt_authentication() {
 
-        final JwtPrinciple principle = mock(JwtPrinciple.class);
+        final JwtPrinciple principal = mock(JwtPrinciple.class);
 
         final List<String> roles = mock(List.class);
         final String username = someString();
@@ -82,12 +82,12 @@ public class JwtPrincipleAuthenticationConverterTest {
         );
 
         // Given
-        given(principle.getUsername()).willReturn(username);
-        given(principle.getRoles()).willReturn(roles);
+        given(principal.getUsername()).willReturn(username);
+        given(principal.getRoles()).willReturn(roles);
         given(grantedAuthorityConverter.convert(roles)).willReturn((Collection) authorities);
 
         // When
-        final Authentication actual = converter.convert(principle);
+        final Authentication actual = converter.convert(principal);
 
         // Then
         assertThat(actual.getPrincipal(), is((Object) username));

@@ -42,7 +42,7 @@ public class JwtPrincipleAuthenticationConverter implements AuthenticationConver
     }
 
     @Override
-    public Authentication convert(JwtPrinciple principle) {
-        return new JwtAuthentication(principle.getUsername(), grantedAuthorityConverter.convert(principle.getRoles()));
+    public Authentication convert(JwtPrinciple principal) {
+        return new JwtAuthentication(principal.getUsername(), grantedAuthorityConverter.convert(principal.getRoles()));
     }
 }
