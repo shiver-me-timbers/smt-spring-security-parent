@@ -20,18 +20,16 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.msgpack.MessagePack;
-import shiver.me.timbers.spring.security.Base64;
 import shiver.me.timbers.spring.security.time.Clock;
 
-import java.io.IOException;
 import java.security.KeyPair;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Karl Bennett
  */
-public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
+public class JJwtTokenParser<T> implements JwtTokenParser<T, String> {
 
     private static final String PRINCIPAL = "principal";
 
@@ -43,10 +41,9 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
     private final int expiryDuration;
     private final TimeUnit expiryUnit;
     private final Clock clock;
-    private final MessagePack messagePack;
-    private final Base64 base64;
+    private final MapConverter<T> mapConverter;
 
-    public MsgPackJwtTokenParser(
+    public JJwtTokenParser(
         Class<T> type,
         JwtBuilder builder,
         JwtParser parser,
@@ -55,8 +52,7 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
         int expiryDuration,
         TimeUnit expiryUnit,
         Clock clock,
-        MessagePack messagePack,
-        Base64 base64
+        MapConverter<T> mapConverter
     ) {
         this.type = type;
         this.builder = builder;
@@ -66,37 +62,27 @@ public class MsgPackJwtTokenParser<T> implements JwtTokenParser<T, String> {
         this.expiryDuration = expiryDuration;
         this.expiryUnit = expiryUnit;
         this.clock = clock;
-        this.messagePack = messagePack;
-        this.base64 = base64;
+        this.mapConverter = mapConverter;
     }
 
     @Override
-    public String create(T principal) throws JwtInvalidTokenException {
-        try {
-            final JwtBuilder signedBuilder = builder.claim(PRINCIPAL, base64.encode(messagePack.write(principal)))
-                .signWith(algorithm, keyPair.getPrivate());
-            if (expiryDuration >= 0) {
-                return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
-            }
-            return signedBuilder.compact();
-        } catch (IOException e) {
-            throw new JwtInvalidTokenException("Could not pack the JWT token principal into a " + type.getName(), e);
+    public String create(T principal) {
+        final JwtBuilder signedBuilder = builder.claim(PRINCIPAL, principal)
+            .signWith(algorithm, keyPair.getPrivate());
+        if (expiryDuration >= 0) {
+            return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();
         }
+        return signedBuilder.compact();
     }
 
     @Override
     public T parse(String token) throws JwtInvalidTokenException {
         try {
-            return messagePack.read(
-                base64.decode(
-                    parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPAL).toString()
-                ),
-                type
+            return mapConverter.convert(
+                parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPAL, Map.class)
             );
         } catch (IllegalArgumentException e) {
             throw new JwtInvalidTokenException("Could not find a JWT token in the request", e);
-        } catch (IOException e) {
-            throw new JwtInvalidTokenException("Could not unpack the JWT token principal into a " + type.getName(), e);
         } catch (JwtException e) {
             throw new JwtInvalidTokenException(e);
         }

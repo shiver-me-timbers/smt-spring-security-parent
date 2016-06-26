@@ -19,15 +19,14 @@ package shiver.me.timbers.spring.security.integration;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.msgpack.MessagePack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import shiver.me.timbers.spring.security.Base64;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
+import shiver.me.timbers.spring.security.jwt.JJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
-import shiver.me.timbers.spring.security.jwt.MsgPackJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.MapConverter;
 import shiver.me.timbers.spring.security.time.Clock;
 
 import java.security.KeyPair;
@@ -59,10 +58,9 @@ public class JwtCustomPrincipleConfiguration {
         JwtParser parser,
         KeyPair keyPair,
         Clock clock,
-        MessagePack messagePack,
-        Base64 base64
+        MapConverter<CustomPrincipal> mapConverter
     ) {
-        return new MsgPackJwtTokenParser<>(
+        return new JJwtTokenParser<>(
             CustomPrincipal.class,
             builder,
             parser,
@@ -71,15 +69,12 @@ public class JwtCustomPrincipleConfiguration {
             expiryDuration,
             expiryUnit,
             clock,
-            messagePack,
-            base64
+            mapConverter
         );
     }
 
     @Bean
-    public MessagePack messagePack() {
-        final MessagePack messagePack = new MessagePack();
-        messagePack.register(CustomPrincipal.class);
-        return messagePack;
+    public MapConverter<CustomPrincipal> mapConverter() {
+        return new CustomPrincipalMapConverter();
     }
 }

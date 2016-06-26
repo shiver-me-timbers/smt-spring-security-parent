@@ -20,7 +20,6 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.msgpack.MessagePack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,10 +35,12 @@ import shiver.me.timbers.spring.security.io.ResourceFileReader;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
-import shiver.me.timbers.spring.security.jwt.JwtPrinciple;
-import shiver.me.timbers.spring.security.jwt.JwtPrincipleAuthenticationConverter;
+import shiver.me.timbers.spring.security.jwt.JJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.JwtPrincipal;
+import shiver.me.timbers.spring.security.jwt.JwtPrincipalAuthenticationConverter;
+import shiver.me.timbers.spring.security.jwt.JwtPrincipalMapConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
-import shiver.me.timbers.spring.security.jwt.MsgPackJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.MapConverter;
 import shiver.me.timbers.spring.security.jwt.RolesGrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.keys.Base64KeyPairs;
 import shiver.me.timbers.spring.security.keys.BouncyCastlePemKeyPairs;
@@ -151,25 +152,24 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(AuthenticationConverter.class)
     @Autowired
-    public AuthenticationConverter<JwtPrinciple> authenticationConverter(
+    public AuthenticationConverter<JwtPrincipal> authenticationConverter(
         GrantedAuthorityConverter<List<String>> grantedAuthorityConverter
     ) {
-        return new JwtPrincipleAuthenticationConverter(grantedAuthorityConverter);
+        return new JwtPrincipalAuthenticationConverter(grantedAuthorityConverter);
     }
 
     @Bean
-    @ConditionalOnMissingBean(MsgPackJwtTokenParser.class)
+    @ConditionalOnMissingBean(JJwtTokenParser.class)
     @Autowired
-    public JwtTokenParser<JwtPrinciple, String> jwtTokenParser(
+    public JwtTokenParser<JwtPrincipal, String> jwtTokenParser(
         JwtBuilder builder,
         JwtParser parser,
         KeyPair keyPair,
         Clock clock,
-        MessagePack messagePack,
-        Base64 base64
+        MapConverter<JwtPrincipal> mapConverter
     ) {
-        return new MsgPackJwtTokenParser<>(
-            JwtPrinciple.class,
+        return new JJwtTokenParser<>(
+            JwtPrincipal.class,
             builder,
             parser,
             algorithm,
@@ -177,8 +177,7 @@ public class JwtConfiguration {
             expiryDuration,
             expiryUnit,
             clock,
-            messagePack,
-            base64
+            mapConverter
         );
     }
 
@@ -214,11 +213,9 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(MessagePack.class)
-    public MessagePack messagePack() {
-        final MessagePack messagePack = new MessagePack();
-        messagePack.register(JwtPrinciple.class);
-        return messagePack;
+    @ConditionalOnMissingBean(MapConverter.class)
+    public MapConverter<JwtPrincipal> mapConverter() {
+        return new JwtPrincipalMapConverter();
     }
 
     @Bean

@@ -16,15 +16,14 @@
 
 package shiver.me.timbers.spring.security.integration;
 
-public class CustomPrincipal {
+import shiver.me.timbers.spring.security.jwt.MapConverter;
 
-    private final String username;
+import java.util.Map;
 
-    public CustomPrincipal(String username) {
-        this.username = username;
-    }
+public class CustomPrincipalMapConverter implements MapConverter<CustomPrincipal> {
 
-    public String getUsername() {
-        return username;
+    @Override
+    public CustomPrincipal convert(Map map) {
+        return new CustomPrincipal(map.get("username").toString());
     }
 }

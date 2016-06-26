@@ -16,12 +16,26 @@
 
 package shiver.me.timbers.spring.security.jwt;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Karl Bennett
  */
-public interface JwtTokenParser<I, S> {
+public class JwtPrincipalMapConverter implements MapConverter<JwtPrincipal> {
 
-    String create(I input);
+    @Override
+    public JwtPrincipal convert(Map map) {
+        return new JwtPrincipal(map.get("username").toString(), toList(map.get("roles")));
+    }
 
-    I parse(S source) throws JwtInvalidTokenException;
+    private static List<String> toList(Object list) {
+        final List<String> oldList = (List<String>) list;
+        final List<String> newList = new ArrayList<>(oldList.size());
+        for (String element : oldList) {
+            newList.add(element);
+        }
+        return newList;
+    }
 }

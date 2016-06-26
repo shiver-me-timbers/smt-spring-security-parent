@@ -41,7 +41,7 @@ public class AuthenticationRequestJwtTokenParser<T> implements JwtTokenParser<Au
     }
 
     @Override
-    public String create(Authentication authentication) throws JwtInvalidTokenException {
+    public String create(Authentication authentication) {
         return tokenParser.create(authenticationConverter.convert(authentication));
     }
 

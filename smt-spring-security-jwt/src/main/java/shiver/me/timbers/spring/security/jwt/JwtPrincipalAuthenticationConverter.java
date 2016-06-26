@@ -25,24 +25,24 @@ import java.util.List;
 /**
  * @author Karl Bennett
  */
-public class JwtPrincipleAuthenticationConverter implements AuthenticationConverter<JwtPrinciple> {
+public class JwtPrincipalAuthenticationConverter implements AuthenticationConverter<JwtPrincipal> {
 
     private final GrantedAuthorityConverter<List<String>> grantedAuthorityConverter;
 
-    public JwtPrincipleAuthenticationConverter(GrantedAuthorityConverter<List<String>> grantedAuthorityConverter) {
+    public JwtPrincipalAuthenticationConverter(GrantedAuthorityConverter<List<String>> grantedAuthorityConverter) {
         this.grantedAuthorityConverter = grantedAuthorityConverter;
     }
 
     @Override
-    public JwtPrinciple convert(Authentication authentication) {
-        return new JwtPrinciple(
+    public JwtPrincipal convert(Authentication authentication) {
+        return new JwtPrincipal(
             ((UserDetails) authentication.getPrincipal()).getUsername(),
             grantedAuthorityConverter.convert(authentication.getAuthorities())
         );
     }
 
     @Override
-    public Authentication convert(JwtPrinciple principal) {
+    public Authentication convert(JwtPrincipal principal) {
         return new JwtAuthentication(principal.getUsername(), grantedAuthorityConverter.convert(principal.getRoles()));
     }
 }

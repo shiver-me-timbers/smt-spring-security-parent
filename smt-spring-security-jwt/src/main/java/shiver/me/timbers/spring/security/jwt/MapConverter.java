@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.integration;
+package shiver.me.timbers.spring.security.jwt;
 
-public class CustomPrincipal {
+import java.util.Map;
 
-    private final String username;
+/**
+ * @author Karl Bennett
+ */
+public interface MapConverter<T> {
 
-    public CustomPrincipal(String username) {
-        this.username = username;
-    }
-
-    public String getUsername() {
-        return username;
-    }
+    T convert(Map map);
 }

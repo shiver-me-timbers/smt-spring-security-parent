@@ -32,16 +32,16 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class JwtPrincipleAuthenticationConverterTest {
+public class JwtPrincipalAuthenticationConverterTest {
 
     private GrantedAuthorityConverter<List<String>> grantedAuthorityConverter;
-    private AuthenticationConverter<JwtPrinciple> converter;
+    private AuthenticationConverter<JwtPrincipal> converter;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
         grantedAuthorityConverter = mock(GrantedAuthorityConverter.class);
-        converter = new JwtPrincipleAuthenticationConverter(grantedAuthorityConverter);
+        converter = new JwtPrincipalAuthenticationConverter(grantedAuthorityConverter);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class JwtPrincipleAuthenticationConverterTest {
         given(grantedAuthorityConverter.convert(authorities)).willReturn(roles);
 
         // When
-        final JwtPrinciple actual = converter.convert(authentication);
+        final JwtPrincipal actual = converter.convert(authentication);
 
         // Then
         assertThat(actual.getUsername(), is(username));
@@ -73,7 +73,7 @@ public class JwtPrincipleAuthenticationConverterTest {
     @SuppressWarnings("unchecked")
     public void Can_convert_a_jwt_principle_to_a_jwt_authentication() {
 
-        final JwtPrinciple principal = mock(JwtPrinciple.class);
+        final JwtPrincipal principal = mock(JwtPrincipal.class);
 
         final List<String> roles = mock(List.class);
         final String username = someString();

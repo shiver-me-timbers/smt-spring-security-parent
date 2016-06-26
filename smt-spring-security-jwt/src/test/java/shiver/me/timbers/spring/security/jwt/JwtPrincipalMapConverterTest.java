@@ -17,54 +17,34 @@
 package shiver.me.timbers.spring.security.jwt;
 
 import org.junit.Test;
-import org.msgpack.MessagePack;
 
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class JwtPrincipleTest {
+public class JwtPrincipalMapConverterTest {
 
     @Test
-    public void Can_pack_a_jwt_principle() throws IOException {
+    public void Can_convert_a_map_into_a_jwt_principal() {
 
-        final MessagePack msgpack = new MessagePack();
+        final HashMap map = new HashMap();
+
         final String username = someString();
         final List<String> roles = asList(someString(), someString(), someString());
 
         // Given
-        msgpack.register(JwtPrinciple.class);
+        map.put("username", username);
+        map.put("roles", roles);
 
         // When
-        final JwtPrinciple actual = msgpack.read(msgpack.write(new JwtPrinciple(username, roles)), JwtPrinciple.class);
+        final JwtPrincipal actual = new JwtPrincipalMapConverter().convert(map);
 
         // Then
         assertThat(actual.getUsername(), is(username));
         assertThat(actual.getRoles(), is(roles));
-    }
-
-    @Test
-    public void Can_set_values() throws IOException {
-
-        final JwtPrinciple principal = new JwtPrinciple();
-        final String username = someString();
-        final List roles = mock(List.class);
-
-        // Given
-        principal.setUsername(username);
-        principal.setRoles(roles);
-
-        // When
-        final String actualUsername = principal.getUsername();
-        final List<String> actualRoles = principal.getRoles();
-
-        // Then
-        assertThat(actualUsername, is(username));
-        assertThat(actualRoles, is(roles));
     }
 }

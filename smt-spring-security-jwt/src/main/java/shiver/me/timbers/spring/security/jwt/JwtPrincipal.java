@@ -16,26 +16,22 @@
 
 package shiver.me.timbers.spring.security.jwt;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 /**
  * @author Karl Bennett
  */
-public class JwtPrinciple {
+public class JwtPrincipal {
 
-    private String username;
-    private List<String> roles;
+    private final String username;
+    private final List<String> roles;
 
-    /**
-     * Must have a public default constructor for class to be successfully deserialised with
-     * {@link org.msgpack.MessagePack#read(byte[], Class)}. The class must also have setters for the class to be
-     * properly serialised {@link org.msgpack.MessagePack#write(Object)}.
-     */
-    public JwtPrinciple() {
-        this(null, null);
-    }
-
-    public JwtPrinciple(String username, List<String> roles) {
+    public JwtPrincipal(
+        @JsonProperty("username") String username,
+        @JsonProperty("roles") List<String> roles
+    ) {
         this.username = username;
         this.roles = roles;
     }
@@ -44,15 +40,7 @@ public class JwtPrinciple {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public List<String> getRoles() {
         return roles;
-    }
-
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
     }
 }
