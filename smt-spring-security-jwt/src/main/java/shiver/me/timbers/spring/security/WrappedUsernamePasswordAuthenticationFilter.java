@@ -28,11 +28,11 @@ public class WrappedUsernamePasswordAuthenticationFilter extends UsernamePasswor
     private final JwtAuthenticationSuccessHandler jwtSuccessHandler;
 
     public WrappedUsernamePasswordAuthenticationFilter(
-        FieldMutator reflectionFieldMutator,
+        FieldMutator fieldMutator,
         UsernamePasswordAuthenticationFilter filter,
         JwtAuthenticationSuccessHandler jwtSuccessHandler
     ) {
-        reflectionFieldMutator.copy(filter, this);
+        fieldMutator.copy(filter, this);
         super.setAuthenticationSuccessHandler(jwtSuccessHandler.withDelegate(super.getSuccessHandler()));
         this.jwtSuccessHandler = jwtSuccessHandler;
     }

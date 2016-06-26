@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.fields;
+package shiver.me.timbers.spring.security.integration;
 
-/**
- * @author Karl Bennett
- */
-public interface FieldMutator {
+import org.springframework.test.context.ActiveProfiles;
 
-    <T> T retrieve(Object object, String name, Class<T> type);
-
-    void replace(Object object, String name, Class type, Object value);
-
-    <T> void update(Object object, String name, Class<T> type, Updater<T> updater);
-
-    <F, T extends F> void copy(F from, T to);
+@ActiveProfiles({"file", "PS512"})
+public class ITSpringSecurityJwtAnnotationFilePS512 extends AbstractSpringSecurityJwtAnnotation {
 }

@@ -60,6 +60,7 @@
                             <instrumentation>
                                 <excludes>
                                     <exclude>**/*Configuration*.class</exclude>
+                                    <exclude>**/JwtSpringSecurityAdaptor*.class</exclude>
                                 </excludes>
                             </instrumentation>
                             <check>

@@ -17,14 +17,27 @@ smt-spring-security-jwt
 ===========
 [![Build Status](https://travis-ci.org/shiver-me-timbers/smt-spring-security-parent.svg)](https://travis-ci.org/shiver-me-timbers/smt-spring-security-parent) [![Coverage Status](https://coveralls.io/repos/shiver-me-timbers/smt-spring-security-parent/badge.svg?branch=master&service=github)](https://coveralls.io/github/shiver-me-timbers/smt-spring-security-parent?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.shiver-me-timbers/smt-spring-security-jwt/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.shiver-me-timbers/smt-spring-security-jwt/)
 
-This library will automatically enable stateless JWT authentication for any Spring Security configuration. It is applied
-with an annotation and weaves itself into your existing Spring Security setup so will not override any of your current
-configuration e.g. AuthenticationSuccessHandlers, LogoutSuccessHandlers.
+This library will automatically enable stateless JWT authentication for any Spring Security configuration. It can be
+applied with either an [annotation](src/main/java/shiver/me/timbers/spring/security/EnableJwtAuthentication.java) or
+an [adaptor](src/main/java/shiver/me/timbers/spring/security/JwtSpringSecurityAdaptor.java) and weaves itself into your
+existing Spring Security setup so will not override any of your current configuration
+e.g. AuthenticationSuccessHandlers, LogoutSuccessHandlers.
 
-**Note:** *The JWT configuration will be weaved into to EVERY Spring Security configuration within the Spring
-application.*
+#### Annotation
+
+The `@EnableJwtAuthentication` annotation should be used if you wish to enable JWT authentication for all of your Spring
+Security configurations that you might have setup for different paths. Just add the annotation to any configuration
+class to enable JWT authentication across your entire application.
+
+#### Adaptor
+
+The `JwtSpringSecurityAdaptor` should be used if you only want JWT authentication applied to specific Spring security
+configurations. The adaptor configuration will fail if the annotation is present, this is because it is redundant when
+the annotation has already been applied.
 
 ## Usage
+
+#### Annotation
 
 ```java
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +60,33 @@ public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
+    }
+}
+```
+
+#### Adaptor
+
+```java
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+import static shiver.me.timbers.spring.security.JwtSpringSecurityAdaptor.jwt;
+
+@EnableWebSecurity
+public class JwtApplySecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected final void configure(HttpSecurity http) throws Exception {
+        http.apply(jwt()); // Just apply this adaptor and configure Spring Security how ever you normally would.
+        http.formLogin().loginPage("/signIn").defaultSuccessUrl("/").permitAll();
+        http.logout().logoutUrl("/jwt/signOut").logoutSuccessUrl("/");
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
     }
 }

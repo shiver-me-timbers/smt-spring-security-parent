@@ -16,6 +16,9 @@
 
 package shiver.me.timbers.spring.security.integration;
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,18 +27,25 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
+import static shiver.me.timbers.spring.security.JwtSpringSecurityAdaptor.jwt;
+
+@Configuration
+@EnableAutoConfiguration
 @EnableWebSecurity
-@Order(102)
-public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@Import({SpringSecurityConfiguration.class, SpringSecurityControllerConfiguration.class})
+@Order(101)
+public class JwtApplySecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {
-        http.antMatcher("/normal/**");
+        http.apply(jwt());
+        http.antMatcher("/jwt/**");
         http.csrf().disable();
         http.authorizeRequests().anyRequest().authenticated();
-        http.formLogin().successHandler(new NoRedirectAuthenticationSuccessHandler()).loginPage("/normal/signIn")
+        http.formLogin().successHandler(new NoRedirectAuthenticationSuccessHandler()).loginPage("/jwt/signIn")
             .permitAll();
-        http.logout().logoutUrl("/normal/signOut").logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
+        http.logout().logoutUrl("/jwt/signOut")
+            .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
         http.exceptionHandling().authenticationEntryPoint(new Http403ForbiddenEntryPoint());
     }
 

@@ -62,7 +62,7 @@ public class ReflectionFieldMutator implements FieldMutator {
     }
 
     @Override
-    public void copy(Object from, Object to) {
+    public <F, T extends F> void copy(F from, T to) {
         try {
             copyFields(from.getClass(), from, to);
         } catch (IllegalAccessException e) {
