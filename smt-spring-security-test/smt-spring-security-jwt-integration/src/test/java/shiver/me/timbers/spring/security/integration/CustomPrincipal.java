@@ -16,11 +16,13 @@
 
 package shiver.me.timbers.spring.security.integration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CustomPrincipal {
 
     private final String username;
 
-    public CustomPrincipal(String username) {
+    public CustomPrincipal(@JsonProperty("username") String username) {
         this.username = username;
     }
 
