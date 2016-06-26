@@ -31,7 +31,8 @@ This library will automatically enable stateless JWT authentication for any Spri
 
 ```java
 @EnableWebSecurity
-@EnableJwtAuthentication // Just add this annotation and configure Spring Security how ever you normally would.
+// Just add this annotation and configure Spring Security how ever you normally would.
+@EnableJwtAuthentication
 public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
@@ -56,7 +57,8 @@ public class JwtApplySecurityConfiguration extends WebSecurityConfigurerAdapter 
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {
-        http.apply(jwt()); // Just apply this adaptor and configure Spring Security how ever you normally would.
+        // Just apply this adaptor and configure Spring Security how ever you normally would.
+        http.apply(jwt());
         http.formLogin().loginPage("/signIn").defaultSuccessUrl("/").permitAll();
         http.logout().logoutUrl("/jwt/signOut").logoutSuccessUrl("/");
     }

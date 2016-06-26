@@ -49,7 +49,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import shiver.me.timbers.spring.security.EnableJwtAuthentication;
 
 @EnableWebSecurity
-@EnableJwtAuthentication // Just add this annotation and configure Spring Security how ever you normally would.
+// Just add this annotation and configure Spring Security how ever you normally would.
+@EnableJwtAuthentication
 public class JwtSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
@@ -81,7 +82,8 @@ public class JwtApplySecurityConfiguration extends WebSecurityConfigurerAdapter 
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {
-        http.apply(jwt()); // Just apply this adaptor and configure Spring Security how ever you normally would.
+        // Just apply this adaptor and configure Spring Security how ever you normally would.
+        http.apply(jwt());
         http.formLogin().loginPage("/signIn").defaultSuccessUrl("/").permitAll();
         http.logout().logoutUrl("/jwt/signOut").logoutSuccessUrl("/");
     }
@@ -142,8 +144,8 @@ ssh-keygen -t ecdsa
 
 Further configuration can be achieved with the following properties:
 ```properties
-# The name of the JWT token, this will set the name of the head and cookie that will be returned in the response of a
-# successful login.
+# The name of the JWT token, this will set the name of the head and cookie that will be returned in the
+# response of a successful login.
 # DEFAULT: X-AUTH-TOKEN
 smt.spring.security.jwt.tokenName=some_token_name
 # The hashing algorithm used when generating the JWT token.
@@ -151,8 +153,8 @@ smt.spring.security.jwt.tokenName=some_token_name
 # VALUES: NONE, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
 # DEFAULT: HS512
 smt.spring.security.jwt.algorithm=RS512
-# The duration that the token will be valid for. It is in relation to the expiryUnit below. This will also be the
-# Max-Age of the JWT token cookie.
+# The duration that the token will be valid for. It is in relation to the expiryUnit below. This will also
+# be the Max-Age of the JWT token cookie.
 # DEFAULT: -1 (does not expire/session cookie)
 smt.spring.security.jwt.token.expiryDuration=30
 # The unit of time for the expiryDuration above. If the expiry is -1 this property is ignored.
