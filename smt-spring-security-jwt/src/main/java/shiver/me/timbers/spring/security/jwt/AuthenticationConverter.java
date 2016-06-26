@@ -16,11 +16,13 @@
 
 package shiver.me.timbers.spring.security.jwt;
 
+import org.springframework.security.core.Authentication;
+
 /**
  * @author Karl Bennett
  */
-public interface JwtPrincipleConverter<T> {
-    JwtPrinciple convert(T input);
+public interface AuthenticationConverter<T> {
+    T convert(Authentication input);
 
-    T convert(JwtPrinciple principle);
+    Authentication convert(T principle);
 }

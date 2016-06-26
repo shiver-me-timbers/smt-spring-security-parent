@@ -37,19 +37,19 @@ public class AuthenticationRequestJwtTokenParserTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     private String tokenName;
-    private JwtPrincipleConverter<Authentication> jwtPrincipleConverter;
-    private JwtTokenParser<JwtPrinciple, String> principleTokenParser;
+    private AuthenticationConverter<Object> authenticationConverter;
+    private JwtTokenParser<Object, String> principleTokenParser;
     private AuthenticationRequestJwtTokenParser tokenParser;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
         tokenName = someString();
-        jwtPrincipleConverter = mock(JwtPrincipleConverter.class);
+        authenticationConverter = mock(AuthenticationConverter.class);
         principleTokenParser = mock(JwtTokenParser.class);
-        tokenParser = new AuthenticationRequestJwtTokenParser(
+        tokenParser = new AuthenticationRequestJwtTokenParser<>(
             tokenName,
-            jwtPrincipleConverter,
+            authenticationConverter,
             principleTokenParser
         );
     }
@@ -59,12 +59,12 @@ public class AuthenticationRequestJwtTokenParserTest {
 
         final Authentication authentication = mock(Authentication.class);
 
-        final JwtPrinciple principle = mock(JwtPrinciple.class);
+        final Object principle = new Object();
 
         final String expected = someString();
 
         // Given
-        given(jwtPrincipleConverter.convert(authentication)).willReturn(principle);
+        given(authenticationConverter.convert(authentication)).willReturn(principle);
         given(principleTokenParser.create(principle)).willReturn(expected);
 
         // When
@@ -82,7 +82,7 @@ public class AuthenticationRequestJwtTokenParserTest {
 
         final Cookie cookie = mock(Cookie.class);
         final String token = someString();
-        final JwtPrinciple principle = mock(JwtPrinciple.class);
+        final Object principle = new Object();
         final Authentication expected = mock(Authentication.class);
 
         // Given
@@ -90,7 +90,7 @@ public class AuthenticationRequestJwtTokenParserTest {
         given(cookie.getName()).willReturn(tokenName);
         given(cookie.getValue()).willReturn(token);
         given(principleTokenParser.parse(token)).willReturn(principle);
-        given(jwtPrincipleConverter.convert(principle)).willReturn(expected);
+        given(authenticationConverter.convert(principle)).willReturn(expected);
 
         // When
         final Authentication actual = tokenParser.parse(request);
@@ -106,14 +106,14 @@ public class AuthenticationRequestJwtTokenParserTest {
         final HttpServletRequest request = mock(HttpServletRequest.class);
 
         final String token = someString();
-        final JwtPrinciple principle = mock(JwtPrinciple.class);
+        final Object principle = new Object();
         final Authentication expected = mock(Authentication.class);
 
         // Given
         given(request.getCookies()).willReturn(new Cookie[0]);
         given(request.getHeader(tokenName)).willReturn(token);
         given(principleTokenParser.parse(token)).willReturn(principle);
-        given(jwtPrincipleConverter.convert(principle)).willReturn(expected);
+        given(authenticationConverter.convert(principle)).willReturn(expected);
 
         // When
         final Authentication actual = tokenParser.parse(request);

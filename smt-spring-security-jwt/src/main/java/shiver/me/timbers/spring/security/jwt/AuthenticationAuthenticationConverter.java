@@ -25,11 +25,11 @@ import java.util.List;
 /**
  * @author Karl Bennett
  */
-public class AuthenticationJwtPrincipleConverter implements JwtPrincipleConverter<Authentication> {
+public class AuthenticationAuthenticationConverter implements AuthenticationConverter<JwtPrinciple> {
 
     private final GrantedAuthorityConverter<List<String>> grantedAuthorityConverter;
 
-    public AuthenticationJwtPrincipleConverter(GrantedAuthorityConverter<List<String>> grantedAuthorityConverter) {
+    public AuthenticationAuthenticationConverter(GrantedAuthorityConverter<List<String>> grantedAuthorityConverter) {
         this.grantedAuthorityConverter = grantedAuthorityConverter;
     }
 

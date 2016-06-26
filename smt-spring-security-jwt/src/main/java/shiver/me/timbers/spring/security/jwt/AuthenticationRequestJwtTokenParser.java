@@ -24,30 +24,30 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Karl Bennett
  */
-public class AuthenticationRequestJwtTokenParser implements JwtTokenParser<Authentication, HttpServletRequest> {
+public class AuthenticationRequestJwtTokenParser<T> implements JwtTokenParser<Authentication, HttpServletRequest> {
 
     private final String tokenName;
-    private final JwtPrincipleConverter<Authentication> jwtPrincipleConverter;
-    private final JwtTokenParser<JwtPrinciple, String> tokenParser;
+    private final AuthenticationConverter<T> authenticationConverter;
+    private final JwtTokenParser<T, String> tokenParser;
 
     public AuthenticationRequestJwtTokenParser(
         String tokenName,
-        JwtPrincipleConverter<Authentication> jwtPrincipleConverter,
-        JwtTokenParser<JwtPrinciple, String> tokenParser
+        AuthenticationConverter<T> authenticationConverter,
+        JwtTokenParser<T, String> tokenParser
     ) {
         this.tokenName = tokenName;
-        this.jwtPrincipleConverter = jwtPrincipleConverter;
+        this.authenticationConverter = authenticationConverter;
         this.tokenParser = tokenParser;
     }
 
     @Override
     public String create(Authentication authentication) throws JwtInvalidTokenException {
-        return tokenParser.create(jwtPrincipleConverter.convert(authentication));
+        return tokenParser.create(authenticationConverter.convert(authentication));
     }
 
     @Override
     public Authentication parse(HttpServletRequest request) throws JwtInvalidTokenException {
-        return jwtPrincipleConverter.convert(tokenParser.parse(findToken(request)));
+        return authenticationConverter.convert(tokenParser.parse(findToken(request)));
     }
 
     private String findToken(HttpServletRequest request) {

@@ -33,11 +33,11 @@ import shiver.me.timbers.spring.security.cookies.Bakery;
 import shiver.me.timbers.spring.security.cookies.CookieBakery;
 import shiver.me.timbers.spring.security.io.FileReader;
 import shiver.me.timbers.spring.security.io.ResourceFileReader;
-import shiver.me.timbers.spring.security.jwt.AuthenticationJwtPrincipleConverter;
+import shiver.me.timbers.spring.security.jwt.AuthenticationAuthenticationConverter;
+import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.jwt.JwtPrinciple;
-import shiver.me.timbers.spring.security.jwt.JwtPrincipleConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.MsgPackJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.RolesGrantedAuthorityConverter;
@@ -129,11 +129,11 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(AuthenticationRequestJwtTokenParser.class)
     @Autowired
-    public JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser(
-        JwtPrincipleConverter<Authentication> jwtPrincipleConverter,
-        JwtTokenParser<JwtPrinciple, String> principleJwtTokenParser
+    public <T> JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser(
+        AuthenticationConverter<T> authenticationConverter,
+        JwtTokenParser<T, String> jwtTokenParser
     ) {
-        return new AuthenticationRequestJwtTokenParser(tokenName, jwtPrincipleConverter, principleJwtTokenParser);
+        return new AuthenticationRequestJwtTokenParser<>(tokenName, authenticationConverter, jwtTokenParser);
     }
 
     @Bean
@@ -149,12 +149,12 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(JwtPrincipleConverter.class)
+    @ConditionalOnMissingBean(AuthenticationConverter.class)
     @Autowired
-    public JwtPrincipleConverter<Authentication> jwtPrincipleConverter(
+    public AuthenticationConverter<JwtPrinciple> jwtPrincipleConverter(
         GrantedAuthorityConverter<List<String>> grantedAuthorityConverter
     ) {
-        return new AuthenticationJwtPrincipleConverter(grantedAuthorityConverter);
+        return new AuthenticationAuthenticationConverter(grantedAuthorityConverter);
     }
 
     @Bean

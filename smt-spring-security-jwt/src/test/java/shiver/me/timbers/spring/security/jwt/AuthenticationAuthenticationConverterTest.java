@@ -32,16 +32,16 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
-public class AuthenticationJwtPrincipleConverterTest {
+public class AuthenticationAuthenticationConverterTest {
 
     private GrantedAuthorityConverter<List<String>> grantedAuthorityConverter;
-    private JwtPrincipleConverter<Authentication> converter;
+    private AuthenticationConverter<JwtPrinciple> converter;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
         grantedAuthorityConverter = mock(GrantedAuthorityConverter.class);
-        converter = new AuthenticationJwtPrincipleConverter(grantedAuthorityConverter);
+        converter = new AuthenticationAuthenticationConverter(grantedAuthorityConverter);
     }
 
     @Test
