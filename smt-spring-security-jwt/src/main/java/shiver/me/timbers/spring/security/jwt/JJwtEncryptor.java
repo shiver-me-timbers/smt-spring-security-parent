@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class JJwtEncryptor implements JwtEncryptor {
 
-    private final JwtBuilder builder;
+    private final JwtBuilderFactory builderFactory;
     private final SignatureAlgorithm algorithm;
     private final KeyPair keyPair;
     private final int expiryDuration;
@@ -36,14 +36,14 @@ public class JJwtEncryptor implements JwtEncryptor {
     private final Clock clock;
 
     public JJwtEncryptor(
-        JwtBuilder builder,
+        JwtBuilderFactory builderFactory,
         SignatureAlgorithm algorithm,
         KeyPair keyPair,
         int expiryDuration,
         TimeUnit expiryUnit,
         Clock clock
     ) {
-        this.builder = builder;
+        this.builderFactory = builderFactory;
         this.algorithm = algorithm;
         this.keyPair = keyPair;
         this.expiryDuration = expiryDuration;
@@ -53,7 +53,7 @@ public class JJwtEncryptor implements JwtEncryptor {
 
     @Override
     public String encrypt(Object principal) {
-        final JwtBuilder signedBuilder = builder.claim(PRINCIPAL, principal)
+        final JwtBuilder signedBuilder = builderFactory.create().claim(PRINCIPAL, principal)
             .signWith(algorithm, keyPair.getPrivate());
         if (expiryDuration >= 0) {
             return signedBuilder.setExpiration(clock.nowPlus(expiryDuration, expiryUnit)).compact();

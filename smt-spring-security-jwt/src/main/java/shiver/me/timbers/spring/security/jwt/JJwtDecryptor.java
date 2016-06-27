@@ -18,7 +18,6 @@ package shiver.me.timbers.spring.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.JwtParser;
 
 import java.security.KeyPair;
 import java.util.Map;
@@ -30,12 +29,12 @@ import static shiver.me.timbers.spring.security.jwt.JwtEncryptor.PRINCIPAL;
  */
 public class JJwtDecryptor implements JwtDecryptor {
 
-    private final JwtParser parser;
+    private final JwtParserFactory parserFactory;
     private final KeyPair keyPair;
     private final ObjectMapper objectMapper;
 
-    public JJwtDecryptor(JwtParser parser, KeyPair keyPair, ObjectMapper objectMapper) {
-        this.parser = parser;
+    public JJwtDecryptor(JwtParserFactory parserFactory, KeyPair keyPair, ObjectMapper objectMapper) {
+        this.parserFactory = parserFactory;
         this.keyPair = keyPair;
         this.objectMapper = objectMapper;
     }
@@ -44,7 +43,8 @@ public class JJwtDecryptor implements JwtDecryptor {
     public <T> T decrypt(String token, Class<T> type) {
         try {
             return objectMapper.convertValue(
-                parser.setSigningKey(keyPair.getPublic()).parseClaimsJws(token).getBody().get(PRINCIPAL, Map.class),
+                parserFactory.create().setSigningKey(keyPair.getPublic()).parseClaimsJws(token)
+                    .getBody().get(PRINCIPAL, Map.class),
                 type
             );
         } catch (IllegalArgumentException e) {

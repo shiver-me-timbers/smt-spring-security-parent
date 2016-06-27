@@ -17,9 +17,6 @@
 package shiver.me.timbers.spring.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,11 +33,15 @@ import shiver.me.timbers.spring.security.io.ResourceFileReader;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
+import shiver.me.timbers.spring.security.jwt.JJwtBuilderFactory;
 import shiver.me.timbers.spring.security.jwt.JJwtDecryptor;
 import shiver.me.timbers.spring.security.jwt.JJwtEncryptor;
+import shiver.me.timbers.spring.security.jwt.JJwtParserFactory;
 import shiver.me.timbers.spring.security.jwt.JJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.JwtBuilderFactory;
 import shiver.me.timbers.spring.security.jwt.JwtDecryptor;
 import shiver.me.timbers.spring.security.jwt.JwtEncryptor;
+import shiver.me.timbers.spring.security.jwt.JwtParserFactory;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipal;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipalAuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
@@ -176,26 +177,26 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtEncryptor.class)
-    public JwtEncryptor encryptor(JwtBuilder builder, KeyPair keyPair, Clock clock) {
-        return new JJwtEncryptor(builder, algorithm, keyPair, expiryDuration, expiryUnit, clock);
+    public JwtEncryptor encryptor(JwtBuilderFactory builderFactory, KeyPair keyPair, Clock clock) {
+        return new JJwtEncryptor(builderFactory, algorithm, keyPair, expiryDuration, expiryUnit, clock);
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtDecryptor.class)
-    public JwtDecryptor decryptor(JwtParser parser, KeyPair keyPair, ObjectMapper objectMapper) {
-        return new JJwtDecryptor(parser, keyPair, objectMapper);
+    public JwtDecryptor decryptor(JwtParserFactory parserFactory, KeyPair keyPair, ObjectMapper objectMapper) {
+        return new JJwtDecryptor(parserFactory, keyPair, objectMapper);
     }
 
     @Bean
-    @ConditionalOnMissingBean(JwtBuilder.class)
-    public JwtBuilder jwtBuilder() {
-        return Jwts.builder();
+    @ConditionalOnMissingBean(JwtBuilderFactory.class)
+    public JwtBuilderFactory jwtBuilderFactory() {
+        return new JJwtBuilderFactory();
     }
 
     @Bean
-    @ConditionalOnMissingBean(JwtParser.class)
-    public JwtParser jwtParser() {
-        return Jwts.parser();
+    @ConditionalOnMissingBean(JwtParserFactory.class)
+    public JwtParserFactory jwtParserFactory() {
+        return new JJwtParserFactory();
     }
 
     @Bean

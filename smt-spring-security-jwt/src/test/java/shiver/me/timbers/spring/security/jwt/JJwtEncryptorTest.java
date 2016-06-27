@@ -19,9 +19,7 @@ package shiver.me.timbers.spring.security.jwt;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import shiver.me.timbers.spring.security.time.Clock;
 
 import java.security.KeyPair;
@@ -43,10 +41,7 @@ public class JJwtEncryptorTest {
 
     private static final String PRINCIPAL = "principal";
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    private JwtBuilder builder;
+    private JwtBuilderFactory builderFactory;
     private SignatureAlgorithm algorithm;
     private PrivateKey privateKey;
     private KeyPair keyPair;
@@ -58,14 +53,14 @@ public class JJwtEncryptorTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
-        builder = mock(JwtBuilder.class);
+        builderFactory = mock(JwtBuilderFactory.class);
         algorithm = someEnum(SignatureAlgorithm.class);
         privateKey = mock(PrivateKey.class);
         keyPair = new KeyPair(mock(PublicKey.class), privateKey);
         expiryDuration = somePositiveInteger();
         expiryUnit = someEnum(TimeUnit.class);
         clock = mock(Clock.class);
-        encryptor = new JJwtEncryptor(builder, algorithm, keyPair, expiryDuration, expiryUnit, clock);
+        encryptor = new JJwtEncryptor(builderFactory, algorithm, keyPair, expiryDuration, expiryUnit, clock);
     }
 
     @Test
@@ -73,6 +68,7 @@ public class JJwtEncryptorTest {
 
         final String principal = someString();
 
+        final JwtBuilder builder = mock(JwtBuilder.class);
         final JwtBuilder principleBuilder = mock(JwtBuilder.class);
         final JwtBuilder secretBuilder = mock(JwtBuilder.class);
         final Date date = mock(Date.class);
@@ -81,6 +77,7 @@ public class JJwtEncryptorTest {
         final String expected = someString();
 
         // Given
+        given(builderFactory.create()).willReturn(builder);
         given(builder.claim(PRINCIPAL, principal)).willReturn(principleBuilder);
         given(principleBuilder.signWith(algorithm, privateKey)).willReturn(secretBuilder);
         given(clock.nowPlus(expiryDuration, expiryUnit)).willReturn(date);
@@ -99,18 +96,20 @@ public class JJwtEncryptorTest {
 
         final String principal = someString();
 
+        final JwtBuilder builder = mock(JwtBuilder.class);
         final JwtBuilder principleBuilder = mock(JwtBuilder.class);
         final JwtBuilder secretBuilder = mock(JwtBuilder.class);
 
         final String expected = someString();
 
         // Given
+        given(builderFactory.create()).willReturn(builder);
         given(builder.claim(PRINCIPAL, principal)).willReturn(principleBuilder);
         given(principleBuilder.signWith(algorithm, privateKey)).willReturn(secretBuilder);
         given(secretBuilder.compact()).willReturn(expected);
 
         // When
-        final String actual = new JJwtEncryptor(builder, algorithm, keyPair, -1, expiryUnit, clock)
+        final String actual = new JJwtEncryptor(builderFactory, algorithm, keyPair, -1, expiryUnit, clock)
             .encrypt(principal);
 
         // Then

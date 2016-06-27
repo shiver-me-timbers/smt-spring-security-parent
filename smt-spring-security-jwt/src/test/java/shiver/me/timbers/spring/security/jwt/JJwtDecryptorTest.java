@@ -45,7 +45,7 @@ public class JJwtDecryptorTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private JwtParser parser;
+    private JwtParserFactory parserFactory;
     private PublicKey publicKey;
     private KeyPair keyPair;
     private ObjectMapper objectMapper;
@@ -54,11 +54,11 @@ public class JJwtDecryptorTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
-        parser = mock(JwtParser.class);
+        parserFactory = mock(JwtParserFactory.class);
         publicKey = mock(PublicKey.class);
         keyPair = new KeyPair(publicKey, mock(PrivateKey.class));
         objectMapper = mock(ObjectMapper.class);
-        decryptor = new JJwtDecryptor(parser, keyPair, objectMapper);
+        decryptor = new JJwtDecryptor(parserFactory, keyPair, objectMapper);
     }
 
     @Test
@@ -67,6 +67,7 @@ public class JJwtDecryptorTest {
         final String token = someString();
         final Class<Object> type = Object.class;
 
+        final JwtParser parser = mock(JwtParser.class);
         final JwtParser secretParser = mock(JwtParser.class);
         @SuppressWarnings("unchecked")
         final Jws<Claims> jws = mock(Jws.class);
@@ -76,6 +77,7 @@ public class JJwtDecryptorTest {
         final Object expected = new Object();
 
         // Given
+        given(parserFactory.create()).willReturn(parser);
         given(parser.setSigningKey(publicKey)).willReturn(secretParser);
         given(secretParser.parseClaimsJws(token)).willReturn(jws);
         given(jws.getBody()).willReturn(claims);
@@ -94,11 +96,13 @@ public class JJwtDecryptorTest {
 
         final String token = someString();
 
+        final JwtParser parser = mock(JwtParser.class);
         final JwtParser secretParser = mock(JwtParser.class);
 
         final JwtException exception = new JwtException(someString());
 
         // Given
+        given(parserFactory.create()).willReturn(parser);
         given(parser.setSigningKey(publicKey)).willReturn(secretParser);
         given(secretParser.parseClaimsJws(token)).willThrow(exception);
         expectedException.expect(JwtInvalidTokenException.class);
@@ -111,11 +115,13 @@ public class JJwtDecryptorTest {
     @Test
     public void Can_fail_to_parse_an_empty_jwt_token() throws JwtInvalidTokenException {
 
+        final JwtParser parser = mock(JwtParser.class);
         final JwtParser secretParser = mock(JwtParser.class);
 
         final IllegalArgumentException exception = new IllegalArgumentException();
 
         // Given
+        given(parserFactory.create()).willReturn(parser);
         given(parser.setSigningKey(publicKey)).willReturn(secretParser);
         given(secretParser.parseClaimsJws("")).willThrow(exception);
         expectedException.expect(JwtInvalidTokenException.class);
