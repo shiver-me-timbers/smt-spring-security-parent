@@ -16,99 +16,42 @@
 
 package shiver.me.timbers.spring.security.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import shiver.me.timbers.spring.security.time.Clock;
 
 import java.io.IOException;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static shiver.me.timbers.data.random.RandomEnums.someEnum;
-import static shiver.me.timbers.data.random.RandomIntegers.somePositiveInteger;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
 public class JJwtTokenParserTest {
 
-    private static final String PRINCIPAL = "principal";
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    private JwtParser parser;
-    private JwtBuilder builder;
-    private SignatureAlgorithm algorithm;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
-    private KeyPair keyPair;
-    private Integer expiryDuration;
-    private TimeUnit expiryUnit;
-    private Clock clock;
-    private ObjectMapper objectMapper;
+    private Class<Object> type;
+    private JwtEncryptor encryptor;
+    private JwtDecryptor decryptor;
     private JwtTokenParser<Object, String> tokenParser;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
-        parser = mock(JwtParser.class);
-        builder = mock(JwtBuilder.class);
-        algorithm = someEnum(SignatureAlgorithm.class);
-        publicKey = mock(PublicKey.class);
-        privateKey = mock(PrivateKey.class);
-        keyPair = new KeyPair(publicKey, privateKey);
-        expiryDuration = somePositiveInteger();
-        expiryUnit = someEnum(TimeUnit.class);
-        clock = mock(Clock.class);
-        objectMapper = mock(ObjectMapper.class);
-        tokenParser = new JJwtTokenParser<>(
-            Object.class,
-            builder,
-            parser,
-            algorithm,
-            keyPair,
-            expiryDuration,
-            expiryUnit,
-            clock,
-            objectMapper
-        );
+        type = Object.class;
+        encryptor = mock(JwtEncryptor.class);
+        decryptor = mock(JwtDecryptor.class);
+        tokenParser = new JJwtTokenParser<>(type, encryptor, decryptor);
     }
 
     @Test
-    public void Can_create_a_jwt_token_from_a_principle() throws IOException {
+    public void Can_create_a_jwt_token_from_a_principle() {
 
         final String principal = someString();
-
-        final JwtBuilder principleBuilder = mock(JwtBuilder.class);
-        final JwtBuilder secretBuilder = mock(JwtBuilder.class);
-        final Date date = mock(Date.class);
-        final JwtBuilder expiringBuilder = mock(JwtBuilder.class);
 
         final String expected = someString();
 
         // Given
-        given(builder.claim(PRINCIPAL, principal)).willReturn(principleBuilder);
-        given(principleBuilder.signWith(algorithm, privateKey)).willReturn(secretBuilder);
-        given(clock.nowPlus(expiryDuration, expiryUnit)).willReturn(date);
-        given(secretBuilder.setExpiration(date)).willReturn(expiringBuilder);
-        given(expiringBuilder.compact()).willReturn(expected);
+        given(encryptor.encrypt(principal)).willReturn(expected);
 
         // When
         final String actual = tokenParser.create(principal);
@@ -118,90 +61,19 @@ public class JJwtTokenParserTest {
     }
 
     @Test
-    public void Can_create_a_jwt_token_with_no_expiry() throws IOException {
-
-        final String principal = someString();
-
-        final JwtBuilder principleBuilder = mock(JwtBuilder.class);
-        final JwtBuilder secretBuilder = mock(JwtBuilder.class);
-
-        final String expected = someString();
-
-        // Given
-        given(builder.claim(PRINCIPAL, principal)).willReturn(principleBuilder);
-        given(principleBuilder.signWith(algorithm, privateKey)).willReturn(secretBuilder);
-        given(secretBuilder.compact()).willReturn(expected);
-
-        // When
-        final String actual = new JJwtTokenParser<>(
-            Object.class, builder, parser, algorithm, keyPair, -1, expiryUnit, clock, objectMapper
-        ).create(principal);
-
-        // Then
-        verifyZeroInteractions(clock);
-        assertThat(actual, is(expected));
-    }
-
-    @Test
     public void Can_parse_a_jwt_token() throws IOException {
 
         final String token = someString();
 
-        final JwtParser secretParser = mock(JwtParser.class);
-        @SuppressWarnings("unchecked")
-        final Jws<Claims> jws = mock(Jws.class);
-        final Claims claims = mock(Claims.class);
-        final Map map = mock(Map.class);
-
         final Object expected = new Object();
 
         // Given
-        given(parser.setSigningKey(publicKey)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws(token)).willReturn(jws);
-        given(jws.getBody()).willReturn(claims);
-        given(claims.get(PRINCIPAL, Map.class)).willReturn(map);
-        given(objectMapper.convertValue(map, Object.class)).willReturn(expected);
+        given(decryptor.decrypt(token, type)).willReturn(expected);
 
         // When
         final Object actual = tokenParser.parse(token);
 
         // Then
         assertThat(actual, is(expected));
-    }
-
-    @Test
-    public void Can_fail_parse_a_jwt_token() throws JwtInvalidTokenException {
-
-        final String token = someString();
-
-        final JwtParser secretParser = mock(JwtParser.class);
-
-        final JwtException exception = new JwtException(someString());
-
-        // Given
-        given(parser.setSigningKey(publicKey)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws(token)).willThrow(exception);
-        expectedException.expect(JwtInvalidTokenException.class);
-        expectedException.expectCause(is(exception));
-
-        // When
-        tokenParser.parse(token);
-    }
-
-    @Test
-    public void Can_fail_to_parse_an_empty_jwt_token() throws JwtInvalidTokenException {
-
-        final JwtParser secretParser = mock(JwtParser.class);
-
-        final IllegalArgumentException exception = new IllegalArgumentException();
-
-        // Given
-        given(parser.setSigningKey(publicKey)).willReturn(secretParser);
-        given(secretParser.parseClaimsJws("")).willThrow(exception);
-        expectedException.expect(JwtInvalidTokenException.class);
-        expectedException.expectCause(is(exception));
-
-        // When
-        tokenParser.parse("");
     }
 }

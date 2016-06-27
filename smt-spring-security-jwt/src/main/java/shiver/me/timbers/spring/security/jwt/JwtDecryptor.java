@@ -19,25 +19,6 @@ package shiver.me.timbers.spring.security.jwt;
 /**
  * @author Karl Bennett
  */
-public class JJwtTokenParser<T> implements JwtTokenParser<T, String> {
-
-    private final Class<T> type;
-    private final JwtEncryptor encryptor;
-    private final JwtDecryptor decryptor;
-
-    public JJwtTokenParser(Class<T> type, JwtEncryptor encryptor, JwtDecryptor decryptor) {
-        this.type = type;
-        this.encryptor = encryptor;
-        this.decryptor = decryptor;
-    }
-
-    @Override
-    public String create(T principal) {
-        return encryptor.encrypt(principal);
-    }
-
-    @Override
-    public T parse(String token) {
-        return decryptor.decrypt(token, type);
-    }
+public interface JwtDecryptor {
+    <T> T decrypt(String token, Class<T> type);
 }

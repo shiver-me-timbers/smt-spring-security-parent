@@ -16,9 +16,6 @@
 
 package shiver.me.timbers.spring.security.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,10 +23,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.JJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.JwtDecryptor;
+import shiver.me.timbers.spring.security.jwt.JwtEncryptor;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
-import shiver.me.timbers.spring.security.time.Clock;
 
-import java.security.KeyPair;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.spy;
@@ -53,23 +50,7 @@ public class JwtCustomPrincipleConfiguration {
 
     @Bean
     @Autowired
-    public JwtTokenParser<CustomPrincipal, String> jwtTokenParser(
-        JwtBuilder builder,
-        JwtParser parser,
-        KeyPair keyPair,
-        Clock clock,
-        ObjectMapper objectMapper
-    ) {
-        return new JJwtTokenParser<>(
-            CustomPrincipal.class,
-            builder,
-            parser,
-            algorithm,
-            keyPair,
-            expiryDuration,
-            expiryUnit,
-            clock,
-            objectMapper
-        );
+    public JwtTokenParser<CustomPrincipal, String> jwtTokenParser(JwtEncryptor encryptor, JwtDecryptor decryptor) {
+        return new JJwtTokenParser<>(CustomPrincipal.class, encryptor, decryptor);
     }
 }

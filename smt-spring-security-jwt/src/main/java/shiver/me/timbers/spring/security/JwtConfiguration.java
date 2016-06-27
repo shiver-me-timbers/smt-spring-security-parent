@@ -36,7 +36,11 @@ import shiver.me.timbers.spring.security.io.ResourceFileReader;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
+import shiver.me.timbers.spring.security.jwt.JJwtDecryptor;
+import shiver.me.timbers.spring.security.jwt.JJwtEncryptor;
 import shiver.me.timbers.spring.security.jwt.JJwtTokenParser;
+import shiver.me.timbers.spring.security.jwt.JwtDecryptor;
+import shiver.me.timbers.spring.security.jwt.JwtEncryptor;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipal;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipalAuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
@@ -160,30 +164,26 @@ public class JwtConfiguration {
     @Bean
     @ConditionalOnMissingBean(JJwtTokenParser.class)
     @Autowired
-    public JwtTokenParser<JwtPrincipal, String> jwtTokenParser(
-        JwtBuilder builder,
-        JwtParser parser,
-        KeyPair keyPair,
-        Clock clock,
-        ObjectMapper objectMapper
-    ) {
-        return new JJwtTokenParser<>(
-            JwtPrincipal.class,
-            builder,
-            parser,
-            algorithm,
-            keyPair,
-            expiryDuration,
-            expiryUnit,
-            clock,
-            objectMapper
-        );
+    public JwtTokenParser<JwtPrincipal, String> jwtTokenParser(JwtEncryptor encryptor, JwtDecryptor decryptor) {
+        return new JJwtTokenParser<>(JwtPrincipal.class, encryptor, decryptor);
     }
 
     @Bean
     @ConditionalOnMissingBean(GrantedAuthorityConverter.class)
     public GrantedAuthorityConverter<List<String>> grantedAuthorityConverter() {
         return new RolesGrantedAuthorityConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtEncryptor.class)
+    public JwtEncryptor encryptor(JwtBuilder builder, KeyPair keyPair, Clock clock) {
+        return new JJwtEncryptor(builder, algorithm, keyPair, expiryDuration, expiryUnit, clock);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtDecryptor.class)
+    public JwtDecryptor decryptor(JwtParser parser, KeyPair keyPair, ObjectMapper objectMapper) {
+        return new JJwtDecryptor(parser, keyPair, objectMapper);
     }
 
     @Bean

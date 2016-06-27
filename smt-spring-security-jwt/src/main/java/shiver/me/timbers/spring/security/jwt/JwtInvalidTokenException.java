@@ -16,12 +16,10 @@
 
 package shiver.me.timbers.spring.security.jwt;
 
-import java.io.IOException;
-
 /**
  * @author Karl Bennett
  */
-public class JwtInvalidTokenException extends IOException {
+public class JwtInvalidTokenException extends RuntimeException {
 
     public JwtInvalidTokenException(Throwable cause) {
         super(cause);
