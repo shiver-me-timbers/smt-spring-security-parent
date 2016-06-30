@@ -75,9 +75,11 @@
     </dependencies>
 
     <modules>
+        <module>smt-spring-security-integration</module>
         <module>smt-spring-security-jwt-integration</module>
         <module>smt-spring-security-jwt-hmac-integration</module>
         <module>smt-spring-security-jwt-rsa-integration</module>
         <module>smt-spring-security-jwt-ecdsa-integration</module>
+        <module>smt-spring-security-stormpath-integration</module>
     </modules>
 </project>

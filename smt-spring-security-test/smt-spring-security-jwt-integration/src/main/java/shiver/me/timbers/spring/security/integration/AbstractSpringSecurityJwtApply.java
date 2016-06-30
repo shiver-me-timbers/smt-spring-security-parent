@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static shiver.me.timbers.spring.security.integration.SpringSecurityJwtController.TEXT;
+import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JwtApplySecurityConfiguration.class)

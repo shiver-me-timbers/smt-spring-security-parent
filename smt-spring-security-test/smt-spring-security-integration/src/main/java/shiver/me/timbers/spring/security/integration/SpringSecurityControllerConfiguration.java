@@ -16,20 +16,14 @@
 
 package shiver.me.timbers.spring.security.integration;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static shiver.me.timbers.data.random.RandomStrings.someString;
+@Configuration
+public class SpringSecurityControllerConfiguration {
 
-@RestController
-public class SpringSecurityJwtController {
-
-    static final String TEXT = someString();
-
-    @RequestMapping(method = GET, produces = TEXT_PLAIN_VALUE)
-    public String request() {
-        return TEXT;
+    @Bean
+    public SpringSecurityController controller() {
+        return new SpringSecurityController();
     }
 }

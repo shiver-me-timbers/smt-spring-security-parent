@@ -41,7 +41,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.junit.Assert.assertThat;
-import static shiver.me.timbers.spring.security.integration.SpringSecurityJwtController.TEXT;
+import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JwtAnnotationSecurityConfiguration.class)

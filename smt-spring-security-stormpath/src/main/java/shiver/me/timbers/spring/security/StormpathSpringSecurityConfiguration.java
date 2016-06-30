@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.integration;
+package shiver.me.timbers.spring.security;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
-@Configuration
-public class SpringSecurityControllerConfiguration {
+/**
+ * @author Karl Bennett
+ */
+@EnableWebSecurity
+public class StormpathSpringSecurityConfiguration {
 
-    @Bean
-    public SpringSecurityJwtController controller() {
-        return new SpringSecurityJwtController();
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication().withUser("test").password("Password1").roles("USER");
     }
 }

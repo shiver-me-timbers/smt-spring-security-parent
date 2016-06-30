@@ -24,23 +24,20 @@
         <version>1.4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smt-spring-security-jwt-integration</artifactId>
+    <artifactId>smt-spring-security-integration</artifactId>
 
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
 
-    <description>This project contains the integration tests for the smt-spring-security-jwt library.</description>
+    <description>
+        This project contains the common code used by all the smt-spring-security integration tests.
+    </description>
 
     <dependencies>
         <dependency>
             <groupId>com.github.shiver-me-timbers</groupId>
             <artifactId>smt-spring-security-jwt</artifactId>
-            <version>1.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.shiver-me-timbers</groupId>
-            <artifactId>smt-spring-security-integration</artifactId>
             <version>1.4-SNAPSHOT</version>
         </dependency>
     </dependencies>

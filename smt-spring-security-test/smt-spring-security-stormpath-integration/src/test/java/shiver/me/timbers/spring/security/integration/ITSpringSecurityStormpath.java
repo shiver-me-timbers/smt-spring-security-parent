@@ -20,17 +20,14 @@ package shiver.me.timbers.spring.security.integration;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
@@ -42,27 +39,16 @@ import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static shiver.me.timbers.matchers.Matchers.hasField;
-import static shiver.me.timbers.matchers.Matchers.hasProperty;
 import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = StormpathSecurityConfiguration.class)
 @WebIntegrationTest
 @DirtiesContext
-public abstract class AbstractJwtCustomPrinciple {
+public class ITSpringSecurityStormpath {
 
     @Value("${local.server.port}")
     private int port;
-
-    @Value("${smt.spring.security.jwt.tokenName}")
-    private String tokenName;
-
-    @Autowired
-    private AuthenticationConverter<CustomPrincipal> authenticationConverter;
 
     private WebTarget annotationTarget;
 
@@ -70,33 +56,25 @@ public abstract class AbstractJwtCustomPrinciple {
     public void setUp() {
         final JerseyClient client = JerseyClientBuilder.createClient();
         client.property(ClientProperties.FOLLOW_REDIRECTS, false);
-        annotationTarget = client.target(format("http://localhost:%d/custom", port));
-    }
-
-    @After
-    @SuppressWarnings("unchecked")
-    public void tearDown() {
-        reset(authenticationConverter);
+        annotationTarget = client.target(format("http://localhost:%d/stormpath", port));
     }
 
     @Test
-    public void Can_sign_in_using_a_custom_principle() {
+    public void Can_sign_in_to_all_security_contexts_with_jwt_cookie() {
 
         final Form form = new Form();
 
         // Given
-        form.param("username", "user");
-        form.param("password", "password");
-        final Response annotationForbidden = annotationTarget.request().get();
+        form.param("username", "test");
+        form.param("password", "Password1");
+        final Response forbidden = annotationTarget.request().get();
         final Response signIn = annotationTarget.path("signIn").request().post(form(form));
 
         // When
-        final Response annotation = annotationTarget.request().cookie(signIn.getCookies().get(tokenName)).get();
+        final Response annotation = annotationTarget.request().cookie(signIn.getCookies().get("JSESSIONID")).get();
 
         // Then
-        verify(authenticationConverter).convert((Authentication) argThat(hasProperty("principal.username", "user")));
-        verify(authenticationConverter, times(2)).convert((CustomPrincipal) argThat(hasField("username", "user")));
-        assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
+        assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.readEntity(String.class), is(TEXT));
