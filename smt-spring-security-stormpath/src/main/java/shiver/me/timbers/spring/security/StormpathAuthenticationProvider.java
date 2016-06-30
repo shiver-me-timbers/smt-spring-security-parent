@@ -16,6 +16,8 @@
 
 package shiver.me.timbers.spring.security;
 
+import com.stormpath.sdk.application.Application;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
@@ -26,12 +28,28 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public class StormpathAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
+    private final Application application;
+    private final StormpathAuthenticationRequestFactory requests;
+    private final UserDetailsConverter converter;
+
+    public StormpathAuthenticationProvider(
+        Application application,
+        StormpathAuthenticationRequestFactory requests,
+        UserDetailsConverter converter
+    ) {
+        this.application = application;
+        this.requests = requests;
+        this.converter = converter;
+    }
+
     @Override
     protected void additionalAuthenticationChecks(
         UserDetails userDetails,
         UsernamePasswordAuthenticationToken authentication
     ) throws AuthenticationException {
-        throw new UnsupportedOperationException();
+        if (!userDetails.getPassword().equals(authentication.getCredentials())) {
+            throw new BadCredentialsException("Password is incorrect.");
+        }
     }
 
     @Override
@@ -39,6 +57,6 @@ public class StormpathAuthenticationProvider extends AbstractUserDetailsAuthenti
         String username,
         UsernamePasswordAuthenticationToken authentication
     ) throws AuthenticationException {
-        throw new UnsupportedOperationException();
+        return converter.convert(application.authenticateAccount(requests.create(username, authentication)));
     }
 }
