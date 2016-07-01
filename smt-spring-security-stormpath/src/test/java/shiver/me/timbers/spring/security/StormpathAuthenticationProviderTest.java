@@ -19,8 +19,12 @@ package shiver.me.timbers.spring.security;
 import com.stormpath.sdk.application.Application;
 import com.stormpath.sdk.authc.AuthenticationRequest;
 import com.stormpath.sdk.authc.AuthenticationResult;
+import com.stormpath.sdk.error.Error;
+import com.stormpath.sdk.resource.ResourceException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,10 +33,13 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 
 public class StormpathAuthenticationProviderTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private Application application;
     private StormpathAuthenticationRequestFactory requests;
@@ -48,37 +55,13 @@ public class StormpathAuthenticationProviderTest {
     }
 
     @Test
-    public void Can_verify_that_the_accounts_password_is_correct() {
-
-        final UserDetails userDetails = mock(UserDetails.class);
-        final UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
-
-        final String password = someString();
-
-        // Given
-        given(userDetails.getPassword()).willReturn(password);
-        given(authentication.getCredentials()).willReturn(password);
+    public void No_additional_checks_carried_out() {
 
         // When
-        provider.additionalAuthenticationChecks(userDetails, authentication);
+        provider.additionalAuthenticationChecks(null, null);
 
         // Then
-        verify(userDetails).getPassword();
-        verify(authentication).getCredentials();
-    }
-
-    @Test(expected = BadCredentialsException.class)
-    public void Can_verify_that_the_accounts_password_is_in_correct() {
-
-        final UserDetails userDetails = mock(UserDetails.class);
-        final UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
-
-        // Given
-        given(userDetails.getPassword()).willReturn(someString());
-        given(authentication.getCredentials()).willReturn(someString());
-
-        // When
-        provider.additionalAuthenticationChecks(userDetails, authentication);
+        verifyZeroInteractions(application, requests, converter);
     }
 
     @Test
@@ -101,5 +84,25 @@ public class StormpathAuthenticationProviderTest {
 
         // Then
         assertThat(actual, is(expected));
+    }
+
+    @Test
+    public void Can_fail_to_retrieve_the_user_details() {
+
+        final String username = someString();
+        final UsernamePasswordAuthenticationToken authentication = mock(UsernamePasswordAuthenticationToken.class);
+
+        final AuthenticationRequest request = mock(AuthenticationRequest.class);
+        final ResourceException exception = new ResourceException(mock(Error.class));
+
+        // Given
+        given(requests.create(username, authentication)).willReturn(request);
+        given(application.authenticateAccount(request)).willThrow(exception);
+        expectedException.expect(BadCredentialsException.class);
+        expectedException.expectMessage("Invalid credentials for " + username);
+        expectedException.expectCause(is(exception));
+
+        // When
+        provider.retrieveUser(username, authentication);
     }
 }

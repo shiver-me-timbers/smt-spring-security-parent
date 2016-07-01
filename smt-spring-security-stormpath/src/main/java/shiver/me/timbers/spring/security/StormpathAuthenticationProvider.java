@@ -17,6 +17,7 @@
 package shiver.me.timbers.spring.security;
 
 import com.stormpath.sdk.application.Application;
+import com.stormpath.sdk.resource.ResourceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
@@ -47,9 +48,6 @@ public class StormpathAuthenticationProvider extends AbstractUserDetailsAuthenti
         UserDetails userDetails,
         UsernamePasswordAuthenticationToken authentication
     ) throws AuthenticationException {
-        if (!userDetails.getPassword().equals(authentication.getCredentials())) {
-            throw new BadCredentialsException("Password is incorrect.");
-        }
     }
 
     @Override
@@ -57,6 +55,10 @@ public class StormpathAuthenticationProvider extends AbstractUserDetailsAuthenti
         String username,
         UsernamePasswordAuthenticationToken authentication
     ) throws AuthenticationException {
-        return converter.convert(application.authenticateAccount(requests.create(username, authentication)));
+        try {
+            return converter.convert(application.authenticateAccount(requests.create(username, authentication)));
+        } catch (ResourceException e) {
+            throw new BadCredentialsException("Invalid credentials for " + username, e);
+        }
     }
 }

@@ -16,7 +16,9 @@
 
 package shiver.me.timbers.spring.security;
 
+import com.stormpath.sdk.application.Application;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
@@ -24,10 +26,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
  * @author Karl Bennett
  */
 @EnableWebSecurity
+@Import(StormpathConfiguration.class)
 public class StormpathSpringSecurityConfiguration {
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser("test").password("Password1").roles("USER");
+    public void configureGlobal(
+        AuthenticationManagerBuilder auth,
+        Application application,
+        StormpathAuthenticationRequestFactory requests,
+        UserDetailsConverter converter
+    ) throws Exception {
+        auth.authenticationProvider(new StormpathAuthenticationProvider(application, requests, converter));
     }
 }
