@@ -30,14 +30,21 @@ import shiver.me.timbers.spring.security.EnableStormpathAuthentication;
 @EnableAutoConfiguration
 @EnableWebSecurity
 @EnableStormpathAuthentication
-@Import({StormpathApplicationConfiguration.class, SpringSecurityControllerConfiguration.class})
+@Import({
+    StormpathMockApplicationConfiguration.class,
+    StormpathRealApplicationConfiguration.class,
+    SpringSecurityControllerConfiguration.class
+})
 public class StormpathAuthenticationConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {
         http.antMatcher("/stormpath/**");
         http.csrf().disable();
-        http.authorizeRequests().anyRequest().authenticated();
+        http.authorizeRequests()
+            .antMatchers("/stormpath/one").access("hasRole('ONE')")
+            .antMatchers("/stormpath/two").access("hasRole('TWO')")
+            .anyRequest().authenticated();
         http.formLogin().successHandler(new NoRedirectAuthenticationSuccessHandler()).loginPage("/stormpath/signIn")
             .permitAll();
         http.logout().logoutUrl("/stormpath/signOut")

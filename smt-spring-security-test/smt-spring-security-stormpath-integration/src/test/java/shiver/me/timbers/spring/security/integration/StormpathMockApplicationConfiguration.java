@@ -17,15 +17,17 @@
 package shiver.me.timbers.spring.security.integration;
 
 import com.stormpath.sdk.application.Application;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import shiver.me.timbers.http.mock.HttpMockServer;
 
 @Configuration
 @Profile("default")
-public class StormpathApplicationConfiguration {
+public class StormpathMockApplicationConfiguration {
 
     @Value("${smt.spring.security.stormpath.apiKey.id}")
     private String apiKeyId;
@@ -39,5 +41,11 @@ public class StormpathApplicationConfiguration {
     @Bean
     public Application application(final Environment environment) {
         return new DeferredApplication(apiKeyId, apiKeySecret, applicationName, environment);
+    }
+
+    @Bean
+    @Autowired
+    public MockStormpath stormpathMock(HttpMockServer http) {
+        return new HttpMockStormpath(applicationName, http);
     }
 }
