@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.jwt;
+package shiver.me.timbers.spring.security;
 
+import com.stormpath.sdk.group.GroupList;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -23,9 +24,6 @@ import java.util.Collection;
 /**
  * @author Karl Bennett
  */
-public interface GrantedAuthorityConverter<I> {
-
-    Collection<? extends GrantedAuthority> convert(I input);
-
-    I convert(Collection<? extends GrantedAuthority> authorities);
+public interface GroupGrantedAuthorityConverter {
+    Collection<? extends GrantedAuthority> convert(GroupList groups);
 }

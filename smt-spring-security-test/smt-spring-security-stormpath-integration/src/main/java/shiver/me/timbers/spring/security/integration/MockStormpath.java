@@ -31,7 +31,11 @@ public interface MockStormpath {
 
     void mockLogin(String baseUrl, String username, String password) throws IOException;
 
+    void mockLogin(String baseUrl, String username, String password, String authenticationId) throws IOException;
+
     void mockEmptyGroups(String baseUrl) throws IOException;
+
+    void mockGroups(String fileName, String baseUrl, String authenticationId) throws IOException;
 
     void verifyCurrentTenant() throws IOException;
 
@@ -42,4 +46,6 @@ public interface MockStormpath {
     void verifyLogin(String username, String password) throws IOException;
 
     void verifyEmptyGroups() throws IOException;
+
+    void verifyGroups(String authenticationId) throws IOException;
 }

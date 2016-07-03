@@ -20,16 +20,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import shiver.me.timbers.spring.security.JwtAuthentication;
 
-import java.util.List;
-
 /**
  * @author Karl Bennett
  */
 public class JwtPrincipalAuthenticationConverter implements AuthenticationConverter<JwtPrincipal> {
 
-    private final GrantedAuthorityConverter<List<String>> grantedAuthorityConverter;
+    private final RolesGrantedAuthorityConverter grantedAuthorityConverter;
 
-    public JwtPrincipalAuthenticationConverter(GrantedAuthorityConverter<List<String>> grantedAuthorityConverter) {
+    public JwtPrincipalAuthenticationConverter(RolesGrantedAuthorityConverter grantedAuthorityConverter) {
         this.grantedAuthorityConverter = grantedAuthorityConverter;
     }
 

@@ -33,6 +33,25 @@
         This is the parent project that groups all the smt-spring-security integration test projects.
     </description>
 
+    <profiles>
+        <profile>
+            <id>real-stormpath</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <spring.profiles.active>real-stormpath</spring.profiles.active>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -81,5 +100,6 @@
         <module>smt-spring-security-jwt-rsa-integration</module>
         <module>smt-spring-security-jwt-ecdsa-integration</module>
         <module>smt-spring-security-stormpath-integration</module>
+        <module>smt-spring-security-all-integration</module>
     </modules>
 </project>

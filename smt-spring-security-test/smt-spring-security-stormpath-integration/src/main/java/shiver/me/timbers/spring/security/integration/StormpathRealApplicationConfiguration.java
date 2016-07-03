@@ -46,7 +46,16 @@ public class StormpathRealApplicationConfiguration {
             }
 
             @Override
+            public void mockLogin(String baseUrl, String username, String password, String authenticationId)
+                throws IOException {
+            }
+
+            @Override
             public void mockEmptyGroups(String baseUrl) throws IOException {
+            }
+
+            @Override
+            public void mockGroups(String fileName, String baseUrl, String authenticationId) throws IOException {
             }
 
             @Override
@@ -67,6 +76,10 @@ public class StormpathRealApplicationConfiguration {
 
             @Override
             public void verifyEmptyGroups() throws IOException {
+            }
+
+            @Override
+            public void verifyGroups(String authenticationId) throws IOException {
             }
         };
     }

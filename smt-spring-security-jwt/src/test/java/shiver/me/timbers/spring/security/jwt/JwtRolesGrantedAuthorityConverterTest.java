@@ -32,13 +32,13 @@ import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 import static shiver.me.timbers.matchers.Matchers.hasField;
 
-public class RolesGrantedAuthorityConverterTest {
+public class JwtRolesGrantedAuthorityConverterTest {
 
     private RolesGrantedAuthorityConverter converter;
 
     @Before
     public void setUp() {
-        converter = new RolesGrantedAuthorityConverter();
+        converter = new JwtRolesGrantedAuthorityConverter();
     }
 
     @Test

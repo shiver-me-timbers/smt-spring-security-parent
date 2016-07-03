@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security.jwt;
+package shiver.me.timbers.spring.security.integration;
 
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
-import java.util.List;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-/**
- * @author Karl Bennett
- */
-public interface RolesGrantedAuthorityConverter {
-
-    Collection<? extends GrantedAuthority> convert(List<String> roles);
-
-    List<String> convert(Collection<? extends GrantedAuthority> authorities);
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = AllAnnotationAuthenticationConfiguration.class)
+@WebIntegrationTest
+@DirtiesContext
+public class ITSpringSecurityAnnotationAll extends AbstractSpringSecurityAll {
 }

@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 import static shiver.me.timbers.matchers.Matchers.hasField;
 
-public class GroupsGrantedAuthorityConverterTest {
+public class StormpathGroupGrantedAuthorityConverterTest {
 
     @Test
     public void Can_convert_groups_to_granted_authorities() {
@@ -56,7 +56,7 @@ public class GroupsGrantedAuthorityConverterTest {
         given(group3.getName()).willReturn(groupName3);
 
         // When
-        final Collection<? extends GrantedAuthority> actual = new GroupsGrantedAuthorityConverter().convert(groups);
+        final Collection<? extends GrantedAuthority> actual = new StormpathGroupGrantedAuthorityConverter().convert(groups);
 
         // Then
         assertThat(actual, contains(hasField("role", groupName1), hasField("role", groupName3)));

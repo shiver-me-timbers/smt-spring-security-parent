@@ -171,7 +171,7 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
             .cookie(role2SignIn.getCookies().get(tokenName)).get();
         final Response role2Failure = annotationTarget.path("one").request()
             .cookie(role2SignIn.getCookies().get(tokenName)).get();
-        final Response normal = normalTarget.request().header(tokenName, role1SignIn.getHeaderString(tokenName)).get();
+        final Response normal = normalTarget.request().cookie(role1SignIn.getCookies().get(tokenName)).get();
 
         // Then
         assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));

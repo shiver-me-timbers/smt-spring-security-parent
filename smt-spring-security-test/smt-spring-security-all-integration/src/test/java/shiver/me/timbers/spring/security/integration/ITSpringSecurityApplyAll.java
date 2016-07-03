@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package shiver.me.timbers.spring.security;
+package shiver.me.timbers.spring.security.integration;
 
-import com.stormpath.sdk.group.GroupList;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-/**
- * @author Karl Bennett
- */
-public interface GrantedAuthorityConverter {
-    Collection<? extends GrantedAuthority> convert(GroupList groups);
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = AllApplyAuthenticationConfiguration.class)
+@WebIntegrationTest
+@DirtiesContext
+public class ITSpringSecurityApplyAll extends AbstractSpringSecurityAll {
 }

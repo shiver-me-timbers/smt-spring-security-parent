@@ -46,6 +46,7 @@ public class HttpMockStormpath implements MockStormpath {
     private final String tenantId;
     private final String applicationId;
     private final String authenticationId;
+    private final String directoryId;
 
     public HttpMockStormpath(String applicationName, HttpMockServer http) {
         this.applicationName = applicationName;
@@ -64,6 +65,7 @@ public class HttpMockStormpath implements MockStormpath {
         tenantId = someAlphaNumericString(22);
         applicationId = someAlphaNumericString(22);
         authenticationId = someAlphaNumericString(22);
+        directoryId = someAlphaNumericString(22);
     }
 
     @Override
@@ -94,19 +96,34 @@ public class HttpMockStormpath implements MockStormpath {
 
     @Override
     public void mockLogin(String baseUrl, String username, String password) throws IOException {
+        mockLogin(baseUrl, username, password, authenticationId);
+    }
+
+    @Override
+    public void mockLogin(String baseUrl, String username, String password, String authenticationId)
+        throws IOException {
         final HttpMockResponse authenticationResponse = mock(HttpMockResponse.class);
         given(handler.post(loginPath(), loginBody(username, password))).willReturn(authenticationResponse);
         given(authenticationResponse.getStatus()).willReturn(200);
         given(authenticationResponse.getBodyAsString())
-            .willReturn(authenticationBody(baseUrl, authenticationId, tenantId, someAlphaNumericString(22)));
+            .willReturn(authenticationBody(baseUrl, authenticationId, tenantId, directoryId));
     }
 
     @Override
     public void mockEmptyGroups(String baseUrl) throws IOException {
+        mockGroups("", baseUrl, authenticationId);
+    }
+
+    @Override
+    public void mockGroups(String roleName, String baseUrl, String authenticationId) throws IOException {
         final HttpMockResponse groupsResponse = mock(HttpMockResponse.class);
-        given(handler.get(groupsPath())).willReturn(groupsResponse);
+        final String fileName = format("stormpath-groups%s.json", roleName.isEmpty() ? "" : "-" + roleName);
+        given(handler.get(groupsPath(authenticationId))).willReturn(groupsResponse);
         given(groupsResponse.getStatus()).willReturn(200);
-        given(groupsResponse.getBodyAsString()).willReturn(groupsBody(baseUrl, authenticationId));
+        given(groupsResponse.getBodyAsString())
+            .willReturn(
+                groupsBody(fileName, baseUrl, authenticationId, someAlphaNumericString(22), directoryId, tenantId)
+            );
     }
 
     @Override
@@ -131,7 +148,12 @@ public class HttpMockStormpath implements MockStormpath {
 
     @Override
     public void verifyEmptyGroups() throws IOException {
-        verify(handler).get(groupsPath());
+        verify(handler).get(groupsPath(authenticationId));
+    }
+
+    @Override
+    public void verifyGroups(String authenticationId) throws IOException {
+        verify(handler).get(groupsPath(authenticationId));
     }
 
     private String currentTenantsPath() {
@@ -153,7 +175,7 @@ public class HttpMockStormpath implements MockStormpath {
         return format("/applications/%s/loginAttempts?expand=account", applicationId);
     }
 
-    private String groupsPath() {
+    private String groupsPath(String authenticationId) {
         return format("/accounts/%s/groups", authenticationId);
     }
 
@@ -166,7 +188,7 @@ public class HttpMockStormpath implements MockStormpath {
     }
 
     private static String tenantBody(String baseUrl, String tenant, String tenantId) throws IOException {
-        return stormpathBody(baseUrl, "stormpath-tenant.json", tenant, tenantId);
+        return stormpathBody("stormpath-tenant.json", baseUrl, tenant, tenantId);
     }
 
     private static String applicationBody(
@@ -177,13 +199,13 @@ public class HttpMockStormpath implements MockStormpath {
         String accountId
     )
         throws IOException {
-        return stormpathBody(baseUrl, "stormpath-application.json", applicationName, tenantId, applicationId,
+        return stormpathBody("stormpath-application.json", baseUrl, applicationName, tenantId, applicationId,
             accountId);
     }
 
     private static String authenticationBody(String baseUrl, String authenticationId, String tenantId, String directoryId)
         throws IOException {
-        return stormpathBody(baseUrl, "stormpath-authentication.json", authenticationId, tenantId, directoryId);
+        return stormpathBody("stormpath-authentication.json", baseUrl, authenticationId, tenantId, directoryId);
     }
 
     private static String loginBody(String username, String password) throws IOException {
@@ -192,11 +214,18 @@ public class HttpMockStormpath implements MockStormpath {
         )).replaceAll("\\n", "").replaceAll("\\s", "");
     }
 
-    private static String groupsBody(String baseUrl, String authenticationId) throws IOException {
-        return stormpathBody(baseUrl, "stormpath-groups.json", authenticationId);
+    private static String groupsBody(
+        String fileName,
+        String baseUrl,
+        String authenticationId,
+        String groupId,
+        String directoryId,
+        String tenantId
+    ) throws IOException {
+        return stormpathBody(fileName, baseUrl, authenticationId, groupId, directoryId, tenantId);
     }
 
-    private static String stormpathBody(String baseUrl, String fileName, Object... parts)
+    private static String stormpathBody(String fileName, String baseUrl, Object... parts)
         throws IOException {
         final List<Object> partList = new ArrayList<>(asList(parts));
         partList.add(0, baseUrl + "/mock");

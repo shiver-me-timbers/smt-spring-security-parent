@@ -38,12 +38,12 @@ import static shiver.me.timbers.data.random.RandomThings.someThing;
 
 public class StormpathUserDetailsConverterTest {
 
-    private GrantedAuthorityConverter authorityConverter;
+    private GroupGrantedAuthorityConverter authorityConverter;
     private StormpathUserDetailsConverter converter;
 
     @Before
     public void setUp() {
-        authorityConverter = mock(GrantedAuthorityConverter.class);
+        authorityConverter = mock(GroupGrantedAuthorityConverter.class);
         converter = new StormpathUserDetailsConverter(authorityConverter);
     }
 

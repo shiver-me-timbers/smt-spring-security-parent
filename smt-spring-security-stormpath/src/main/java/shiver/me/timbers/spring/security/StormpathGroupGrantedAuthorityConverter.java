@@ -29,7 +29,7 @@ import static com.stormpath.sdk.group.GroupStatus.ENABLED;
 /**
  * @author Karl Bennett
  */
-public class GroupsGrantedAuthorityConverter implements GrantedAuthorityConverter {
+public class StormpathGroupGrantedAuthorityConverter implements GroupGrantedAuthorityConverter {
 
     @Override
     public Collection<? extends GrantedAuthority> convert(GroupList groups) {

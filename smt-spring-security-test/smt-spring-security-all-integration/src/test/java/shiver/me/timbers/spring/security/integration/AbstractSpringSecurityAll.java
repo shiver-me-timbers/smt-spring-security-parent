@@ -22,13 +22,8 @@ import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
@@ -45,14 +40,13 @@ import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.data.random.RandomStrings.someAlphaNumericString;
 import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = StormpathAuthenticationConfiguration.class)
-@WebIntegrationTest
-@DirtiesContext
-public class ITSpringSecurityStormpath {
+public abstract class AbstractSpringSecurityAll {
 
     @Value("${local.server.port}")
     private int port;
+
+    @Value("${smt.spring.security.jwt.tokenName}")
+    private String tokenName;
 
     @Autowired
     private MockStormpath mockStormpath;
@@ -65,11 +59,11 @@ public class ITSpringSecurityStormpath {
         baseUrl = format("http://localhost:%d", port);
         final JerseyClient client = JerseyClientBuilder.createClient();
         client.property(ClientProperties.FOLLOW_REDIRECTS, false);
-        target = client.target(baseUrl + "/stormpath");
+        target = client.target(baseUrl + "/all");
     }
 
     @Test
-    public void Can_sign_in_using_stormpath() throws IOException {
+    public void Can_sign_in_using_all_the_smt_spring_security_libraries() throws IOException {
 
         final String username = "test";
         final String password = "Password1";
@@ -85,7 +79,7 @@ public class ITSpringSecurityStormpath {
         mockStormpath.mockEmptyGroups(baseUrl);
         final Response forbidden = target.request().get();
         final Response signIn = target.path("signIn").request().post(form(form));
-        final Cookie sessionCookie = signIn.getCookies().get("JSESSIONID");
+        final Cookie sessionCookie = signIn.getCookies().get(tokenName);
 
         // When
         final Response annotation = target.request().cookie(sessionCookie).get();
@@ -130,9 +124,9 @@ public class ITSpringSecurityStormpath {
         final Response role1Forbidden = target.path("one").request().get();
         final Response role2Forbidden = target.path("two").request().get();
         final Response role1SignIn = target.path("signIn").request().post(form(role1Form));
-        final Cookie sessionCookie1 = role1SignIn.getCookies().get("JSESSIONID");
+        final Cookie sessionCookie1 = role1SignIn.getCookies().get(tokenName);
         final Response role2SignIn = target.path("signIn").request().post(form(role2Form));
-        final Cookie sessionCookie2 = role2SignIn.getCookies().get("JSESSIONID");
+        final Cookie sessionCookie2 = role2SignIn.getCookies().get(tokenName);
         final Response normalForbidden = target.request().get();
 
         // When

@@ -34,13 +34,13 @@ import static shiver.me.timbers.data.random.RandomStrings.someString;
 
 public class JwtPrincipalAuthenticationConverterTest {
 
-    private GrantedAuthorityConverter<List<String>> grantedAuthorityConverter;
+    private RolesGrantedAuthorityConverter grantedAuthorityConverter;
     private AuthenticationConverter<JwtPrincipal> converter;
 
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
-        grantedAuthorityConverter = mock(GrantedAuthorityConverter.class);
+        grantedAuthorityConverter = mock(RolesGrantedAuthorityConverter.class);
         converter = new JwtPrincipalAuthenticationConverter(grantedAuthorityConverter);
     }
 

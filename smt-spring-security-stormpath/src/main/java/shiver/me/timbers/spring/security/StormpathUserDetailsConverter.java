@@ -30,9 +30,9 @@ import static com.stormpath.sdk.account.AccountStatus.ENABLED;
  */
 public class StormpathUserDetailsConverter implements UserDetailsConverter {
 
-    private final GrantedAuthorityConverter authorityConverter;
+    private final GroupGrantedAuthorityConverter authorityConverter;
 
-    public StormpathUserDetailsConverter(GrantedAuthorityConverter authorityConverter) {
+    public StormpathUserDetailsConverter(GroupGrantedAuthorityConverter authorityConverter) {
         this.authorityConverter = authorityConverter;
     }
 

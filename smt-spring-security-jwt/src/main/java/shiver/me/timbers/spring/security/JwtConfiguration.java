@@ -32,7 +32,6 @@ import shiver.me.timbers.spring.security.io.FileReader;
 import shiver.me.timbers.spring.security.io.ResourceFileReader;
 import shiver.me.timbers.spring.security.jwt.AuthenticationConverter;
 import shiver.me.timbers.spring.security.jwt.AuthenticationRequestJwtTokenParser;
-import shiver.me.timbers.spring.security.jwt.GrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.jwt.JJwtBuilderFactory;
 import shiver.me.timbers.spring.security.jwt.JJwtDecryptor;
 import shiver.me.timbers.spring.security.jwt.JJwtEncryptor;
@@ -44,6 +43,7 @@ import shiver.me.timbers.spring.security.jwt.JwtEncryptor;
 import shiver.me.timbers.spring.security.jwt.JwtParserFactory;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipal;
 import shiver.me.timbers.spring.security.jwt.JwtPrincipalAuthenticationConverter;
+import shiver.me.timbers.spring.security.jwt.JwtRolesGrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
 import shiver.me.timbers.spring.security.jwt.RolesGrantedAuthorityConverter;
 import shiver.me.timbers.spring.security.keys.Base64KeyPairs;
@@ -61,7 +61,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -157,9 +156,9 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(AuthenticationConverter.class)
     @Autowired
     public AuthenticationConverter<JwtPrincipal> authenticationConverter(
-        GrantedAuthorityConverter<List<String>> grantedAuthorityConverter
+        RolesGrantedAuthorityConverter rolesGrantedAuthorityConverter
     ) {
-        return new JwtPrincipalAuthenticationConverter(grantedAuthorityConverter);
+        return new JwtPrincipalAuthenticationConverter(rolesGrantedAuthorityConverter);
     }
 
     @Bean
@@ -170,9 +169,9 @@ public class JwtConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(GrantedAuthorityConverter.class)
-    public GrantedAuthorityConverter<List<String>> grantedAuthorityConverter() {
-        return new RolesGrantedAuthorityConverter();
+    @ConditionalOnMissingBean(RolesGrantedAuthorityConverter.class)
+    public RolesGrantedAuthorityConverter rolesGrantedAuthorityConverter() {
+        return new JwtRolesGrantedAuthorityConverter();
     }
 
     @Bean

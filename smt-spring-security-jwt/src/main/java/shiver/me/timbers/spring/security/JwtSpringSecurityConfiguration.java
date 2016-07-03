@@ -16,14 +16,11 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import shiver.me.timbers.spring.security.weaving.Weaver;
-
-import java.security.Security;
 
 /**
  * @author Karl Bennett
@@ -35,7 +32,6 @@ public class JwtSpringSecurityConfiguration {
 
     @Autowired
     public void weaveInJwtConfiguration(Weaver weaver) {
-        Security.addProvider(new BouncyCastleProvider()); // Enable support for all the hashing algorithms.
         weaver.weave();
     }
 }
