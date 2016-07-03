@@ -23,6 +23,9 @@
         </encoder>
     </appender>
 
+    <logger name="shiver.me.timbers.http.mock" level="ERROR" />
+    <logger name="org.apache.http" level="ERROR" />
+
     <root level="ERROR">
         <appender-ref ref="STDOUT" />
     </root>

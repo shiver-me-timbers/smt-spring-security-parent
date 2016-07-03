@@ -18,6 +18,7 @@ package shiver.me.timbers.spring.security;
 
 import com.stormpath.sdk.api.ApiKeys;
 import com.stormpath.sdk.application.Application;
+import com.stormpath.sdk.client.Client;
 import com.stormpath.sdk.client.Clients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -44,11 +45,14 @@ public class StormpathConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(Application.class)
-    public Application application() {
-        return Clients.builder().setApiKey(ApiKeys.builder().setId(apiKeyId).setSecret(apiKeySecret).build()).build()
-            .getCurrentTenant()
-            .getApplications(where(name().eqIgnoreCase(applicationName)))
-            .iterator().next();
+    public Application application(Client client) {
+        return client.getCurrentTenant().getApplications(where(name().eqIgnoreCase(applicationName))).iterator().next();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(Client.class)
+    public Client client() {
+        return Clients.builder().setApiKey(ApiKeys.builder().setId(apiKeyId).setSecret(apiKeySecret).build()).build();
     }
 
     @Bean

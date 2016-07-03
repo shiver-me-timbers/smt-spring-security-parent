@@ -1,0 +1,34 @@
+{
+  "href": "%1$s/tenants/%3$s",
+  "name": "%2$s",
+  "key": "%2$s",
+  "createdAt": "2016-06-30T08:27:32.835Z",
+  "modifiedAt": "2016-06-30T08:27:33.313Z",
+  "customData": {
+    "href": "%1$s/tenants/%3$s/customData"
+  },
+  "organizations": {
+    "href": "%1$s/tenants/%3$s/organizations"
+  },
+  "applications": {
+    "href": "%1$s/tenants/%3$s/applications"
+  },
+  "directories": {
+    "href": "%1$s/tenants/%3$s/directories"
+  },
+  "accounts": {
+    "href": "%1$s/tenants/%3$s/accounts"
+  },
+  "agents": {
+    "href": "%1$s/tenants/%3$s/agents"
+  },
+  "groups": {
+    "href": "%1$s/tenants/%3$s/groups"
+  },
+  "idSites": {
+    "href": "%1$s/tenants/%3$s/idSites"
+  },
+  "smtpServers": {
+    "href": "%1$s/tenants/%3$s/smtpServers"
+  }
+}

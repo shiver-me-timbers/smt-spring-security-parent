@@ -30,8 +30,8 @@ import shiver.me.timbers.spring.security.EnableStormpathAuthentication;
 @EnableAutoConfiguration
 @EnableWebSecurity
 @EnableStormpathAuthentication
-@Import(SpringSecurityControllerConfiguration.class)
-public class StormpathSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@Import({StormpathApplicationConfiguration.class, SpringSecurityControllerConfiguration.class})
+public class StormpathAuthenticationConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {

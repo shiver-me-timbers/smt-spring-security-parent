@@ -1,0 +1,46 @@
+{
+  "account": {
+    "href": "%1$s/accounts/%2$s",
+    "username": "test",
+    "email": "karl.bennett.smt@gmail.com",
+    "givenName": "Test",
+    "middleName": "Application",
+    "surname": "User",
+    "fullName": "Test Application User",
+    "status": "ENABLED",
+    "createdAt": "2016-06-30T09:01:21.129Z",
+    "modifiedAt": "2016-07-01T10:46:56.486Z",
+    "passwordModifiedAt": "2016-06-30T09:01:21.000Z",
+    "emailVerificationToken": null,
+    "customData": {
+      "href": "%1$s/accounts/%2$s/customData"
+    },
+    "providerData": {
+      "href": "%1$s/accounts/%2$s/providerData"
+    },
+    "directory": {
+      "href": "%1$s/directories/%4$s"
+    },
+    "tenant": {
+      "href": "%1$s/tenants/%3$s"
+    },
+    "groups": {
+      "href": "%1$s/accounts/%2$s/groups"
+    },
+    "applications": {
+      "href": "%1$s/accounts/%2$s/applications"
+    },
+    "groupMemberships": {
+      "href": "%1$s/accounts/%2$s/groupMemberships"
+    },
+    "apiKeys": {
+      "href": "%1$s/accounts/%2$s/apiKeys"
+    },
+    "accessTokens": {
+      "href": "%1$s/accounts/%2$s/accessTokens"
+    },
+    "refreshTokens": {
+      "href": "%1$s/accounts/%2$s/refreshTokens"
+    }
+  }
+}
