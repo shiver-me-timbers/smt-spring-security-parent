@@ -25,7 +25,16 @@ public class CustomPrincipleAuthenticationConverter implements AuthenticationCon
 
     @Override
     public CustomPrincipal convert(Authentication authentication) {
-        return new CustomPrincipal(((UserDetails) authentication.getPrincipal()).getUsername());
+        return new CustomPrincipal(extractUsername(authentication));
+    }
+
+    private static String extractUsername(Authentication authentication) {
+        final Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        }
+
+        return principal.toString();
     }
 
     @Override
