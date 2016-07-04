@@ -108,7 +108,8 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
 
         // When
         final Response annotation = annotationTarget.request().cookie(signInCookie).get();
-        final Response normal = normalTarget.request().cookie(signInCookie).get();
+        final NewCookie signInRefreshCookie = annotation.getCookies().get(tokenName);
+        final Response normal = normalTarget.request().cookie(signInRefreshCookie).get();
 
         // Then
         assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
@@ -121,6 +122,11 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         assertThat(signInCookie.isHttpOnly(), equalTo(httpOnly));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(signInRefreshCookie.getExpiry(), fallsOn(expiryDate(), within(5L, SECONDS)));
+        assertThat(signInRefreshCookie.getDomain(), equalTo(domain()));
+        assertThat(signInRefreshCookie.getPath(), equalTo(path));
+        assertThat(signInRefreshCookie.isSecure(), equalTo(secure));
+        assertThat(signInRefreshCookie.isHttpOnly(), equalTo(httpOnly));
         assertThat(normal.getStatus(), is(OK.getStatusCode()));
         assertThat(normal.readEntity(String.class), is(TEXT));
     }
@@ -136,10 +142,12 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         final Response annotationForbidden = annotationTarget.request().get();
         final Response normalForbidden = annotationTarget.request().get();
         final Response signIn = annotationTarget.path("signIn").request().post(form(form));
+        final String signInHeader = signIn.getHeaderString(tokenName);
 
         // When
-        final Response annotation = annotationTarget.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
-        final Response normal = normalTarget.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
+        final Response annotation = annotationTarget.request().header(tokenName, signInHeader).get();
+        final String signInRefreshHeader = annotation.getHeaderString(tokenName);
+        final Response normal = normalTarget.request().header(tokenName, signInRefreshHeader).get();
 
         // Then
         assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));

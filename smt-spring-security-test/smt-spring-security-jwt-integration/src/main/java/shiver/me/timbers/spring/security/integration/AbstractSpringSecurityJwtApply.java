@@ -31,17 +31,26 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.client.Entity.form;
 import static javax.ws.rs.client.Entity.text;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static shiver.me.timbers.matchers.Matchers.fallsBefore;
+import static shiver.me.timbers.matchers.Matchers.fallsOn;
+import static shiver.me.timbers.matchers.Within.within;
 import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -55,6 +64,24 @@ public abstract class AbstractSpringSecurityJwtApply {
 
     @Value("${smt.spring.security.jwt.tokenName}")
     private String tokenName;
+
+    @Value("${smt.spring.security.jwt.token.expiryDuration:-1}")
+    private int expiryDuration;
+
+    @Value("${smt.spring.security.jwt.token.expiryUnit:MINUTES}")
+    private TimeUnit expiryUnit;
+
+    @Value("${smt.spring.security.jwt.cookie.domain:}")
+    private String domain;
+
+    @Value("${smt.spring.security.jwt.cookie.path:/}")
+    private String path;
+
+    @Value("${smt.spring.security.jwt.cookie.secure:false}")
+    private boolean secure;
+
+    @Value("${smt.spring.security.jwt.cookie.httpOnly:false}")
+    private boolean httpOnly;
 
     private WebTarget annotationTarget;
     private WebTarget normalTarget;
@@ -78,17 +105,29 @@ public abstract class AbstractSpringSecurityJwtApply {
         final Response annotationForbidden = annotationTarget.request().get();
         final Response normalForbidden = normalTarget.request().get();
         final Response signIn = annotationTarget.path("signIn").request().post(form(form));
+        final NewCookie signInCookie = signIn.getCookies().get(tokenName);
 
         // When
-        final Response annotation = annotationTarget.request().cookie(signIn.getCookies().get(tokenName)).get();
-        final Response normal = normalTarget.request().cookie(signIn.getCookies().get(tokenName)).get();
+        final Response annotation = annotationTarget.request().cookie(signInCookie).get();
+        final NewCookie signInRefreshCookie = annotation.getCookies().get(tokenName);
+        final Response normal = normalTarget.request().cookie(signInCookie).get();
 
         // Then
         assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(normalForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
+        assertThat(signInCookie.getExpiry(), fallsOn(expiryDate(), within(5L, SECONDS)));
+        assertThat(signInCookie.getDomain(), equalTo(domain()));
+        assertThat(signInCookie.getPath(), equalTo(path));
+        assertThat(signInCookie.isSecure(), equalTo(secure));
+        assertThat(signInCookie.isHttpOnly(), equalTo(httpOnly));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(signInRefreshCookie.getExpiry(), fallsOn(expiryDate(), within(5L, SECONDS)));
+        assertThat(signInRefreshCookie.getDomain(), equalTo(domain()));
+        assertThat(signInRefreshCookie.getPath(), equalTo(path));
+        assertThat(signInRefreshCookie.isSecure(), equalTo(secure));
+        assertThat(signInRefreshCookie.isHttpOnly(), equalTo(httpOnly));
         assertThat(normal.getStatus(), is(FORBIDDEN.getStatusCode()));
     }
 
@@ -103,10 +142,12 @@ public abstract class AbstractSpringSecurityJwtApply {
         final Response annotationForbidden = annotationTarget.request().get();
         final Response normalForbidden = annotationTarget.request().get();
         final Response signIn = annotationTarget.path("signIn").request().post(form(form));
+        final String signInHeader = signIn.getHeaderString(tokenName);
 
         // When
-        final Response annotation = annotationTarget.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
-        final Response normal = normalTarget.request().header(tokenName, signIn.getHeaderString(tokenName)).get();
+        final Response annotation = annotationTarget.request().header(tokenName, signInHeader).get();
+        final String signInRefreshHeader = annotation.getHeaderString(tokenName);
+        final Response normal = normalTarget.request().header(tokenName, signInHeader).get();
 
         // Then
         assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
@@ -114,6 +155,7 @@ public abstract class AbstractSpringSecurityJwtApply {
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(signInRefreshHeader, not(isEmptyString()));
         assertThat(normal.getStatus(), is(FORBIDDEN.getStatusCode()));
     }
 
@@ -132,12 +174,17 @@ public abstract class AbstractSpringSecurityJwtApply {
             .post(text(null));
         final Response normal = normalTarget.path("signOut").request().cookie(signIn.getCookies().get(tokenName))
             .post(text(null));
+        final NewCookie annotationSignOutCookie = annotation.getCookies().get(tokenName);
 
         // Then
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
-        assertThat(annotation.getCookies().get(tokenName).getMaxAge(), is(-1));
-        assertThat(annotation.getCookies().get(tokenName).getValue(), isEmptyString());
+        assertThat(annotationSignOutCookie.getExpiry(), fallsBefore(now()));
+        assertThat(annotationSignOutCookie.getValue(), isEmptyString());
+        assertThat(annotationSignOutCookie.getDomain(), equalTo(domain()));
+        assertThat(annotationSignOutCookie.getPath(), equalTo(path));
+        assertThat(annotationSignOutCookie.isSecure(), equalTo(secure));
+        assertThat(annotationSignOutCookie.isHttpOnly(), equalTo(httpOnly));
         assertThat(normal.getStatus(), is(OK.getStatusCode()));
         assertThat(normal.getCookies().get(tokenName), nullValue());
     }
@@ -185,5 +232,17 @@ public abstract class AbstractSpringSecurityJwtApply {
         assertThat(role2Success.readEntity(String.class), is(TEXT));
         assertThat(role2Failure.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(normal.getStatus(), is(FORBIDDEN.getStatusCode()));
+    }
+
+    private Date expiryDate() {
+        return new Date(System.currentTimeMillis() + expiryUnit.toMillis(expiryDuration));
+    }
+
+    private String domain() {
+        return domain.isEmpty() ? null : domain;
+    }
+
+    private Date now() {
+        return new Date();
     }
 }

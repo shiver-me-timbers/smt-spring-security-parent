@@ -18,11 +18,8 @@ package shiver.me.timbers.spring.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import shiver.me.timbers.spring.security.cookies.Bakery;
-import shiver.me.timbers.spring.security.jwt.JwtTokenParser;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -32,28 +29,18 @@ import java.io.IOException;
  */
 public class CookieAndHeaderJwtAuthenticationSuccessHandler implements JwtAuthenticationSuccessHandler {
 
-    private final String tokenName;
-    private final JwtTokenParser<Authentication, ?> tokenParser;
-    private final Bakery<Cookie> bakery;
+    private final JwtAuthenticationApplier authenticationApplier;
     private AuthenticationSuccessHandler delegate;
 
-    public CookieAndHeaderJwtAuthenticationSuccessHandler(
-        String tokenName,
-        JwtTokenParser<Authentication, ?> tokenParser,
-        Bakery<Cookie> bakery
-    ) {
-        this(tokenName, tokenParser, bakery, null);
+    public CookieAndHeaderJwtAuthenticationSuccessHandler(JwtAuthenticationApplier authenticationApplier) {
+        this(authenticationApplier, null);
     }
 
     public CookieAndHeaderJwtAuthenticationSuccessHandler(
-        String tokenName,
-        JwtTokenParser<Authentication, ?> tokenParser,
-        Bakery<Cookie> bakery,
+        JwtAuthenticationApplier authenticationApplier,
         AuthenticationSuccessHandler delegate
     ) {
-        this.tokenName = tokenName;
-        this.tokenParser = tokenParser;
-        this.bakery = bakery;
+        this.authenticationApplier = authenticationApplier;
         this.delegate = delegate;
     }
 
@@ -63,9 +50,7 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandler implements JwtAuthen
         HttpServletResponse response,
         Authentication authentication
     ) throws IOException, ServletException {
-        final String token = tokenParser.create(authentication);
-        response.addHeader(tokenName, token);
-        response.addCookie(bakery.bake(tokenName, token));
+        authenticationApplier.apply(authentication, response);
         if (delegate != null) {
             delegate.onAuthenticationSuccess(request, response, authentication);
         }

@@ -46,7 +46,7 @@ public class JwtPrincipalAuthenticationConverterTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void Can_convert_an_authentication_to_a_jwt_principle() {
+    public void Can_convert_an_authentication_with_a_user_details_to_a_jwt_principle() {
 
         final Authentication authentication = mock(Authentication.class);
 
@@ -58,6 +58,29 @@ public class JwtPrincipalAuthenticationConverterTest {
         // Given
         given(authentication.getPrincipal()).willReturn(userDetails);
         given(userDetails.getUsername()).willReturn(username);
+        given(authentication.getAuthorities()).willReturn((Collection) authorities);
+        given(grantedAuthorityConverter.convert(authorities)).willReturn(roles);
+
+        // When
+        final JwtPrincipal actual = converter.convert(authentication);
+
+        // Then
+        assertThat(actual.getUsername(), is(username));
+        assertThat(actual.getRoles(), is(roles));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void Can_convert_an_authentication_with_a_username_to_a_jwt_principle() {
+
+        final Authentication authentication = mock(Authentication.class);
+
+        final String username = someString();
+        final Collection<GrantedAuthority> authorities = mock(Collection.class);
+        final List<String> roles = mock(List.class);
+
+        // Given
+        given(authentication.getPrincipal()).willReturn(username);
         given(authentication.getAuthorities()).willReturn((Collection) authorities);
         given(grantedAuthorityConverter.convert(authorities)).willReturn(roles);
 

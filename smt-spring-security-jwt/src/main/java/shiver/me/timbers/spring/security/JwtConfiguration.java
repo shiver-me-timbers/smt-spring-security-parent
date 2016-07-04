@@ -112,23 +112,32 @@ public class JwtConfiguration {
     @Autowired
     public JwtAuthenticationFilter jwtAuthenticationFilter(
         JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser,
-        SecurityContextHolder securityContextHolder
+        SecurityContextHolder securityContextHolder,
+        JwtAuthenticationApplier authenticationApplier
     ) {
-        return new CookieAndHeaderJwtAuthenticationFilter(authenticationRequestJwtTokenParser, securityContextHolder);
+        return new CookieAndHeaderJwtAuthenticationFilter(
+            authenticationRequestJwtTokenParser,
+            securityContextHolder,
+            authenticationApplier
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
     @Autowired
     public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler(
+        JwtAuthenticationApplier authenticationApplier
+    ) {
+        return new CookieAndHeaderJwtAuthenticationSuccessHandler(authenticationApplier);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JwtAuthenticationApplier.class)
+    public JwtAuthenticationApplier authenticationApplier(
         JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser,
         Bakery<Cookie> bakery
     ) {
-        return new CookieAndHeaderJwtAuthenticationSuccessHandler(
-            tokenName,
-            authenticationRequestJwtTokenParser,
-            bakery
-        );
+        return new CookieJwtAuthenticationApplier(tokenName, authenticationRequestJwtTokenParser, bakery);
     }
 
     @Bean

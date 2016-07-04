@@ -29,6 +29,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static org.mockito.BDDMockito.given;
@@ -41,6 +42,7 @@ public class CookieAndHeaderJwtAuthenticationFilterTest {
 
     private JwtTokenParser<Authentication, HttpServletRequest> tokenParser;
     private SecurityContextHolder securityContextHolder;
+    private JwtAuthenticationApplier authenticationApplier;
     private CookieAndHeaderJwtAuthenticationFilter filter;
 
     @Before
@@ -48,14 +50,15 @@ public class CookieAndHeaderJwtAuthenticationFilterTest {
     public void setUp() {
         tokenParser = mock(JwtTokenParser.class);
         securityContextHolder = mock(SecurityContextHolder.class);
-        filter = new CookieAndHeaderJwtAuthenticationFilter(tokenParser, securityContextHolder);
+        authenticationApplier = mock(JwtAuthenticationApplier.class);
+        filter = new CookieAndHeaderJwtAuthenticationFilter(tokenParser, securityContextHolder, authenticationApplier);
     }
 
     @Test
     public void Can_authenticate_a_request() throws IOException, ServletException, JwtInvalidTokenException {
 
         final HttpServletRequest request = mock(HttpServletRequest.class);
-        final ServletResponse response = mock(ServletResponse.class);
+        final HttpServletResponse response = mock(HttpServletResponse.class);
         final FilterChain chain = mock(FilterChain.class);
 
         final Authentication authentication = mock(Authentication.class);
@@ -69,8 +72,9 @@ public class CookieAndHeaderJwtAuthenticationFilterTest {
         filter.doFilter(request, response, chain);
 
         // Then
-        final InOrder order = inOrder(securityContext, chain);
+        final InOrder order = inOrder(securityContext, authenticationApplier, chain);
         order.verify(securityContext).setAuthentication(authentication);
+        order.verify(authenticationApplier).apply(authentication, response);
         order.verify(chain).doFilter(request, response);
     }
 
@@ -91,7 +95,7 @@ public class CookieAndHeaderJwtAuthenticationFilterTest {
         filter.doFilter(request, response, chain);
 
         // Then
-        verifyZeroInteractions(securityContext);
+        verifyZeroInteractions(securityContext, authenticationApplier);
         verify(chain).doFilter(request, response);
     }
 }

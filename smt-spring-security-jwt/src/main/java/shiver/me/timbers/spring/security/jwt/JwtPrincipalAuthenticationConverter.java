@@ -34,7 +34,7 @@ public class JwtPrincipalAuthenticationConverter implements AuthenticationConver
     @Override
     public JwtPrincipal convert(Authentication authentication) {
         return new JwtPrincipal(
-            ((UserDetails) authentication.getPrincipal()).getUsername(),
+            extractUsername(authentication),
             grantedAuthorityConverter.convert(authentication.getAuthorities())
         );
     }
@@ -42,5 +42,15 @@ public class JwtPrincipalAuthenticationConverter implements AuthenticationConver
     @Override
     public Authentication convert(JwtPrincipal principal) {
         return new JwtAuthentication(principal.getUsername(), grantedAuthorityConverter.convert(principal.getRoles()));
+    }
+
+    private String extractUsername(Authentication authentication) {
+        final Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        }
+
+        return principal.toString();
     }
 }

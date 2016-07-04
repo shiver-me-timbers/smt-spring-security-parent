@@ -29,6 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -40,20 +41,24 @@ public class CookieAndHeaderJwtAuthenticationFilter extends GenericFilterBean im
 
     private final JwtTokenParser<Authentication, HttpServletRequest> tokenParser;
     private final SecurityContextHolder securityContextHolder;
+    private final JwtAuthenticationApplier authenticationApplier;
 
     public CookieAndHeaderJwtAuthenticationFilter(
         JwtTokenParser<Authentication, HttpServletRequest> tokenParser,
-        SecurityContextHolder securityContextHolder
-    ) {
+        SecurityContextHolder securityContextHolder,
+        JwtAuthenticationApplier authenticationApplier) {
         this.tokenParser = tokenParser;
         this.securityContextHolder = securityContextHolder;
+        this.authenticationApplier = authenticationApplier;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException {
         try {
-            securityContextHolder.getContext().setAuthentication(tokenParser.parse((HttpServletRequest) request));
+            final Authentication authentication = tokenParser.parse((HttpServletRequest) request);
+            securityContextHolder.getContext().setAuthentication(authentication);
+            authenticationApplier.apply(authentication, (HttpServletResponse) response);
         } catch (JwtInvalidTokenException e) {
             log.debug("Failed JWT authentication.", e);
         }
