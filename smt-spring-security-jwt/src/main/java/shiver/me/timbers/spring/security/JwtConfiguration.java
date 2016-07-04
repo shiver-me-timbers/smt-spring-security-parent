@@ -102,8 +102,9 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtLogoutHandler.class)
-    public JwtLogoutHandler jwtLogoutHandler() {
-        return new CookieJwtLogoutHandler(tokenName);
+    @Autowired
+    public JwtLogoutHandler jwtLogoutHandler(Bakery<Cookie> bakery) {
+        return new CookieJwtLogoutHandler(tokenName, bakery);
     }
 
     @Bean

@@ -16,41 +16,42 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.hamcrest.Matcher;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.springframework.security.core.Authentication;
+import shiver.me.timbers.spring.security.cookies.Bakery;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static shiver.me.timbers.data.random.RandomStrings.someAlphaNumericString;
-import static shiver.me.timbers.matchers.Matchers.hasField;
-import static shiver.me.timbers.matchers.Matchers.hasFieldThat;
 
 public class CookieJwtLogoutHandlerTest {
 
     @Test
     public void Can_remove_the_jwt_cookie() {
 
-        // Given
+        @SuppressWarnings("unchecked")
+        final Bakery<Cookie> bakery = mock(Bakery.class);
         final String tokenName = someAlphaNumericString(8);
         final HttpServletResponse response = mock(HttpServletResponse.class);
 
+        final Cookie cookie = mock(Cookie.class);
+
+        // Given
+        given(bakery.bake(tokenName, "")).willReturn(cookie);
+
         // When
-        new CookieJwtLogoutHandler(tokenName)
+        new CookieJwtLogoutHandler(tokenName, bakery)
             .logout(mock(HttpServletRequest.class), response, mock(Authentication.class));
 
         // Then
-        verify(response).addCookie(argThat(allOf(
-            (Matcher<? super Cookie>) hasField("name", tokenName),
-            hasFieldThat("value", isEmptyString()),
-            hasField("maxAge", 0)
-        )));
+        final InOrder order = inOrder(cookie, response);
+        order.verify(cookie).setMaxAge(0);
+        order.verify(response).addCookie(cookie);
     }
 }

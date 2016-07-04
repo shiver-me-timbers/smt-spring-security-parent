@@ -47,7 +47,7 @@ public class CookieAndHeaderJwtAuthenticationSuccessHandler implements JwtAuthen
 
     public CookieAndHeaderJwtAuthenticationSuccessHandler(
         String tokenName,
-        JwtTokenParser tokenParser,
+        JwtTokenParser<Authentication, ?> tokenParser,
         Bakery<Cookie> bakery,
         AuthenticationSuccessHandler delegate
     ) {

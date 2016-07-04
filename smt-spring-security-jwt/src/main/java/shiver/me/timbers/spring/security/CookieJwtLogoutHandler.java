@@ -17,6 +17,7 @@
 package shiver.me.timbers.spring.security;
 
 import org.springframework.security.core.Authentication;
+import shiver.me.timbers.spring.security.cookies.Bakery;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -28,14 +29,16 @@ import javax.servlet.http.HttpServletResponse;
 public class CookieJwtLogoutHandler implements JwtLogoutHandler {
 
     private final String tokenName;
+    private final Bakery<Cookie> bakery;
 
-    public CookieJwtLogoutHandler(String tokenName) {
+    public CookieJwtLogoutHandler(String tokenName, Bakery<Cookie> bakery) {
         this.tokenName = tokenName;
+        this.bakery = bakery;
     }
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        final Cookie cookie = new Cookie(tokenName, "");
+        final Cookie cookie = bakery.bake(tokenName, "");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
