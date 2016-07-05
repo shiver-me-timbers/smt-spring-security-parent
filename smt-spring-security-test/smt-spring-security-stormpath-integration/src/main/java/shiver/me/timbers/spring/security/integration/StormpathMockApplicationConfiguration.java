@@ -29,13 +29,13 @@ import shiver.me.timbers.http.mock.HttpMockServer;
 @Profile("default")
 public class StormpathMockApplicationConfiguration {
 
-    @Value("${smt.spring.security.stormpath.apiKey.id}")
+    @Value("${smt.spring.security.stormpath.client.apiKey.id}")
     private String apiKeyId;
 
-    @Value("${smt.spring.security.stormpath.apiKey.secret}")
+    @Value("${smt.spring.security.stormpath.client.apiKey.secret}")
     private String apiKeySecret;
 
-    @Value("${smt.spring.security.stormpath.applicationName}")
+    @Value("${smt.spring.security.stormpath.application.name}")
     private String applicationName;
 
     @Bean

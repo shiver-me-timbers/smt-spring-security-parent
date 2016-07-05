@@ -32,7 +32,7 @@ public class ChoosingSecretKeeper implements SecretKeeper {
     public ChoosingSecretKeeper(String secret, String secretFile, FileReader fileReader) {
         if (secret.isEmpty() && secretFile.isEmpty()) {
             throw new IllegalArgumentException(
-                "At least one of either (smt.spring.security.jwt.secret) or (smt.spring.security.jwt.secretFile) must be set."
+                "Either one of (smt.spring.security.jwt.secret) or (smt.spring.security.jwt.secretFile) must be set."
             );
         }
         this.secret = secret;

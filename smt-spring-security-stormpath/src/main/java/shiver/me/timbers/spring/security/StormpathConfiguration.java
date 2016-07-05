@@ -34,18 +34,31 @@ import static com.stormpath.sdk.application.Applications.where;
 @Configuration
 public class StormpathConfiguration {
 
-    @Value("${smt.spring.security.stormpath.apiKey.id:}")
+    @Value("${smt.spring.security.stormpath.client.apiKey.id:}")
     private String apiKeyId;
 
-    @Value("${smt.spring.security.stormpath.apiKey.secret:}")
+    @Value("${smt.spring.security.stormpath.client.apiKey.secret:}")
     private String apiKeySecret;
 
-    @Value("${smt.spring.security.stormpath.applicationName}")
+    @Value("${smt.spring.security.stormpath.application.name:}")
     private String applicationName;
+
+    @Value("${smt.spring.security.stormpath.application.href:}")
+    private String applicationHref;
 
     @Bean
     @ConditionalOnMissingBean(Application.class)
     public Application application(Client client) {
+        if (applicationName.isEmpty() && applicationHref.isEmpty()) {
+            throw new IllegalStateException(
+                "Either one of (smt.spring.security.stormpath.application.name) or (smt.spring.security.stormpath.application.href) must be set."
+            );
+        }
+
+        if (!applicationHref.isEmpty()) {
+            return client.getResource(applicationHref, Application.class);
+        }
+
         return client.getCurrentTenant().getApplications(where(name().eqIgnoreCase(applicationName))).iterator().next();
     }
 
