@@ -44,7 +44,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static shiver.me.timbers.matchers.Matchers.hasField;
 import static shiver.me.timbers.matchers.Matchers.hasProperty;
@@ -95,7 +94,7 @@ public abstract class AbstractJwtCustomPrinciple {
 
         // Then
         verify(authenticationConverter).convert((Authentication) argThat(hasProperty("principal.username", "user")));
-        verify(authenticationConverter, times(2)).convert((CustomPrincipal) argThat(hasField("username", "user")));
+        verify(authenticationConverter).convert((CustomPrincipal) argThat(hasField("username", "user")));
         assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));

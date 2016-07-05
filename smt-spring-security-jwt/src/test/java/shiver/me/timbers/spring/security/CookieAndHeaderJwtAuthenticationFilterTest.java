@@ -32,11 +32,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static java.lang.Boolean.TRUE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static shiver.me.timbers.spring.security.CookieAndHeaderJwtAuthenticationFilter.FILTER_APPLIED;
 
 public class CookieAndHeaderJwtAuthenticationFilterTest {
 
@@ -72,10 +74,29 @@ public class CookieAndHeaderJwtAuthenticationFilterTest {
         filter.doFilter(request, response, chain);
 
         // Then
-        final InOrder order = inOrder(securityContext, authenticationApplier, chain);
+        final InOrder order = inOrder(securityContext, authenticationApplier, request, chain);
         order.verify(securityContext).setAuthentication(authentication);
         order.verify(authenticationApplier).apply(authentication, response);
+        order.verify(request).setAttribute(FILTER_APPLIED, TRUE);
         order.verify(chain).doFilter(request, response);
+    }
+
+    @Test
+    public void Can_only_authenticate_a_request_once() throws IOException, ServletException, JwtInvalidTokenException {
+
+        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final HttpServletResponse response = mock(HttpServletResponse.class);
+        final FilterChain chain = mock(FilterChain.class);
+
+        // Given
+        given(request.getAttribute(FILTER_APPLIED)).willReturn(TRUE);
+
+        // When
+        filter.doFilter(request, response, chain);
+
+        // Then
+        verify(chain).doFilter(request, response);
+        verifyZeroInteractions(tokenParser, securityContextHolder, authenticationApplier);
     }
 
     @Test

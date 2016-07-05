@@ -32,10 +32,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static java.lang.Boolean.TRUE;
+
 /**
  * @author Karl Bennett
  */
 public class CookieAndHeaderJwtAuthenticationFilter extends GenericFilterBean implements JwtAuthenticationFilter {
+
+    static final String FILTER_APPLIED = "__cookie_and_header_jwt_authentication_Filter_applied";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -55,10 +59,16 @@ public class CookieAndHeaderJwtAuthenticationFilter extends GenericFilterBean im
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException {
+        if (request.getAttribute(FILTER_APPLIED) != null) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         try {
             final Authentication authentication = tokenParser.parse((HttpServletRequest) request);
             securityContextHolder.getContext().setAuthentication(authentication);
             authenticationApplier.apply(authentication, (HttpServletResponse) response);
+            request.setAttribute(FILTER_APPLIED, TRUE);
         } catch (JwtInvalidTokenException e) {
             log.debug("Failed JWT authentication.", e);
         }
