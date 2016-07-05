@@ -192,8 +192,10 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtDecryptor.class)
-    public JwtDecryptor decryptor(JwtParserFactory parserFactory, KeyPair keyPair, ObjectMapper objectMapper) {
-        return new JJwtDecryptor(parserFactory, keyPair, objectMapper);
+    public JwtDecryptor decryptor(JwtParserFactory parserFactory, KeyPair keyPair) {
+        // Creating the object mapper here so that this library doesn't pollute the Spring context with such a generic
+        // class.
+        return new JJwtDecryptor(parserFactory, keyPair, new ObjectMapper());
     }
 
     @Bean
@@ -219,12 +221,6 @@ public class JwtConfiguration {
     @ConditionalOnMissingBean(Clock.class)
     public Clock clock() {
         return new DateClock();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
     }
 
     @Bean
