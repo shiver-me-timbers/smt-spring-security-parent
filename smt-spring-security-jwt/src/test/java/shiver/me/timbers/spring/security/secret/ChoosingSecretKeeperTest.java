@@ -88,7 +88,7 @@ public class ChoosingSecretKeeperTest {
         // Given
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(
-            "At least one of either (smt.spring.security.jwt.secret) or (smt.spring.security.jwt.secretFile) must be set."
+            "Either one of (smt.spring.security.jwt.secret) or (smt.spring.security.jwt.secretFile) must be set."
         );
 
         // When
