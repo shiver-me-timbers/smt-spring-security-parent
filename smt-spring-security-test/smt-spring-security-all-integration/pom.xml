@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.github.shiver-me-timbers</groupId>
         <artifactId>smt-spring-security-test</artifactId>
-        <version>1.6</version>
+        <version>1.7-SNAPSHOT</version>
     </parent>
 
     <artifactId>smt-spring-security-all-integration</artifactId>
@@ -38,12 +38,12 @@
         <dependency>
             <groupId>com.github.shiver-me-timbers</groupId>
             <artifactId>smt-spring-security-jwt</artifactId>
-            <version>1.6</version>
+            <version>1.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.github.shiver-me-timbers</groupId>
             <artifactId>smt-spring-security-stormpath-integration</artifactId>
-            <version>1.6</version>
+            <version>1.7-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
