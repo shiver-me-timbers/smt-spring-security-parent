@@ -1,7 +1,7 @@
 {
   "account": {
     "href": "%1$s/accounts/%2$s",
-    "username": "test",
+    "username": "%5$s",
     "email": "karl.bennett.smt@gmail.com",
     "givenName": "Test",
     "middleName": "Application",

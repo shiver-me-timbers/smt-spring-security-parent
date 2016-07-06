@@ -106,7 +106,7 @@ public class HttpMockStormpath implements MockStormpath {
         given(handler.post(loginPath(), loginBody(username, password))).willReturn(authenticationResponse);
         given(authenticationResponse.getStatus()).willReturn(200);
         given(authenticationResponse.getBodyAsString())
-            .willReturn(authenticationBody(baseUrl, authenticationId, tenantId, directoryId));
+            .willReturn(authenticationBody(baseUrl, authenticationId, tenantId, directoryId, username));
     }
 
     @Override
@@ -203,9 +203,14 @@ public class HttpMockStormpath implements MockStormpath {
             accountId);
     }
 
-    private static String authenticationBody(String baseUrl, String authenticationId, String tenantId, String directoryId)
-        throws IOException {
-        return stormpathBody("stormpath-authentication.json", baseUrl, authenticationId, tenantId, directoryId);
+    private static String authenticationBody(
+        String baseUrl,
+        String authenticationId,
+        String tenantId,
+        String directoryId,
+        String username
+    ) throws IOException {
+        return stormpathBody("stormpath-authentication.json", baseUrl, authenticationId, tenantId, directoryId, username);
     }
 
     private static String loginBody(String username, String password) throws IOException {
