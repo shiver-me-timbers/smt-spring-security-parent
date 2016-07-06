@@ -16,7 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,14 +44,12 @@ public class JwtModificationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(LogoutHandlerAdder.class)
-    @Autowired
     public LogoutHandlerAdder logoutHandlerAdder(FieldMutator mutator, JwtLogoutHandler logoutHandler) {
         return new JwtLogoutHandlerAdder(mutator, logoutHandler);
     }
 
     @Bean
     @ConditionalOnMissingBean(SuccessHandlerWrapper.class)
-    @Autowired
     public SuccessHandlerWrapper successHandlerWrapper(
         FieldMutator mutator,
         JwtAuthenticationSuccessHandler successHandler
@@ -68,7 +65,6 @@ public class JwtModificationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(FieldMutator.class)
-    @Autowired
     public FieldMutator mutator(FieldFinder fieldFinder, FieldGetSetter fieldGetSetter) {
         return new ReflectionFieldMutator(fieldFinder, fieldGetSetter);
     }

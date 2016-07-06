@@ -16,7 +16,6 @@
 
 package shiver.me.timbers.spring.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,14 +40,12 @@ public class JwtWeavingConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(Weaver.class)
-    @Autowired
     public Weaver weaver(FilterChainProxy filterChainProxy, ChainWeaver<SecurityFilterChain> chainWeaver) {
         return new FilterChainProxyWeaver(filterChainProxy, chainWeaver);
     }
 
     @Bean
     @ConditionalOnMissingBean(ChainWeaver.class)
-    @Autowired
     public ChainWeaver<SecurityFilterChain> securityFilterChainWeaver(
         LogoutHandlerAdder logoutHandlerAdder,
         SuccessHandlerWrapper successHandlerWrapper,

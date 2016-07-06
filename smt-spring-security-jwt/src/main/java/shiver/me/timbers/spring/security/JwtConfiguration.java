@@ -18,7 +18,6 @@ package shiver.me.timbers.spring.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -102,14 +101,12 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtLogoutHandler.class)
-    @Autowired
     public JwtLogoutHandler jwtLogoutHandler(Bakery<Cookie> bakery) {
         return new CookieJwtLogoutHandler(tokenName, bakery);
     }
 
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationFilter.class)
-    @Autowired
     public JwtAuthenticationFilter jwtAuthenticationFilter(
         JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser,
         SecurityContextHolder securityContextHolder,
@@ -124,7 +121,6 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JwtAuthenticationSuccessHandler.class)
-    @Autowired
     public JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler(
         JwtAuthenticationApplier authenticationApplier
     ) {
@@ -142,7 +138,6 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AuthenticationRequestJwtTokenParser.class)
-    @Autowired
     public <T> JwtTokenParser<Authentication, HttpServletRequest> authenticationRequestJwtTokenParser(
         AuthenticationConverter<T> authenticationConverter,
         JwtTokenParser<T, String> jwtTokenParser
@@ -164,7 +159,6 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AuthenticationConverter.class)
-    @Autowired
     public AuthenticationConverter<JwtPrincipal> authenticationConverter(
         RolesGrantedAuthorityConverter rolesGrantedAuthorityConverter
     ) {
@@ -173,7 +167,6 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(JJwtTokenParser.class)
-    @Autowired
     public JwtTokenParser<JwtPrincipal, String> jwtTokenParser(JwtEncryptor encryptor, JwtDecryptor decryptor) {
         return new JJwtTokenParser<>(JwtPrincipal.class, encryptor, decryptor);
     }
@@ -212,7 +205,6 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(KeyPair.class)
-    @Autowired
     public KeyPair keyPair(SecretKeeper secretKeeper, KeyParser keyParser) throws IOException {
         return keyParser.parse(secretKeeper.getSecret());
     }
@@ -231,7 +223,6 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(KeyParser.class)
-    @Autowired
     public KeyParser keyParser(Base64KeyPairs base64KeyPairs, PemKeyPairs pemKeyPairs) {
         return new SignatureAlgorithmKeyParser(algorithm, base64KeyPairs, pemKeyPairs);
     }
@@ -244,7 +235,6 @@ public class JwtConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(Base64KeyPairs.class)
-    @Autowired
     public Base64KeyPairs base64KeyPairs(Base64 base64) {
         return new SecretBase64KeyPairs(base64, algorithm);
     }
