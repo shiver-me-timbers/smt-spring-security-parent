@@ -27,6 +27,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import static shiver.me.timbers.spring.security.JwtSpringSecurityAdaptor.jwt;
 
 @Configuration
@@ -38,6 +39,7 @@ public class JwtApplySecurityConfiguration extends WebSecurityConfigurerAdapter 
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {
+        http.sessionManagement().sessionCreationPolicy(STATELESS);
         http.apply(jwt());
         http.antMatcher("/jwt/**");
         http.csrf().disable();

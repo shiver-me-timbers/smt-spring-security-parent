@@ -43,7 +43,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.data.random.RandomStrings.someAlphaNumericString;
-import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = StormpathAuthenticationConfiguration.class)
@@ -99,7 +98,7 @@ public class ITSpringSecurityStormpath {
         assertThat(forbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
-        assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(annotation.readEntity(String.class), is(username));
     }
 
     @Test
@@ -157,12 +156,12 @@ public class ITSpringSecurityStormpath {
         assertThat(role1SignIn.getStatus(), is(OK.getStatusCode()));
         assertThat(role2SignIn.getStatus(), is(OK.getStatusCode()));
         assertThat(role1Success.getStatus(), is(OK.getStatusCode()));
-        assertThat(role1Success.readEntity(String.class), is(TEXT));
+        assertThat(role1Success.readEntity(String.class), is(username1));
         assertThat(role1Failure.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(role2Success.getStatus(), is(OK.getStatusCode()));
-        assertThat(role2Success.readEntity(String.class), is(TEXT));
+        assertThat(role2Success.readEntity(String.class), is(username2));
         assertThat(role2Failure.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(normal.getStatus(), is(OK.getStatusCode()));
-        assertThat(normal.readEntity(String.class), is(TEXT));
+        assertThat(normal.readEntity(String.class), is(username1));
     }
 }

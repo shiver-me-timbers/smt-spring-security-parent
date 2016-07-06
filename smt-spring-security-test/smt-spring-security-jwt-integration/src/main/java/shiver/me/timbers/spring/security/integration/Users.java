@@ -16,19 +16,10 @@
 
 package shiver.me.timbers.spring.security.integration;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+public class Users {
 
-import java.security.Principal;
-
-import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
-@RestController
-public class SpringSecurityController {
-
-    @RequestMapping(method = GET, produces = TEXT_PLAIN_VALUE)
-    public String request(Principal principal) {
-        return principal.getName();
-    }
+    public static final String USERNAME = "user";
+    public static final String PASSWORD = "password";
+    public static final String USERNAME_ROLE1 = "role1";
+    public static final String USERNAME_ROLE2 = "role2";
 }

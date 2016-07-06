@@ -27,6 +27,8 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import shiver.me.timbers.spring.security.EnableJwtAuthentication;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 @Configuration
 @EnableAutoConfiguration
 @EnableWebSecurity
@@ -36,6 +38,7 @@ public class JwtAnnotationSecurityConfiguration extends WebSecurityConfigurerAda
 
     @Override
     protected final void configure(HttpSecurity http) throws Exception {
+        http.sessionManagement().sessionCreationPolicy(STATELESS);
         http.antMatcher("/jwt/**");
         http.csrf().disable();
         http.authorizeRequests()

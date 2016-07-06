@@ -47,7 +47,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static shiver.me.timbers.matchers.Matchers.hasField;
 import static shiver.me.timbers.matchers.Matchers.hasProperty;
-import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebIntegrationTest
@@ -98,6 +97,6 @@ public abstract class AbstractJwtCustomPrinciple {
         assertThat(annotationForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
-        assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(annotation.readEntity(String.class), is("user"));
     }
 }

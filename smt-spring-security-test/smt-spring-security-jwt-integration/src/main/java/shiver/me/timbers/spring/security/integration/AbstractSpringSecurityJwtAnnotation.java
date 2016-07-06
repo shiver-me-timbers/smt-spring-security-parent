@@ -49,7 +49,10 @@ import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.matchers.Matchers.fallsBefore;
 import static shiver.me.timbers.matchers.Matchers.fallsOn;
 import static shiver.me.timbers.matchers.Within.within;
-import static shiver.me.timbers.spring.security.integration.SpringSecurityController.TEXT;
+import static shiver.me.timbers.spring.security.integration.Users.PASSWORD;
+import static shiver.me.timbers.spring.security.integration.Users.USERNAME;
+import static shiver.me.timbers.spring.security.integration.Users.USERNAME_ROLE1;
+import static shiver.me.timbers.spring.security.integration.Users.USERNAME_ROLE2;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = JwtAnnotationSecurityConfiguration.class)
@@ -99,8 +102,8 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         final Form form = new Form();
 
         // Given
-        form.param("username", "user");
-        form.param("password", "password");
+        form.param("username", USERNAME);
+        form.param("password", PASSWORD);
         final Response annotationForbidden = annotationTarget.request().get();
         final Response normalForbidden = normalTarget.request().get();
         final Response signIn = annotationTarget.path("signIn").request().post(form(form));
@@ -121,14 +124,14 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         assertThat(signInCookie.isSecure(), equalTo(secure));
         assertThat(signInCookie.isHttpOnly(), equalTo(httpOnly));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
-        assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(annotation.readEntity(String.class), is(USERNAME));
         assertThat(signInRefreshCookie.getExpiry(), fallsOn(expiryDate(), within(5L, SECONDS)));
         assertThat(signInRefreshCookie.getDomain(), equalTo(domain()));
         assertThat(signInRefreshCookie.getPath(), equalTo(path));
         assertThat(signInRefreshCookie.isSecure(), equalTo(secure));
         assertThat(signInRefreshCookie.isHttpOnly(), equalTo(httpOnly));
         assertThat(normal.getStatus(), is(OK.getStatusCode()));
-        assertThat(normal.readEntity(String.class), is(TEXT));
+        assertThat(normal.readEntity(String.class), is(USERNAME));
     }
 
     @Test
@@ -137,8 +140,8 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         final Form form = new Form();
 
         // Given
-        form.param("username", "user");
-        form.param("password", "password");
+        form.param("username", USERNAME);
+        form.param("password", PASSWORD);
         final Response annotationForbidden = annotationTarget.request().get();
         final Response normalForbidden = annotationTarget.request().get();
         final Response signIn = annotationTarget.path("signIn").request().post(form(form));
@@ -154,9 +157,9 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         assertThat(normalForbidden.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(signIn.getStatus(), is(OK.getStatusCode()));
         assertThat(annotation.getStatus(), is(OK.getStatusCode()));
-        assertThat(annotation.readEntity(String.class), is(TEXT));
+        assertThat(annotation.readEntity(String.class), is(USERNAME));
         assertThat(normal.getStatus(), is(OK.getStatusCode()));
-        assertThat(normal.readEntity(String.class), is(TEXT));
+        assertThat(normal.readEntity(String.class), is(USERNAME));
     }
 
     @Test
@@ -165,8 +168,8 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         final Form form = new Form();
 
         // Given
-        form.param("username", "user");
-        form.param("password", "password");
+        form.param("username", USERNAME);
+        form.param("password", PASSWORD);
         final Response signIn = annotationTarget.path("signIn").request().post(form(form));
 
         // When
@@ -202,10 +205,10 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         final Form role2Form = new Form();
 
         // Given
-        role1Form.param("username", "role1");
-        role1Form.param("password", "password");
-        role2Form.param("username", "role2");
-        role2Form.param("password", "password");
+        role1Form.param("username", USERNAME_ROLE1);
+        role1Form.param("password", PASSWORD);
+        role2Form.param("username", USERNAME_ROLE2);
+        role2Form.param("password", PASSWORD);
         final Response forbidden = annotationTarget.request().get();
         final Response role1Forbidden = annotationTarget.path("one").request().get();
         final Response role2Forbidden = annotationTarget.path("two").request().get();
@@ -232,13 +235,13 @@ public abstract class AbstractSpringSecurityJwtAnnotation {
         assertThat(role1SignIn.getStatus(), is(OK.getStatusCode()));
         assertThat(role2SignIn.getStatus(), is(OK.getStatusCode()));
         assertThat(role1Success.getStatus(), is(OK.getStatusCode()));
-        assertThat(role1Success.readEntity(String.class), is(TEXT));
+        assertThat(role1Success.readEntity(String.class), is(USERNAME_ROLE1));
         assertThat(role1Failure.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(role2Success.getStatus(), is(OK.getStatusCode()));
-        assertThat(role2Success.readEntity(String.class), is(TEXT));
+        assertThat(role2Success.readEntity(String.class), is(USERNAME_ROLE2));
         assertThat(role2Failure.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(normal.getStatus(), is(OK.getStatusCode()));
-        assertThat(normal.readEntity(String.class), is(TEXT));
+        assertThat(normal.readEntity(String.class), is(USERNAME_ROLE1));
     }
 
     private Date expiryDate() {
