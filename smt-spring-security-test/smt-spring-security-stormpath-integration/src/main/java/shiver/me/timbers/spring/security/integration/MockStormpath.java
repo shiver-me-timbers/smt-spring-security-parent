@@ -29,6 +29,8 @@ public interface MockStormpath {
 
     void mockApplication(String baseUrl) throws IOException;
 
+    void mockApplication(String baseUrl, String applicationId) throws IOException;
+
     void mockLogin(String baseUrl, String username, String password) throws IOException;
 
     void mockLogin(String baseUrl, String username, String password, String authenticationId) throws IOException;
@@ -42,6 +44,8 @@ public interface MockStormpath {
     void verifyTenant() throws IOException;
 
     void verifyApplication() throws IOException;
+
+    void verifyApplication(String applicationId);
 
     void verifyLogin(String username, String password) throws IOException;
 

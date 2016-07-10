@@ -42,6 +42,10 @@ public class StormpathRealApplicationConfiguration {
             }
 
             @Override
+            public void mockApplication(String baseUrl, String applicationId) throws IOException {
+            }
+
+            @Override
             public void mockLogin(String baseUrl, String username, String password) throws IOException {
             }
 
@@ -68,6 +72,10 @@ public class StormpathRealApplicationConfiguration {
 
             @Override
             public void verifyApplication() throws IOException {
+            }
+
+            @Override
+            public void verifyApplication(String applicationId) {
             }
 
             @Override

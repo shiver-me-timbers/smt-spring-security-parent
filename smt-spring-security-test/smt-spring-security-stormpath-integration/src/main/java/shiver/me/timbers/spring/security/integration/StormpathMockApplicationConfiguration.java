@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import shiver.me.timbers.http.mock.HttpMockServer;
+import shiver.me.timbers.spring.security.ApplicationFactory;
 
 @Configuration
 @Profile("default")
@@ -35,12 +36,22 @@ public class StormpathMockApplicationConfiguration {
     @Value("${smt.spring.security.stormpath.client.apiKey.secret}")
     private String apiKeySecret;
 
-    @Value("${smt.spring.security.stormpath.application.name}")
+    @Value("${smt.spring.security.stormpath.application.name:}")
     private String applicationName;
 
+    @Value("${smt.spring.security.stormpath.application.href:}")
+    private String applicationHref;
+
     @Bean
-    public Application application(final Environment environment) {
-        return new DeferredApplication(apiKeyId, apiKeySecret, applicationName, environment);
+    public Application application(ApplicationFactory applicationFactory, final Environment environment) {
+        return new DeferredApplication(
+            applicationFactory,
+            apiKeyId,
+            apiKeySecret,
+            applicationHref,
+            applicationName,
+            environment
+        );
     }
 
     @Bean

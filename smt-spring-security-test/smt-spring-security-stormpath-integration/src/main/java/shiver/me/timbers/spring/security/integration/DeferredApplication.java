@@ -55,31 +55,36 @@ import com.stormpath.sdk.saml.SamlIdpUrlBuilder;
 import com.stormpath.sdk.saml.SamlPolicy;
 import com.stormpath.sdk.tenant.Tenant;
 import org.springframework.core.env.Environment;
+import shiver.me.timbers.spring.security.ApplicationFactory;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static com.stormpath.sdk.application.Applications.name;
-import static com.stormpath.sdk.application.Applications.where;
 import static java.lang.String.format;
 
 public class DeferredApplication implements Application {
 
+    private final ApplicationFactory applicationFactory;
     private final String apiKeyId;
     private final String apiKeySecret;
+    private final String applicationHref;
     private final String applicationName;
     private final Environment environment;
     private Application application;
 
     public DeferredApplication(
+        ApplicationFactory applicationFactory,
         String apiKeyId,
         String apiKeySecret,
+        String applicationHref,
         String applicationName,
         Environment environment
     ) {
+        this.applicationFactory = applicationFactory;
         this.apiKeyId = apiKeyId;
         this.apiKeySecret = apiKeySecret;
+        this.applicationHref = applicationHref;
         this.applicationName = applicationName;
         this.environment = environment;
     }
@@ -92,10 +97,14 @@ public class DeferredApplication implements Application {
     }
 
     private Application buildApplication() {
-        return Clients.builder()
-            .setBaseUrl(format("http://localhost:%s/mock", environment.getProperty("local.server.port")))
-            .setApiKey(ApiKeys.builder().setId(apiKeyId).setSecret(apiKeySecret).build()).build()
-            .getCurrentTenant().getApplications(where(name().eqIgnoreCase(applicationName))).iterator().next();
+        final String port = environment.getProperty("local.server.port");
+        return applicationFactory.create(
+            Clients.builder()
+                .setBaseUrl(format("http://localhost:%s/mock", port))
+                .setApiKey(ApiKeys.builder().setId(apiKeyId).setSecret(apiKeySecret).build()).build(),
+            format(applicationHref, port),
+            applicationName
+        );
     }
 
     @Override

@@ -45,10 +45,10 @@ import static org.junit.Assert.assertThat;
 import static shiver.me.timbers.data.random.RandomStrings.someAlphaNumericString;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = StormpathAuthenticationConfiguration.class)
+@SpringApplicationConfiguration(classes = StormpathApplicationNameConfiguration.class)
 @WebIntegrationTest
 @DirtiesContext
-public class ITSpringSecurityStormpath {
+public class ITSpringSecurityStormpathApplicationName {
 
     @Value("${local.server.port}")
     private int port;

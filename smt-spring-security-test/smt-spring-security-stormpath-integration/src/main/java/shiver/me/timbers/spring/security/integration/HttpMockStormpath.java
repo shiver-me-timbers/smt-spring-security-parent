@@ -44,7 +44,7 @@ public class HttpMockStormpath implements MockStormpath {
     private final String applicationName;
     private final HttpMockHandler handler;
     private final String tenantId;
-    private final String applicationId;
+    private String applicationId;
     private final String authenticationId;
     private final String directoryId;
 
@@ -87,11 +87,23 @@ public class HttpMockStormpath implements MockStormpath {
 
     @Override
     public void mockApplication(String baseUrl) throws IOException {
+        mockApplicationWithPath("stormpath-tenant-application.json", baseUrl, applicationPath());
+    }
+
+    @Override
+    public void mockApplication(String baseUrl, String applicationId) throws IOException {
+        this.applicationId = applicationId;
+        mockApplicationWithPath("stormpath-application.json", baseUrl, applicationResourcePath(applicationId));
+    }
+
+    private void mockApplicationWithPath(String jsonFile, String baseUrl, String applicationPath) throws IOException {
         final HttpMockResponse applicationResponse = mock(HttpMockResponse.class);
-        given(handler.get(applicationPath())).willReturn(applicationResponse);
+        given(handler.get(applicationPath)).willReturn(applicationResponse);
         given(applicationResponse.getStatus()).willReturn(200);
         given(applicationResponse.getBodyAsString())
-            .willReturn(applicationBody(baseUrl, applicationName, tenantId, applicationId, someAlphaNumericString(22)));
+            .willReturn(applicationBody(
+                jsonFile, baseUrl, applicationName, tenantId, applicationId, someAlphaNumericString(22)
+            ));
     }
 
     @Override
@@ -142,6 +154,11 @@ public class HttpMockStormpath implements MockStormpath {
     }
 
     @Override
+    public void verifyApplication(String applicationId) {
+        verify(handler).get(applicationResourcePath(applicationId));
+    }
+
+    @Override
     public void verifyLogin(String username, String password) throws IOException {
         verify(handler).post(loginPath(), loginBody(username, password));
     }
@@ -165,10 +182,11 @@ public class HttpMockStormpath implements MockStormpath {
     }
 
     private String applicationPath() throws UnsupportedEncodingException {
-        return format(
-            "/tenants/%s/applications?name=%s",
-            tenantId, encode(applicationName, "UTF-8")
-        );
+        return format("/tenants/%s/applications?name=%s", tenantId, encode(applicationName, "UTF-8"));
+    }
+
+    private static String applicationResourcePath(String applicationId) {
+        return format("/applications/%s", applicationId);
     }
 
     private String loginPath() {
@@ -192,6 +210,7 @@ public class HttpMockStormpath implements MockStormpath {
     }
 
     private static String applicationBody(
+        String jsonFile,
         String baseUrl,
         String applicationName,
         String tenantId,
@@ -199,8 +218,7 @@ public class HttpMockStormpath implements MockStormpath {
         String accountId
     )
         throws IOException {
-        return stormpathBody("stormpath-application.json", baseUrl, applicationName, tenantId, applicationId,
-            accountId);
+        return stormpathBody(jsonFile, baseUrl, applicationName, tenantId, applicationId, accountId);
     }
 
     private static String authenticationBody(

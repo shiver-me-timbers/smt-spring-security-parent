@@ -1,59 +1,52 @@
 {
-  "href": "%1$s/tenants/%3$s/applications",
-  "offset": 0,
-  "limit": 25,
-  "size": 1,
-  "items": [
-    {
-      "href": "%1$s/applications/%4$s",
-      "name": "%2$s",
-      "description": "Test application for the smt-spring-security-stormpath (https://github.com/shiver-me-timbers/smt-spring-security-parent/tree/master/smt-spring-security-stormpath) libraries integration tests.",
-      "status": "ENABLED",
-      "createdAt": "2016-06-30T08:27:33.285Z",
-      "modifiedAt": "2016-06-30T08:33:13.658Z",
-      "authorizedCallbackUris": [],
-      "tenant": {
-        "href": "%1$s/tenants/%3$s"
-      },
-      "defaultAccountStoreMapping": {
-        "href": "%1$s/accountStoreMappings/%5$s"
-      },
-      "defaultGroupStoreMapping": {
-        "href": "%1$s/accountStoreMappings/%5$s"
-      },
-      "customData": {
-        "href": "%1$s/applications/%4$s/customData"
-      },
-      "oAuthPolicy": {
-        "href": "%1$s/oAuthPolicies/%4$s"
-      },
-      "samlPolicy": {
-        "href": "%1$s/samlPolicies/%4$s"
-      },
-      "accounts": {
-        "href": "%1$s/applications/%4$s/accounts"
-      },
-      "groups": {
-        "href": "%1$s/applications/%4$s/groups"
-      },
-      "accountStoreMappings": {
-        "href": "%1$s/applications/%4$s/accountStoreMappings"
-      },
-      "loginAttempts": {
-        "href": "%1$s/applications/%4$s/loginAttempts"
-      },
-      "passwordResetTokens": {
-        "href": "%1$s/applications/%4$s/passwordResetTokens"
-      },
-      "apiKeys": {
-        "href": "%1$s/applications/%4$s/apiKeys"
-      },
-      "verificationEmails": {
-        "href": "%1$s/applications/%4$s/verificationEmails"
-      },
-      "authTokens": {
-        "href": "%1$s/applications/%4$s/authTokens"
-      }
-    }
-  ]
+  "href": "%1$s/applications/%4$s",
+  "name": "%2$s",
+  "description": "Test application for the smt-spring-security-stormpath (https://github.com/shiver-me-timbers/smt-spring-security-parent/tree/master/smt-spring-security-stormpath) libraries integration tests.",
+  "status": "ENABLED",
+  "createdAt": "2016-06-30T08:27:33.285Z",
+  "modifiedAt": "2016-06-30T08:33:13.658Z",
+  "authorizedCallbackUris": [],
+  "tenant": {
+    "href": "%1$s/tenants/%3$s"
+  },
+  "defaultAccountStoreMapping": {
+    "href": "%1$s/accountStoreMappings/%5$s"
+  },
+  "defaultGroupStoreMapping": {
+    "href": "%1$s/accountStoreMappings/%5$s"
+  },
+  "customData": {
+    "href": "%1$s/applications/%4$s/customData"
+  },
+  "oAuthPolicy": {
+    "href": "%1$s/oAuthPolicies/%4$s"
+  },
+  "samlPolicy": {
+    "href": "%1$s/samlPolicies/%4$s"
+  },
+  "accounts": {
+    "href": "%1$s/applications/%4$s/accounts"
+  },
+  "groups": {
+    "href": "%1$s/applications/%4$s/groups"
+  },
+  "accountStoreMappings": {
+    "href": "%1$s/applications/%4$s/accountStoreMappings"
+  },
+  "loginAttempts": {
+    "href": "%1$s/applications/%4$s/loginAttempts"
+  },
+  "passwordResetTokens": {
+    "href": "%1$s/applications/%4$s/passwordResetTokens"
+  },
+  "apiKeys": {
+    "href": "%1$s/applications/%4$s/apiKeys"
+  },
+  "verificationEmails": {
+    "href": "%1$s/applications/%4$s/verificationEmails"
+  },
+  "authTokens": {
+    "href": "%1$s/applications/%4$s/authTokens"
+  },
+  "idSiteModel": null
 }
