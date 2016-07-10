@@ -25,9 +25,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.stormpath.sdk.application.Applications.name;
-import static com.stormpath.sdk.application.Applications.where;
-
 /**
  * @author Karl Bennett
  */
@@ -48,24 +45,26 @@ public class StormpathConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(Application.class)
-    public Application application(Client client) {
-        if (applicationName.isEmpty() && applicationHref.isEmpty()) {
-            throw new IllegalStateException(
-                "Either one of (smt.spring.security.stormpath.application.name) or (smt.spring.security.stormpath.application.href) must be set."
-            );
-        }
+    public Application application(ApplicationFactory applicationFactory, Client client) {
+        return applicationFactory.create(client, applicationHref, applicationName);
+    }
 
-        if (!applicationHref.isEmpty()) {
-            return client.getResource(applicationHref, Application.class);
-        }
-
-        return client.getCurrentTenant().getApplications(where(name().eqIgnoreCase(applicationName))).iterator().next();
+    @Bean
+    @ConditionalOnMissingBean(ApplicationFactory.class)
+    public ApplicationFactory applicationFactory(ApplicationCriteriaFactory applicationCriteriaFactory) {
+        return new StormpathApplicationFactory(applicationCriteriaFactory);
     }
 
     @Bean
     @ConditionalOnMissingBean(Client.class)
     public Client client() {
         return Clients.builder().setApiKey(ApiKeys.builder().setId(apiKeyId).setSecret(apiKeySecret).build()).build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ApplicationCriteriaFactory.class)
+    public ApplicationCriteriaFactory applicationCriteriaFactory() {
+        return new StormpathApplicationCriteriaFactory();
     }
 
     @Bean
