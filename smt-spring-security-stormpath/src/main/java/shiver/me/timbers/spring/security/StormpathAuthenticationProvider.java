@@ -31,12 +31,12 @@ public class StormpathAuthenticationProvider extends AbstractUserDetailsAuthenti
 
     private final Application application;
     private final StormpathAuthenticationRequestFactory requests;
-    private final UserDetailsConverter converter;
+    private final UserDetailsFactory converter;
 
     public StormpathAuthenticationProvider(
         Application application,
         StormpathAuthenticationRequestFactory requests,
-        UserDetailsConverter converter
+        UserDetailsFactory converter
     ) {
         this.application = application;
         this.requests = requests;
@@ -56,7 +56,7 @@ public class StormpathAuthenticationProvider extends AbstractUserDetailsAuthenti
         UsernamePasswordAuthenticationToken authentication
     ) throws AuthenticationException {
         try {
-            return converter.convert(application.authenticateAccount(requests.create(username, authentication)));
+            return converter.create(application.authenticateAccount(requests.create(username, authentication)));
         } catch (ResourceException e) {
             throw new BadCredentialsException("Invalid credentials for " + username, e);
         }

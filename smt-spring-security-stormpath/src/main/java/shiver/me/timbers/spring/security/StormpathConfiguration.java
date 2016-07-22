@@ -76,9 +76,9 @@ public class StormpathConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(UserDetailsConverter.class)
-    public UserDetailsConverter userDetailsConverter(GroupGrantedAuthorityConverter authorityConverter) {
-        return new StormpathUserDetailsConverter(authorityConverter);
+    @ConditionalOnMissingBean(UserDetailsFactory.class)
+    public UserDetailsFactory userDetailsConverter(GroupGrantedAuthorityConverter authorityConverter) {
+        return new StormpathUserDetailsFactory(authorityConverter);
     }
 
     @Bean

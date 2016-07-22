@@ -16,12 +16,13 @@
 
 package shiver.me.timbers.spring.security;
 
-import com.stormpath.sdk.authc.AuthenticationResult;
+import com.stormpath.sdk.account.Account;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * @author Karl Bennett
  */
-public interface UserDetailsConverter {
-    UserDetails convert(AuthenticationResult result);
+public interface AccountUserDetails extends UserDetails {
+
+    Account getAccount();
 }

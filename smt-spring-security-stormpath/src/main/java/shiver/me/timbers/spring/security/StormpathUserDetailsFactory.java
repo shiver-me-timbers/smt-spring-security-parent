@@ -19,7 +19,6 @@ package shiver.me.timbers.spring.security;
 import com.stormpath.sdk.account.Account;
 import com.stormpath.sdk.authc.AuthenticationResult;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
@@ -28,28 +27,27 @@ import static com.stormpath.sdk.account.AccountStatus.ENABLED;
 /**
  * @author Karl Bennett
  */
-public class StormpathUserDetailsConverter implements UserDetailsConverter {
+public class StormpathUserDetailsFactory implements UserDetailsFactory {
 
     private final GroupGrantedAuthorityConverter authorityConverter;
 
-    public StormpathUserDetailsConverter(GroupGrantedAuthorityConverter authorityConverter) {
+    public StormpathUserDetailsFactory(GroupGrantedAuthorityConverter authorityConverter) {
         this.authorityConverter = authorityConverter;
     }
 
     @Override
-    public UserDetails convert(AuthenticationResult result) {
+    public AccountUserDetails create(AuthenticationResult result) {
         final Account account = result.getAccount();
         final Collection<? extends GrantedAuthority> authorities = authorityConverter.convert(account.getGroups());
-
-        return new AccountUserDetails(authorities, account);
+        return new StormpathAccountUserDetails(authorities, account);
     }
 
-    private static class AccountUserDetails implements UserDetails {
+    private static class StormpathAccountUserDetails implements AccountUserDetails {
 
         private final Collection<? extends GrantedAuthority> authorities;
         private final Account account;
 
-        public AccountUserDetails(Collection<? extends GrantedAuthority> authorities, Account account) {
+        public StormpathAccountUserDetails(Collection<? extends GrantedAuthority> authorities, Account account) {
             this.authorities = authorities;
             this.account = account;
         }
@@ -87,6 +85,11 @@ public class StormpathUserDetailsConverter implements UserDetailsConverter {
         @Override
         public boolean isEnabled() {
             return ENABLED.equals(account.getStatus());
+        }
+
+        @Override
+        public Account getAccount() {
+            return account;
         }
     }
 }

@@ -43,14 +43,14 @@ public class StormpathAuthenticationProviderTest {
 
     private Application application;
     private StormpathAuthenticationRequestFactory requests;
-    private UserDetailsConverter converter;
+    private UserDetailsFactory converter;
     private StormpathAuthenticationProvider provider;
 
     @Before
     public void setUp() {
         application = mock(Application.class);
         requests = mock(StormpathAuthenticationRequestFactory.class);
-        converter = mock(UserDetailsConverter.class);
+        converter = mock(UserDetailsFactory.class);
         provider = new StormpathAuthenticationProvider(application, requests, converter);
     }
 
@@ -72,18 +72,18 @@ public class StormpathAuthenticationProviderTest {
 
         final AuthenticationRequest request = mock(AuthenticationRequest.class);
         final AuthenticationResult result = mock(AuthenticationResult.class);
-        final UserDetails expected = mock(UserDetails.class);
+        final AccountUserDetails expected = mock(AccountUserDetails.class);
 
         // Given
         given(requests.create(username, authentication)).willReturn(request);
         given(application.authenticateAccount(request)).willReturn(result);
-        given(converter.convert(result)).willReturn(expected);
+        given(converter.create(result)).willReturn(expected);
 
         // When
         final UserDetails actual = provider.retrieveUser(username, authentication);
 
         // Then
-        assertThat(actual, is(expected));
+        assertThat(actual, is((UserDetails) expected));
     }
 
     @Test

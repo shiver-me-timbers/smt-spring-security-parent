@@ -34,7 +34,7 @@ public class StormpathSpringSecurityConfiguration {
         AuthenticationManagerBuilder auth,
         Application application,
         StormpathAuthenticationRequestFactory requests,
-        UserDetailsConverter converter
+        UserDetailsFactory converter
     ) throws Exception {
         auth.authenticationProvider(new StormpathAuthenticationProvider(application, requests, converter));
     }

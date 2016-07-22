@@ -22,7 +22,6 @@ import com.stormpath.sdk.authc.AuthenticationResult;
 import com.stormpath.sdk.group.GroupList;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -36,15 +35,15 @@ import static org.mockito.Mockito.mock;
 import static shiver.me.timbers.data.random.RandomStrings.someString;
 import static shiver.me.timbers.data.random.RandomThings.someThing;
 
-public class StormpathUserDetailsConverterTest {
+public class StormpathUserDetailsFactoryTest {
 
     private GroupGrantedAuthorityConverter authorityConverter;
-    private StormpathUserDetailsConverter converter;
+    private StormpathUserDetailsFactory converter;
 
     @Before
     public void setUp() {
         authorityConverter = mock(GroupGrantedAuthorityConverter.class);
-        converter = new StormpathUserDetailsConverter(authorityConverter);
+        converter = new StormpathUserDetailsFactory(authorityConverter);
     }
 
     @Test
@@ -66,7 +65,7 @@ public class StormpathUserDetailsConverterTest {
         given(authorityConverter.convert(groups)).willReturn(authorities);
 
         // When
-        final UserDetails actual = converter.convert(result);
+        final AccountUserDetails actual = converter.create(result);
 
         // Then
         assertThat(actual.getUsername(), is(username));
@@ -76,6 +75,7 @@ public class StormpathUserDetailsConverterTest {
         assertThat(actual.isAccountNonLocked(), is(true));
         assertThat(actual.isCredentialsNonExpired(), is(true));
         assertThat(actual.isEnabled(), is(true));
+        assertThat(actual.getAccount(), is(account));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class StormpathUserDetailsConverterTest {
         given(authorityConverter.convert(groups)).willReturn(authorities);
 
         // When
-        final UserDetails actual = converter.convert(result);
+        final AccountUserDetails actual = converter.create(result);
 
         // Then
         assertThat(actual.getUsername(), is(username));
@@ -109,5 +109,6 @@ public class StormpathUserDetailsConverterTest {
         assertThat(actual.isAccountNonLocked(), is(true));
         assertThat(actual.isCredentialsNonExpired(), is(true));
         assertThat(actual.isEnabled(), is(false));
+        assertThat(actual.getAccount(), is(account));
     }
 }
